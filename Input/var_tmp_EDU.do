@@ -12,7 +12,7 @@ Output:             Excel-DTA file
 ====================================================================*/
 
 /*=================================================================================
-                        Program descroption: para incluir en el programa maestro  
+                        Program description: para incluir en el programa maestro  
 ===================================================================================*/
 
 
