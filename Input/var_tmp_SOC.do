@@ -34,8 +34,7 @@ Output:             Excel-DTA file
 		* 2.4 Entre 12.4 y 62
 				gen middle=0 if pc_ytot_ch!=.
 				replace middle=1 if ((pc_ytot_ch>=lp31_ci*4) & (pc_ytot_ch<lp31_ci*20))
-		
-
+				
 		
 		
 		
