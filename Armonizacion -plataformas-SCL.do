@@ -32,11 +32,11 @@ tempname ptablas
 
 ** Este postfile da estructura a la base:
 
-postfile `ptablas' str30(tiempo_id country_id geography_id clase clase2 nivel_id tema indicador valor muestra) using `tablas', replace
+postfile `ptablas' str30(tiempo_id id_country_code geography_id clase clase2 nivel_id tema indicador valor muestra) using `tablas', replace
 
 ** Creo locales principales:
  
-local temas  educacion pobreza laboral vivienda demografia  										
+local temas  educacion pobreza laboral vivienda demografia diversidad migracion  										
 local paises ARG BHS BOL BRB BLZ BOL BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
 local anos 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018
 local geography_id total_nacional
@@ -94,6 +94,8 @@ qui {
 									include "${temporal}\var_tmp_LMK.do"
 								* Pobreza, vivienda, demograficas
 									include "${temporal}\var_tmp_SOC.do"
+								* Inclusion
+									include "${temporal}\var_tmp_DGI.do"
 							
 							
 *****************************************************************************************************************************************
@@ -106,6 +108,7 @@ qui {
 							if "`tema'" == "educacion"  local indicadores tasa_neta_asis tasa_asis_edad Años_Escolaridad_25_mas Ninis_2 leavers tasa_terminacion_c tasa_sobre_edad
 							if "`tema'" == "vivienda"   local indicadores aguared_ch des2_ch luz_ch dirtf 
 							if "`tema'" == "laboral"    local indicadores tasa_ocupacion tasa_desocupacion tasa_participacion ocup_suf_salario ingreso_mens_prom ingreso_hor_prom formalidad_2 pensionista_65_mas ingreso_pension_65_mas 
+							if "`tema'" == "diversidad" local indicadores pdis_ci
 	
 							foreach indicador of local indicadores {
 							noi di in y "Calculating numbers for country: `pais' - year : `ano' - tema: `tema' - indicator: `indicador'"
@@ -135,7 +138,7 @@ qui {
 		if "`tema'" == "educacion" 	{
 			
 			local clases  Total Hombre Mujer quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano
-			local clases2 Hombre Mujer Rural Urbano
+			local clases2 Total Hombre Mujer Rural Urbano
 			
 			foreach clase of local clases {	
 				foreach clase2 of local clases2{
@@ -446,7 +449,7 @@ qui {
 		if "`tema'" == "laboral" 	{
 			
 			local clases  Total Hombre Mujer quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano
-			local clases2 Hombre Mujer Rural Urbano
+			local clases2 Total Hombre Mujer Rural Urbano
 			local niveles Total age_15_24 age_15_29 age_15_64 age_25_64 age_65_mas 
 				
 				foreach clase of local clases {
@@ -706,7 +709,7 @@ qui {
 		if "`tema'" == "vivienda" 	{
 		
 			local clases Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano
-			local clases2 Rural Urbano
+			local clases2 Total Rural Urbano
 		
 				foreach clase of local clases{
 					foreach clase2 of local clases2 {
@@ -783,7 +786,39 @@ qui {
 				} /*cierro clase*/
 		} /*cierro vivienda*/
 								
+														
+		if "`tema'"	== "inclusion" {
+							
+							/* [inserte nombre extrendidpo del indicador] */
+							if "`indicador'" == "[inserte nombre corto indicador]" {
+	
+											capture sum Total [w=factor_ci]	 if `clase'==1 & `clase2' ==1
+											local denominador = `r(sum)'
+											
+											sum Total [w=factor_ci]	 if raza==1 & `clase'==1 & `clase2' ==1
+											local numerador = `r(sum)'
+											local valor = (`numerador' / `denominador') * 100 
+											
+											sum Total if raza==1 & `clase'==1 & `clase2' ==1
+											local muestra = `r(sum)'
+											
+											post `ptablas' ("`ano'") ("`pais'") ("`geography_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+											
+							} /* cierro indicador*/
+		} /*cierro demografia */
+		
+																
+		if "`tema'"	== "migracion" {
+							
+							/* [inserte nombre del indicador extendido] 
+							
+							if "`indicador'" == "[inserte nombre indicador corto]" {
 
+							} /* cierro indicador*/
+							
+							*/ 
+		} /*cierro migracion */
+		
 								}  /*cierro indicadores*/
 						}/*Cierro temas*/
 						
@@ -797,7 +832,9 @@ qui {
 							if "`tema'" == "pobreza"    local indicadores pobreza31 pobreza vulnerable middle ginihh
 							if "`tema'" == "educacion"  local indicadores tasa_neta_asis tasa_asis_edad Años_Escolaridad_25_mas Ninis_2 leavers tasa_terminacion_c tasa_sobre_edad
 							if "`tema'" == "vivienda"   local indicadores aguared_ch des2_ch luz_ch dirtf
-							if "`tema'" == "laboral"    local indicadores tasa_ocupacion tasa_desocupacion tasa_participacion ocup_suf_salario ingreso_mens_prom ingreso_hor_prom formalidad_2 pensionista_65_mas ingreso_pension_65_mas 										
+							if "`tema'" == "laboral"    local indicadores tasa_ocupacion tasa_desocupacion tasa_participacion ocup_suf_salario ingreso_mens_prom ingreso_hor_prom formalidad_2 pensionista_65_mas ingreso_pension_65_mas 
+							if "`tema'" == "inclusion"  local indicadores 
+							if "`tema'" == "migracion"  local indicadores 
 							
 							foreach indicador of local indicadores {
 									noi di in y "Calculating numbers for country: `pais' - year : `ano' - tema: `tema' - indicator: `indicador'"
@@ -875,16 +912,29 @@ qui {
 											foreach clase2 of local clases2 {	
 												
 													post `ptablas' ("`ano'") ("`pais'") ("`geography_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") (".") (".")
-										
+													
 											} /*cierro clases2*/
 										} /*cierro clases*/
 									} /*cierro vivienda*/
-										
-										
+																		
+									if "`tema'" == "inclusion" {
 									
+										local clases Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano
+										local clases2 Total
+									
+										foreach clase of local clases {									  
+											foreach clase2 of local clases2 {	
+												
+												post `ptablas' ("`ano'") ("`pais'") ("`geography_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") (".") (".")
+											
+									
+											} /*cierro clases2*/
+										} /*cierro clases*/
+									} /*cierro inclusion*/
+																			
 							} /*cierro indicadores*/
-						
 						} /* cierro temas */
+					
 					}/*cierro if _rc*/
 				
 				
@@ -910,7 +960,7 @@ save "\\hqpnas01\EDULAC\EDW\2. Indicators\Databases\Stata\Indicadores_SCL.dta", 
 * Variables de formato 
 
 include "${temporal}\var_formato.do"
-order tiempo tiempo_id country_id geography_id clase nivel nivel_id tema indicador tipo valor
+order tiempo tiempo_id country_id geography_id clase nivel nivel_id tema indicador tipo valor muestra
 
 
 /*====================================================================
@@ -923,9 +973,11 @@ save "${output}\Indicadores_SCL.csv", replace
 
 	g 		division = "SOC" if tema == "demografia" | tema == "vivienda" | tema == "pobreza" 
 	replace division = "LMK" if tema == "laboral" 													 
-	replace division = "EDU" if tema == "educacion" 		
+	replace division = "EDU" if tema == "educacion" 
+	replace division = "GDI" if tema == "inclusion"
+	replace division = "MIG" if tema == "migracion"
 
-local divisiones SOC LMK EDU											 
+local divisiones SOC LMK EDU GDI MIG											 
 
 foreach div of local divisiones { 
 	        
