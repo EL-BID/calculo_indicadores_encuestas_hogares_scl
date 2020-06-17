@@ -24,7 +24,7 @@ Output:             Excel-DTA file
 	*1.2. Diferentes análisis de la PET:			
 				gen age_15_64  = inrange(edad_ci,15,64) 
 				gen age_25_64  = inrange(edad_ci,25,64) 
-				gen age_65_mas = inrange(edad_ci,18,24) 
+				gen age_65_mas = inrange(edad_ci,65,120) 
 				
 *2 ppp por país:
 	
@@ -65,7 +65,7 @@ Output:             Excel-DTA file
 				replace liv_wage   =. if hsal==.			
 
 	* 3.2 Ingreso laboral monetario
-	
+				replace ylm_ci=. if ylmpri_ci==.
 				gen       ylab_ci=ylm_ci if emp_ci==1
 				label var ylab_ci "ingreso laboral monetario total"
 
@@ -104,15 +104,5 @@ Output:             Excel-DTA file
 				gen pensiont_ci=1 if pension_ci==1 | pensionsub_ci==1
 				egen aux_pensiont_ci=mean(pensiont_ci)  /*indica q no hay dato ese año*/
 				recode pensiont_ci .=0 if edad_ci>=65
-				
-				
-
-
-
-				
-				
-				
-				
-				
 				
 				

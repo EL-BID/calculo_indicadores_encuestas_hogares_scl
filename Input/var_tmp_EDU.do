@@ -39,6 +39,13 @@ Output:             Excel-DTA file
 				gen age_15_29 = inrange(edad_ci,15,29) // Ninis 2 
 				gen age_18_24 = inrange(edad_ci,18,24) 
 				
+	* 1.4 útiles para optimizar el codigo maestro 		
+				gen age_4_5   = inrange(edad_ci,4,5)
+				gen age_6_11  = inrange(edad_ci,6,11)
+				gen age_12_14 = inrange(edad_ci,12,14)
+				gen age_15_17 = inrange(edad_ci,15,17)
+				gen age_18_23 = inrange(edad_ci,18,23)
+				
 * 2. Niveles teóricos CIMA
 
 	* 2.1. Asistencia 
@@ -54,6 +61,14 @@ Output:             Excel-DTA file
 				g leavers=.
 				replace leavers = 1 if age_18_24 == 1 & (aedu_ci > 0 & aedu_ci<=9) & asiste_ci == 0
 				
+* 4. Nivel educativo de la poblacion  
+ 
+				gen anos_0 			= 1 if  aedu_ci==0  & (aedu_ci !=. | edad_ci !=.)
+				gen anos_1_5 		= 1 if (aedu_ci>=1  & aedu_ci <=5) & (aedu_ci !=. | edad_ci !=.)
+				gen anos_6			= 1 if  aedu_ci==6  & (aedu_ci !=. | edad_ci !=.)
+				gen anos_7_11 		= 1 if (aedu_ci>=7  & aedu_ci <=11) & (aedu_ci !=. | edad_ci !=.) 
+				gen anos_12 		= 1	if  aedu_ci==12 & (aedu_ci !=. | edad_ci !=.)
+				gen anos_13_o_mas	= 1 if  aedu_ci>=13 & (aedu_ci !=. | edad_ci !=.)
 * ==========================================================================================================================================
 *                                                                 Edades y niveles costumizados 
 * ==========================================================================================================================================				
