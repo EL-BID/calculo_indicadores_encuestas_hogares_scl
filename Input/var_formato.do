@@ -58,9 +58,9 @@ Output:
 		replace clase = "quintil_ingreso" if clase_id == "quintil_1" | clase_id == "quintil_2" | clase_id == "quintil_3" | clase_id == "quintil_4" | clase_id == "quintil_5"
 		
 		cap gen clase2 = clase2_id 
-		replace clase = "sexo" if clase2_id == "Hombre" | clase2_id == "Mujer"
-		replace clase = "area" if clase2_id == "Rural" | clase2_id == "Urbano"
-		replace clase = "quintil_ingreso" if clase2_id == "quintil_1" | clase2_id == "quintil_2" | clase2_id == "quintil_3" | clase2_id == "quintil_4" | clase2_id == "quintil_5"
+		replace clase2 = "sexo" if clase2_id == "Hombre" | clase2_id == "Mujer"
+		replace clase2 = "area" if clase2_id == "Rural" | clase2_id == "Urbano"
+		replace clase2 = "quintil_ingreso" if clase2_id == "quintil_1" | clase2_id == "quintil_2" | clase2_id == "quintil_3" | clase2_id == "quintil_4" | clase2_id == "quintil_5"
 
 		
 		
