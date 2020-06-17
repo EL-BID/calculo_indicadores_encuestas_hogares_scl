@@ -44,7 +44,7 @@ Creation Date:    19 Jul 2018 - 11:14:13
 	
 	if "`pais'" == "PER"                       local encuestas ENAHO
 	
-	if "`pais'" == "DOM" & ("`ano'" == "2017") local encuestas ENCFT
+	if "`pais'" == "DOM" & ("`ano'" >= "2017") local encuestas ENCFT
 	if "`pais'" == "DOM"  & ("`ano'" < "2017") local encuestas ENFT
 	
 	if "`pais'" == "SUR"                       local encuestas SLC
@@ -101,10 +101,11 @@ Creation Date:    19 Jul 2018 - 11:14:13
 	if "`pais'" == "PAN" & ("`ano'" >  "2010") local rondas m3
 * Paraguay
 	if "`pais'" == "PRY" & ("`ano'" == "2006") local rondas m11_m12
-	if "`pais'" == "PRY" & ("`ano'" >  "2006") local rondas m10_m12
+	if "`pais'" == "PRY" & ("`ano'" >  "2006" & "`ano'" <=  "2017" ) local rondas m10_m12
+	if "`pais'" == "PRY" & ("`ano'" > "2017") local rondas t4
 * Republica Dominicana	
 	if "`pais'" == "DOM" & ("`ano'" <  "2017") local rondas m10
-	if "`pais'" == "DOM" & ("`ano'" == "2017") local rondas t4
+	if "`pais'" == "DOM" & ("`ano'" >= "2017") local rondas t4
 * Surinam 	
 	if "`pais'" == "SUR"                       local rondas m10_m9
 * Venezuela	
