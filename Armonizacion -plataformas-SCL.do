@@ -17,7 +17,7 @@ version 15.1
 drop _all 
 set more off 
 *ssc install quantiles
- ssc install inequal7
+* ssc install inequal7
 
 * Directory Paths
 global input  	"\\Sdssrv03\surveys\harmonized"
@@ -94,8 +94,10 @@ qui {
 									include "${temporal}\var_tmp_LMK.do"
 								* Pobreza, vivienda, demograficas
 									include "${temporal}\var_tmp_SOC.do"
+
 								* Inclusion
-									include "${temporal}\var_tmp_DGI.do"
+									include "${temporal}\var_tmp_GDI.do"
+
 							
 							
 *****************************************************************************************************************************************
@@ -869,10 +871,12 @@ qui {
 									
 									if "`tema'" == "laboral" {
 									
+
+
 										 local niveles Total age_15_24 age_15_29 age_15_64 age_25_64 age_65_mas 
 										 local clases Total Hombre Mujer quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano
-										 local clases2 Hombre Mujer Rural Urbano
-										 
+										 local clases2 Total Hombre Mujer Rural Urbano
+
 										foreach clase of local clases {
 											foreach clase2 of local clases2 {
 												
@@ -888,8 +892,10 @@ qui {
 									if "`tema'" == "pobreza" {	
 										
 										local niveles Total age_00_04 age_05_14 age_15_24 age_25_64 age_65_mas
+
 										local clases  Total Hombre Mujer Rural Urbano
-										local clases2 Hombre Mujer
+										local clases2 Total Hombre Mujer
+
 										
 										if "`indicador'" == "ginihh" local niveles no_aplica
 										if "`indicador'" == "ginihh" local clases Total Rural Urbano
@@ -960,7 +966,9 @@ save "\\hqpnas01\EDULAC\EDW\2. Indicators\Databases\Stata\Indicadores_SCL.dta", 
 * Variables de formato 
 
 include "${temporal}\var_formato.do"
-order tiempo tiempo_id country_id geography_id clase nivel nivel_id tema indicador tipo valor muestra
+
+order tiempo tiempo_id id_country_code geography_id clase clase2 nivel nivel_id tema indicador tipo valor muestra
+
 
 
 /*====================================================================
@@ -968,14 +976,16 @@ order tiempo tiempo_id country_id geography_id clase nivel nivel_id tema indicad
 ====================================================================*/
 
 
-export excel using "${output}\Indicadores_SCL.xlsx", first(var) sheet(Total_results) sheetreplace
-save "${output}\Indicadores_SCL.csv", replace
+*export excel using "${output}\Indicadores_SCL.xlsx", first(var) sheet(Total_results) sheetreplace
+save "${output}\indicadores_encuestas_hogares_scl.csv", replace
 
-	g 		division = "SOC" if tema == "demografia" | tema == "vivienda" | tema == "pobreza" 
-	replace division = "LMK" if tema == "laboral" 													 
-	replace division = "EDU" if tema == "educacion" 
-	replace division = "GDI" if tema == "inclusion"
-	replace division = "MIG" if tema == "migracion"
+
+	g 		division = "soc" if tema == "demografia" | tema == "vivienda" | tema == "pobreza" 
+	replace division = "lmk" if tema == "laboral" 													 
+	replace division = "edu" if tema == "educacion" 
+	replace division = "gdi" if tema == "inclusion"
+	replace division = "mig" if tema == "migracion"
+
 
 local divisiones SOC LMK EDU GDI MIG											 
 
@@ -986,7 +996,7 @@ foreach div of local divisiones {
 			keep if (division == "`div'")
 			drop division
 		
-			export excel using "${output}\\Indicadores_`div'.xlsx", first(var) sheet(Total_results) sheetreplace
+			save "${output}\\indicadores_encuestas_hogares_`div'.csv", replace
 			sleep 1000
 			restore
 						
@@ -995,13 +1005,6 @@ foreach div of local divisiones {
 exit
 /* End of do-file */
 
-><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><
 
-Notes:
-1. 
-
-
-
-Version Control:
 
 
