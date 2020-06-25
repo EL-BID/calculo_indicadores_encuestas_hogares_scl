@@ -564,38 +564,25 @@ qui {
 							
 							if "`indicador'" == "ingreso_mens_prom" {	
 							
-								capture sum `nivel' [w=factor_ci] if `clase'==1 & ylab_ppp!=. & `clase2' ==1
-								if _rc == 0 {
-								local denominador = `r(sum)'
-												
-								sum ylab_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1
-								local numerador = `r(sum)'
-								local valor = (`numerador' / `denominador') 												
+								sum ylab_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								local valor = `r(mean)' 												
 								
-								sum ylab_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1
+								sum ylab_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								local muestra = `r(sum)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-
 								}
 							} /*cierro indicador*/
 							
 							if "`indicador'" == "ingreso_hor_prom" {	
-							
-								capture sum `nivel' [w=factor_ci] if `clase'==1 & hwage_ppp!=. & `clase2' ==1
-								if _rc == 0 {
-								local denominador = `r(sum)'
 												
-								sum hwage_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1
-								local numerador = `r(sum)'
-								local valor = (`numerador' / `denominador') 												
+								sum hwage_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								local valor = `r(mean)'												
 								
-								sum hwage_ppp if `clase'==1 & `nivel'==1 & `clase2' ==1
+								sum hwage_ppp if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								local muestra = `r(sum)'
 								
-
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-
 								}
 							} /*cierro indicador*/
 							
