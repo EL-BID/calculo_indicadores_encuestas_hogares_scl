@@ -487,17 +487,12 @@ qui {
 					
 							if "`indicador'" == "tasa_ocupacion" {																						 
 				  
-								capture sum `nivel' [w=factor_ci] if `clase'==1 & pet==1 & `clase2' ==1
 								if _rc == 0 {
-								local denominador = `r(sum)'
-												
-								sum `nivel' [w=factor_ci]	 if `clase'==1 & condocup_ci==1  & `clase2' ==1
-								local numerador = `r(sum)'
-								local valor = (`numerador' / `denominador') * 100 
-								
-								sum `nivel'  if `clase'==1 & condocup_ci==1  & `clase2' ==1
-								local muestra = `r(sum)'
-								
+								estpost tabulate condocup_ci [w=factor_ci] if `clase'==1 & `clase2' ==1
+								mat a = e(pct)
+								mat b = e(b)
+								local valor=a[1,1]
+								local muestra=b[1,1]				
 
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 
