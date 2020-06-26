@@ -81,6 +81,15 @@ Output:             Excel-DTA file
 	
 				gen  	 ypen_ppp=ypen_ci/ppp/ipc_c
 				
+	* 3.5 Salario mínimo mensual - PPP 
+	
+				gen salmm_ppp=salmm_ci/ppp/ipc_c
+				label var salmm_ppp "salario minimo legal mensual a US$PPP(2011)"
+	
+	* 3.6 Salario por actividad principal menor al mínimo legal (por mes)
+	
+				g menorwmin = (ylmpri_ci<=salmm_ci) if condocup_ci==1 & salmm_ci !=. & ylmpri_ci!=.
+				
 * 4 Formalidad laboral 
 				gen 	formal_aux=1 if cotizando_ci==1
 				replace formal_aux=1 if afiliado_ci==1 & (cotizando_ci!=1 | cotizando_ci!=0) & condocup_ci==1 & pais_c=="URY" & anio_c<=2000
