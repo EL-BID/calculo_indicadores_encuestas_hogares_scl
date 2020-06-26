@@ -111,7 +111,7 @@ qui {
 							if "`tema'" == "pobreza"    local indicadores pobreza31 pobreza vulnerable middle ginihh
 							if "`tema'" == "educacion"  local indicadores tasa_neta_asis tasa_asis_edad Años_Escolaridad_25_mas Ninis_2 leavers tasa_terminacion_c tasa_sobre_edad
 							if "`tema'" == "vivienda"   local indicadores aguared_ch des2_ch luz_ch dirtf 
-							if "`tema'" == "laboral"    local indicadores tasa_ocupacion tasa_desocupacion tasa_participacion ocup_suf_salario ingreso_mens_prom ingreso_hor_prom formalidad_2 pensionista_65_mas ingreso_pension_65_mas 
+							if "`tema'" == "laboral"    local indicadores tasa_ocupacion tasa_desocupacion tasa_participacion ocup_suf_salario ingreso_mens_prom ingreso_hor_prom formalidad_2 pensionista_65_mas ingreso_pension_65_mas horas_trabajadas salminmes_ppp sal_menor_salmin dura_desempleo empleo_publico 
 							if "`tema'" == "diversidad" local indicadores pdis_ci
 	
 							foreach indicador of local indicadores {
@@ -593,6 +593,66 @@ qui {
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 								}
 							} /*cierro indicador*/
+							
+							if "`indicador'" == "horas_trabajadas" {	
+							
+								sum horastot_ci [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & horastot_ci!=.
+								local valor = `r(mean)'												
+								
+								sum horastot_ci if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & horastot_ci!=.
+								local muestra = `r(N)'
+								
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								}
+							} /*cierro indicador*/	
+
+							if "`indicador'" == "dura_desempleo" {	
+							
+								sum durades_ci [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==2 & durades_ci!=.
+								local valor = `r(mean)'												
+								
+								sum durades_ci if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==2  & durades_ci!=.
+								local muestra = `r(N)'
+								
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								}
+							} /*cierro indicador*/	
+
+							if "`indicador'" == "salminmes_ppp" {	
+							
+								sum salmm_ppp [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & salmm_ppp!=.
+								local valor = `r(mean)'												
+								
+								sum salmm_ppp if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & salmm_ppp!=.
+								local muestra = `r(N)'
+								
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								}
+							} /*cierro indicador*/
+							
+							if "`indicador'" == "sal_menor_salmin" {	
+							
+								estpost tabulate menorwmin [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								mat a = e(pct)
+								mat b = e(b)
+								local valor=a[1,2]
+								local muestra=b[1,2]
+								
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								}
+							} /*cierro indicador*/
+							
+							if "`indicador'" == "empleo_publico" {	
+							
+								estpost tabulate spublico_ci [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								mat a = e(pct)
+								mat b = e(b)
+								local valor=a[1,2]
+								local muestra=b[1,2]
+								
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								}
+							} /*cierro indicador*/	
 							
 							if "`indicador'" == "formalidad_2" {	
 							
