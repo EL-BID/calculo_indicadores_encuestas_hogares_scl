@@ -89,6 +89,12 @@ Output:             Excel-DTA file
 	* 3.6 Salario por actividad principal menor al mínimo legal (por mes)
 	
 				g menorwmin = (ylmpri_ci<=salmm_ci) if condocup_ci==1 & salmm_ci !=. & ylmpri_ci!=.
+	
+	* 3.7 Valor de todas las pensiones
+		
+				egen ypent_ci = rsum(ypen_ci ypensub_ci), missing
+				replace ypent_ci=. if edad_ci<65 | pension_ci==0
+				label var ypent_ci "Valor de todas las pensiones que recibe"
 				
 * 4 Formalidad laboral 
 				gen 	formal_aux=1 if cotizando_ci==1
