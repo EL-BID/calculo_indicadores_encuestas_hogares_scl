@@ -635,11 +635,13 @@ qui {
 							
 							if "`indicador'" == "sal_menor_salmin" {	
 							
-								capture estpost tabulate menorwmin [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								capture estpost tab menorwmin [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								if _rc == 0 {
 								mat a = e(pct)
-								mat b = e(b)
 								local valor=a[1,2]
+								
+								estpost tab menorwmin if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								mat b = e(b)
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
@@ -648,11 +650,13 @@ qui {
 							
 							if "`indicador'" == "empleo_publico" {	
 							
-								capture estpost tabulate spublico_ci [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								capture estpost tab spublico_ci [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								if _rc == 0 {
 								mat a = e(pct)
-								mat b = e(b)
 								local valor=a[1,2]
+								
+								estpost tab spublico_ci if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								mat b = e(b)
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
