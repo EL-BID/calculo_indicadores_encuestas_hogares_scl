@@ -81,10 +81,16 @@ Output:             Excel-DTA file
 	
 				gen  	 ypen_ppp=ypen_ci/ppp/ipc_c
 				
-	* 3.5 Salario mínimo mensual - PPP 
+	* 3.5 Salario mínimo mensual y horario - PPP 
 	
 				gen salmm_ppp=salmm_ci/ppp/ipc_c
 				label var salmm_ppp "salario minimo legal mensual a US$PPP(2011)"
+				
+				gen hsmin_ppp=salmm_ppp/(5*8*4.3)
+				label var hsmin_ppp "salario minimo legal horario a US$PPP(2011)"
+				
+				gen hsmin_ci=salmm_ci/(5*8*4.3)
+				label var hsmin_ci "salario minimo legal horario"
 	
 	* 3.6 Salario por actividad principal menor al mínimo legal (por mes)
 	
