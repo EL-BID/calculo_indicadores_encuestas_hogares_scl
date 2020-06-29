@@ -111,7 +111,7 @@ qui {
 							if "`tema'" == "pobreza"    local indicadores pobreza31 pobreza vulnerable middle ginihh
 							if "`tema'" == "educacion"  local indicadores tasa_neta_asis tasa_asis_edad Años_Escolaridad_25_mas Ninis_2 leavers tasa_terminacion_c tasa_sobre_edad
 							if "`tema'" == "vivienda"   local indicadores aguared_ch des2_ch luz_ch dirtf 
-							if "`tema'" == "laboral"    local indicadores tasa_ocupacion tasa_desocupacion tasa_participacion ocup_suf_salario ingreso_mens_prom ingreso_hor_prom formalidad_2 pensionista_65_mas y_pen_cont_ppp horas_trabajadas salminmes_ppp sal_menor_salmin dura_desempleo empleo_publico 
+							if "`tema'" == "laboral"    local indicadores tasa_ocupacion tasa_desocupacion tasa_participacion ocup_suf_salario ingreso_mens_prom ingreso_hor_prom formalidad_2 pensionista_65_mas y_pen_cont_ppp horas_trabajadas salminmes_ppp sal_menor_salmin dura_desempleo empleo_publico y_pen_cont y_pen_nocont y_pen_total 
 							if "`tema'" == "diversidad" local indicadores pdis_ci
 	
 							foreach indicador of local indicadores {
@@ -708,11 +708,49 @@ qui {
 								sum ypen_ppp if `clase'==1 & age_65_mas==1 & `clase2' ==1
 								local muestra = `r(sum)'
 								
-
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-
+								}
+							} /*cierro indicador*/
+							
+							if "`indicador'" == "y_pen_cont" {	
+							
+								capture sum ypen_ci [w=factor_ci] if `clase'==1 & ypen_ci!=. & `clase2' ==1 & age_65_mas==1
+								if _rc == 0 {
+								local valor = `r(mean)'											
+								
+								sum ypen_ci if `clase'==1 & ypen_ci!=. & `clase2' ==1 & age_65_mas==1
+								local muestra = `r(N)'
+								
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 								}
 							} /*cierro indicador*/	
+							
+							if "`indicador'" == "y_pen_nocont" {	
+							
+								capture sum ypensub_ci [w=factor_ci] if `clase'==1 & ypensub_ci!=. & `clase2' ==1 & age_65_mas==1
+								if _rc == 0 {
+								local valor = `r(mean)'											
+								
+								sum ypensub_ci if `clase'==1 & ypensub_ci!=. & `clase2' ==1 & age_65_mas==1
+								local muestra = `r(N)'
+								
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								}
+							} /*cierro indicador*/	
+						
+							if "`indicador'" == "y_pen_total" {	
+							
+								capture sum ypent_ci [w=factor_ci] if `clase'==1 & ypent_ci!=. & `clase2' ==1 & age_65_mas==1
+								if _rc == 0 {
+								local valor = `r(mean)'											
+								
+								sum ypent_ci if `clase'==1 & ypent_ci!=. & `clase2' ==1 & age_65_mas==1
+								local muestra = `r(N)'
+								
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								}
+							} /*cierro indicador*/	
+
 					}/*cierro clase2*/
 				} /* cierro clase*/ 
 		} /*cierro laboral*/
