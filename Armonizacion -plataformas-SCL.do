@@ -111,7 +111,7 @@ qui {
 							if "`tema'" == "pobreza"    local indicadores pobreza31 pobreza vulnerable middle ginihh
 							if "`tema'" == "educacion"  local indicadores tasa_neta_asis tasa_asis_edad Años_Escolaridad_25_mas Ninis_2 leavers tasa_terminacion_c tasa_sobre_edad
 							if "`tema'" == "vivienda"   local indicadores aguared_ch des2_ch luz_ch dirtf 
-							if "`tema'" == "laboral"    local indicadores tasa_ocupacion tasa_desocupacion tasa_participacion ocup_suf_salario ingreso_mens_prom ingreso_hor_prom formalidad_2 pensionista_65_mas ingreso_pension_65_mas horas_trabajadas salminmes_ppp sal_menor_salmin dura_desempleo empleo_publico 
+							if "`tema'" == "laboral"    local indicadores tasa_ocupacion tasa_desocupacion tasa_participacion ocup_suf_salario ingreso_mens_prom ingreso_hor_prom formalidad_2 pensionista_65_mas y_pen_cont_ppp horas_trabajadas salminmes_ppp sal_menor_salmin dura_desempleo empleo_publico 
 							if "`tema'" == "diversidad" local indicadores pdis_ci
 	
 							foreach indicador of local indicadores {
@@ -695,7 +695,7 @@ qui {
 								}
 							} /*cierro indicador*/	
 							
-							if "`indicador'" == "ingreso_pension_65_mas" {	
+							if "`indicador'" == "y_pen_cont_ppp" {	
 							
 								capture sum age_65_mas [w=factor_ci] if `clase'==1 & ypen_ppp!=. & `clase2' ==1
 								if _rc == 0 {
@@ -953,7 +953,7 @@ qui {
 							if "`tema'" == "pobreza"    local indicadores pobreza31 pobreza vulnerable middle ginihh
 							if "`tema'" == "educacion"  local indicadores tasa_neta_asis tasa_asis_edad Años_Escolaridad_25_mas Ninis_2 leavers tasa_terminacion_c tasa_sobre_edad
 							if "`tema'" == "vivienda"   local indicadores aguared_ch des2_ch luz_ch dirtf
-							if "`tema'" == "laboral"    local indicadores tasa_ocupacion tasa_desocupacion tasa_participacion ocup_suf_salario ingreso_mens_prom ingreso_hor_prom formalidad_2 pensionista_65_mas ingreso_pension_65_mas 
+							if "`tema'" == "laboral"    local indicadores tasa_ocupacion tasa_desocupacion tasa_participacion ocup_suf_salario ingreso_mens_prom ingreso_hor_prom formalidad_2 pensionista_65_mas y_pen_cont_ppp 
 							if "`tema'" == "inclusion"  local indicadores 
 							if "`tema'" == "migracion"  local indicadores 
 							
@@ -1003,7 +1003,7 @@ qui {
 										foreach clase of local clases {
 											foreach clase2 of local clases2 {
 												
-												if "`indicador'" == "pensionista_65_mas" | "`indicador'" == "ingreso_pension_65_mas"	local niveles age_65_mas
+												if "`indicador'" == "pensionista_65_mas" | "`indicador'" == "y_pen_cont_ppp"	local niveles age_65_mas
 									  
 												foreach nivel of local niveles {
 
