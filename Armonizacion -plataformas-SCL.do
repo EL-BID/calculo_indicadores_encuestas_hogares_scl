@@ -596,7 +596,8 @@ qui {
 							
 							if "`indicador'" == "horas_trabajadas" {	
 							
-								sum horastot_ci [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & horastot_ci!=.
+								capture sum horastot_ci [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & horastot_ci!=.
+								if _rc == 0 {
 								local valor = `r(mean)'												
 								
 								sum horastot_ci if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & horastot_ci!=.
@@ -608,7 +609,8 @@ qui {
 
 							if "`indicador'" == "dura_desempleo" {	
 							
-								sum durades_ci [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==2 & durades_ci!=.
+								capture sum durades_ci [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==2 & durades_ci!=.
+								if _rc == 0 {
 								local valor = `r(mean)'												
 								
 								sum durades_ci if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==2  & durades_ci!=.
@@ -620,7 +622,8 @@ qui {
 
 							if "`indicador'" == "salminmes_ppp" {	
 							
-								sum salmm_ppp [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & salmm_ppp!=.
+								capture sum salmm_ppp [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & salmm_ppp!=.
+								if _rc == 0 {
 								local valor = `r(mean)'												
 								
 								sum salmm_ppp if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & salmm_ppp!=.
@@ -632,7 +635,8 @@ qui {
 							
 							if "`indicador'" == "sal_menor_salmin" {	
 							
-								estpost tabulate menorwmin [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								capture estpost tabulate menorwmin [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								if _rc == 0 {
 								mat a = e(pct)
 								mat b = e(b)
 								local valor=a[1,2]
@@ -644,7 +648,8 @@ qui {
 							
 							if "`indicador'" == "empleo_publico" {	
 							
-								estpost tabulate spublico_ci [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								capture estpost tabulate spublico_ci [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								if _rc == 0 {
 								mat a = e(pct)
 								mat b = e(b)
 								local valor=a[1,2]
