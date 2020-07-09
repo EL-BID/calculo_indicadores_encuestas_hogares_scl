@@ -126,4 +126,24 @@ Output:             Excel-DTA file
 				egen aux_pensiont_ci=mean(pensiont_ci)  /*indica q no hay dato ese año*/
 				recode pensiont_ci .=0 if edad_ci>=65
 				
+* 7 Categorías de rama de actividad
 				
+				gen byte agro=1 if condocup_ci==1 & rama_ci==1
+				recode agro .=0 if condocup_ci==1
+				gen byte minas=1 if condocup_ci==1 & rama_ci==2
+				recode minas .=0 if condocup_ci==1
+				gen byte industria=1 if condocup_ci==1 & rama_ci==3
+				recode industria .=0 if condocup_ci==1
+				gen byte sspublicos=1 if condocup_ci==1 & rama_ci==4
+				recode sspublicos .=0 if condocup_ci==1
+				gen byte construccion=1 if condocup_ci==1 & rama_ci==5
+				recode construccion .=0 if condocup_ci==1
+				gen byte comercio=1 if condocup_ci==1 & rama_ci==6
+				recode comercio .=0 if condocup_ci==1
+				capture drop transporte
+				gen byte transporte=1 if condocup_ci==1 & rama_ci==7
+				recode transporte .=0 if condocup_ci==1
+				gen byte financiero=1 if condocup_ci==1 & rama_ci==8
+				recode financiero .=0 if condocup_ci==1
+				gen byte servicios=1 if condocup_ci==1 & rama_ci==9
+				recode servicios .=0 if condocup_ci==1			
