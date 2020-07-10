@@ -146,4 +146,25 @@ Output:             Excel-DTA file
 				gen byte financiero=1 if condocup_ci==1 & rama_ci==8
 				recode financiero .=0 if condocup_ci==1
 				gen byte servicios=1 if condocup_ci==1 & rama_ci==9
-				recode servicios .=0 if condocup_ci==1			
+				recode servicios .=0 if condocup_ci==1		
+				
+* 8 Categorías de grandes grupos de ocupación
+
+				gen byte profestecnico=1 if condocup_ci==1 & ocupa_ci==1
+				recode profestecnico .=0 if condocup_ci==1
+				gen byte director=1 if condocup_ci==1 & ocupa_ci==2
+				recode director .=0 if condocup_ci==1
+				gen byte administrativo=1 if condocup_ci==1 & ocupa_ci==3
+				recode administrativo .=0 if condocup_ci==1
+				gen byte comerciantes=1 if condocup_ci==1 & ocupa_ci==4
+				recode comerciantes .=0 if condocup_ci==1
+				gen byte trabss=1 if condocup_ci==1 & ocupa_ci==5
+				recode trabss .=0 if condocup_ci==1
+				gen byte trabagricola=1 if condocup_ci==1 & ocupa_ci==6
+				recode trabagricola .=0 if condocup_ci==1
+				gen byte obreros=1 if condocup_ci==1 & ocupa_ci==7
+				recode obreros .=0 if condocup_ci==1
+				gen byte ffaa=1 if condocup_ci==1 & ocupa_ci==8
+				recode ffaa .=0 if condocup_ci==1
+				gen byte otrostrab=1 if condocup_ci==1 & ocupa_ci==9
+				recode otrostrab .=0 if condocup_ci==1
