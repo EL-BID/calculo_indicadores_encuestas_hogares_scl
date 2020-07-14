@@ -111,7 +111,7 @@ qui {
 							if "`tema'" == "pobreza"    local indicadores pobreza31 pobreza vulnerable middle ginihh
 							if "`tema'" == "educacion"  local indicadores tasa_neta_asis tasa_asis_edad Años_Escolaridad_25_mas Ninis_2 leavers tasa_terminacion_c tasa_sobre_edad
 							if "`tema'" == "vivienda"   local indicadores aguared_ch des2_ch luz_ch dirtf 
-							if "`tema'" == "laboral"    local indicadores tasa_ocupacion tasa_desocupacion tasa_participacion ocup_suf_salario ingreso_mens_prom ingreso_hor_prom formalidad_2 pensionista_65_mas y_pen_cont_ppp horas_trabajadas salminmes_ppp sal_menor_salmin dura_desempleo empleo_publico y_pen_cont y_pen_nocont y_pen_total salminhora_ppp salmin_hora salmin_mes tasa_asalariados tasa_independientes tasa_patrones tasa_sinremuneracion subempleo inglaboral_ppp_formales inglaboral_ppp_informales inglaboral_formales inglaboral_informales nivel_asalariados nivel_independientes nivel_patrones nivel_sinremuneracion nivel_subempleo tasa_agro nivel_agro tasa_minas nivel_minas tasa_industria nivel_industria tasa_sspublicos nivel_sspublicos tasa_construccion nivel_construccion tasa_comercio nivel_comercio tasa_transporte nivel_transporte tasa_financiero nivel_financiero tasa_servicios nivel_servicios tasa_profestecnico nivel_profestecnico tasa_director nivel_director tasa_administrativo nivel_administrativo tasa_comerciantes nivel_comerciantes tasa_trabss nivel_trabss tasa_trabagricola nivel_trabagricola tasa_obreros nivel_obreros tasa_ffaa nivel_ffaa tasa_otrostrab nivel_otrostrab 
+							if "`tema'" == "laboral"    local indicadores tasa_ocupacion tasa_desocupacion tasa_participacion ocup_suf_salario ingreso_mens_prom ingreso_hor_prom formalidad_2 formalidad_3 formalidad_4 pensionista_65_mas num_pensionista_65_mas pensionista_cont_65_mas pensionista_nocont_65_mas pensionista_ocup_65_mas y_pen_cont_ppp horas_trabajadas salminmes_ppp sal_menor_salmin dura_desempleo empleo_publico y_pen_cont y_pen_nocont y_pen_total salminhora_ppp salmin_hora salmin_mes tasa_asalariados tasa_independientes tasa_patrones tasa_sinremuneracion subempleo inglaboral_ppp_formales inglaboral_ppp_informales inglaboral_formales inglaboral_informales nivel_asalariados nivel_independientes nivel_patrones nivel_sinremuneracion nivel_subempleo tasa_agro nivel_agro tasa_minas nivel_minas tasa_industria nivel_industria tasa_sspublicos nivel_sspublicos tasa_construccion nivel_construccion tasa_comercio nivel_comercio tasa_transporte nivel_transporte tasa_financiero nivel_financiero tasa_servicios nivel_servicios tasa_profestecnico nivel_profestecnico tasa_director nivel_director tasa_administrativo nivel_administrativo tasa_comerciantes nivel_comerciantes tasa_trabss nivel_trabss tasa_trabagricola nivel_trabagricola tasa_obreros nivel_obreros tasa_ffaa nivel_ffaa tasa_otrostrab nivel_otrostrab 
 							if "`tema'" == "diversidad" local indicadores pdis_ci
 	
 							foreach indicador of local indicadores {
@@ -1459,6 +1459,41 @@ qui {
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 								}
 							} /*cierro indicador*/
+							
+							if "`indicador'" == "formalidad_3" {	
+							
+								capture sum `nivel' [w=factor_ci] if `clase'==1 & condocup_ci==1 & categopri_ci==3 & `clase2' ==1
+								if _rc == 0 {
+								local denominador = `r(sum)'
+												
+								sum `nivel' [w=factor_ci]	 if `clase'==1 & formal_ci==1 & categopri_ci==3 & condocup_ci==1 & `clase2' ==1
+								local numerador = `r(sum)'
+								local valor = (`numerador' / `denominador') * 100												
+								
+								sum `nivel' if `clase'==1 & formal_ci==1 & condocup_ci==1 & `clase2' ==1
+								local muestra = `r(sum)'
+								
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								}
+							} /*cierro indicador*/
+							
+								if "`indicador'" == "formalidad_4" {	
+							
+								capture sum `nivel' [w=factor_ci] if `clase'==1 & condocup_ci==1 & categopri_ci==2 & `clase2' ==1
+								if _rc == 0 {
+								local denominador = `r(sum)'
+												
+								sum `nivel' [w=factor_ci]	 if `clase'==1 & formal_ci==1 & categopri_ci==3 & condocup_ci==1 & `clase2' ==1
+								local numerador = `r(sum)'
+								local valor = (`numerador' / `denominador') * 100												
+								
+								sum `nivel' if `clase'==1 & formal_ci==1 & condocup_ci==1 & `clase2' ==1
+								local muestra = `r(sum)'
+								
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								}
+							} /*cierro indicador*/
+							
 						} /*cierro niveles*/
 					
 							if "`indicador'" == "pensionista_65_mas" {	
@@ -1479,6 +1514,77 @@ qui {
 								}
 							} /*cierro indicador*/	
 							
+							if "`indicador'" == "num_pensionista_65_mas" {	
+							
+								capture sum age_65_mas [w=factor_ci] if `clase'==1 & pensiont_ci==1 & `clase2' ==1
+								if _rc == 0 {
+								local valor = `r(sum)'
+								
+								sum age_65_mas if `clase'==1 & pensiont_ci==1 & `clase2' ==1
+								local muestra = `r(sum)'
+
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
+								}
+							} /*cierro indicador*/	
+							
+							
+								if "`indicador'" == "pensionista_cont_65_mas" {	
+							
+								capture sum age_65_mas [w=factor_ci] if `clase'==1 & `clase2' ==1
+								if _rc == 0 {
+								local denominador = `r(sum)'
+												
+								sum age_65_mas [w=factor_ci]	 if `clase'==1 & pension_ci==1 & `clase2' ==1
+								local numerador = `r(sum)'
+								local valor = (`numerador' / `denominador') * 100												
+								
+								sum age_65_mas if `clase'==1 & pension_ci==1 & `clase2' ==1
+								local muestra = `r(sum)'
+
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
+								}
+							} /*cierro indicador*/	
+						
+								if "`indicador'" == "pensionista_nocont_65_mas" {	
+							
+								capture sum age_65_mas [w=factor_ci] if `clase'==1 & `clase2' ==1
+								if _rc == 0 {
+								local denominador = `r(sum)'
+												
+								sum age_65_mas [w=factor_ci]	 if `clase'==1 & pensionsub_ci==1 & `clase2' ==1
+								local numerador = `r(sum)'
+								local valor = (`numerador' / `denominador') * 100												
+								
+								sum age_65_mas if `clase'==1 & pensionsub_ci==1 & `clase2' ==1
+								local muestra = `r(sum)'
+
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
+								}
+							} /*cierro indicador*/	
+							
+								if "`indicador'" == "pensionista_ocup_65_mas" {	
+							
+								capture sum age_65_mas [w=factor_ci] if `clase'==1 & `clase2' ==1
+								if _rc == 0 {
+								local denominador = `r(sum)'
+												
+								sum age_65_mas [w=factor_ci]	 if `clase'==1 & condocup_ci==1 & `clase2' ==1
+								local numerador = `r(sum)'
+								local valor = (`numerador' / `denominador') * 100												
+								
+								sum age_65_mas if `clase'==1 & condocup_ci==1 & `clase2' ==1
+								local muestra = `r(sum)'
+
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
+								}
+							} /*cierro indicador*/	
+							
+										
+														
 							if "`indicador'" == "y_pen_cont_ppp" {	
 							
 								capture sum age_65_mas [w=factor_ci] if `clase'==1 & ypen_ppp!=. & `clase2' ==1
