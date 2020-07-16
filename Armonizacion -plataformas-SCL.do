@@ -1483,11 +1483,11 @@ qui {
 								if _rc == 0 {
 								local denominador = `r(sum)'
 												
-								sum `nivel' [w=factor_ci]	 if `clase'==1 & formal_ci==1 & categopri_ci==3 & condocup_ci==1 & `clase2' ==1
+								sum `nivel' [w=factor_ci]	 if `clase'==1 & formal_ci==1 & categopri_ci==2 & condocup_ci==1 & `clase2' ==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100												
 								
-								sum `nivel' if `clase'==1 & formal_ci==1 & condocup_ci==1 & `clase2' ==1
+								sum `nivel' if `clase'==1 & formal_ci==1 & categopri_ci==2 & condocup_ci==1 & `clase2' ==1
 								local muestra = `r(sum)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
@@ -1571,11 +1571,11 @@ qui {
 								if _rc == 0 {
 								local denominador = `r(sum)'
 												
-								sum age_65_mas [w=factor_ci]	 if `clase'==1 & condocup_ci==1 & `clase2' ==1
+								sum age_65_mas [w=factor_ci]	 if `clase'==1 & condocup_ci==1 & (pension_ci==1 | pensionsub_ci==1) & `clase2' ==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100												
 								
-								sum age_65_mas if `clase'==1 & condocup_ci==1 & `clase2' ==1
+								sum age_65_mas if `clase'==1 & condocup_ci==1 & (pension_ci==1 | pensionsub_ci==1) & `clase2' ==1
 								local muestra = `r(sum)'
 
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
