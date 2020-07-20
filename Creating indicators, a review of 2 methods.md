@@ -23,14 +23,15 @@ Nota: aquí el 'capture' -> 'if_rc' se usa en ambos métodos para evitar quiebre
                 
 # Segundo método
 2. El segundo método recoge los valores del porcentaje de ocupados directamente del 'tab' de la variable condocup_ci, a través la librería estpost. Esta librería guarda los resultados de varios comandos de stata en 'e()'. En nuestro caso, la columna de porcentajes del tab se guarda en el vector 'e(pct)'. Para más información usar: 'help estpost'. En síntesis, este método asigna los valores de los resultados de, por ejemplo, tabulaciones, a vectores matriciales (por ej. 'mat a = e(pct)') que luego se usan para definir el local 'valor' sin el paso intermedio de la razón numerador/denominador.
-
-								if "`indicador'" == "tasa_ocupacion" {	
-  A							capture estpost tabulate condocup_ci [w=round(factor_ci)] if `clase'==1 & pet==1 & `clase2' ==1
+							
+							if "`indicador'" == "tasa_ocupacion" {
+								
+								capture estpost tabulate condocup_ci [w=round(factor_ci)] if `clase'==1 & pet==1 & `clase2' ==1
 								if _rc == 0 {
 								mat a = e(pct)
 								local valor=a[1,1]
 								
-  B							capture estpost tabulate condocup_ci if `clase'==1 & pet==1 & `clase2' ==1
+								capture estpost tabulate condocup_ci if `clase'==1 & pet==1 & `clase2' ==1
 								mat b = e(b)
 								local muestra=b[1,1]
 								}
