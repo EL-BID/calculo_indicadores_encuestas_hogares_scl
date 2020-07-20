@@ -81,6 +81,27 @@ Output:             Excel-DTA file
 	
 				gen  	 ypen_ppp=ypen_ci/ppp/ipc_c
 				
+	* 3.5 Salario mínimo mensual y horario - PPP 
+	
+				gen salmm_ppp=salmm_ci/ppp/ipc_c
+				label var salmm_ppp "salario minimo legal mensual a US$PPP(2011)"
+				
+				gen hsmin_ppp=salmm_ppp/(5*8*4.3)
+				label var hsmin_ppp "salario minimo legal horario a US$PPP(2011)"
+				
+				gen hsmin_ci=salmm_ci/(5*8*4.3)
+				label var hsmin_ci "salario minimo legal horario"
+	
+	* 3.6 Salario por actividad principal menor al mínimo legal (por mes)
+	
+				g menorwmin = (ylmpri_ci<=salmm_ci) if condocup_ci==1 & salmm_ci !=. & ylmpri_ci!=.
+	
+	* 3.7 Valor de todas las pensiones
+		
+				egen ypent_ci = rsum(ypen_ci ypensub_ci), missing
+				replace ypent_ci=. if edad_ci<65 | pension_ci==0
+				label var ypent_ci "Valor de todas las pensiones que recibe"
+				
 * 4 Formalidad laboral 
 				gen 	formal_aux=1 if cotizando_ci==1
 				replace formal_aux=1 if afiliado_ci==1 & (cotizando_ci!=1 | cotizando_ci!=0) & condocup_ci==1 & pais_c=="URY" & anio_c<=2000
@@ -105,4 +126,45 @@ Output:             Excel-DTA file
 				egen aux_pensiont_ci=mean(pensiont_ci)  /*indica q no hay dato ese año*/
 				recode pensiont_ci .=0 if edad_ci>=65
 				
+* 7 Categorías de rama de actividad
 				
+				gen byte agro=1 if condocup_ci==1 & rama_ci==1
+				recode agro .=0 if condocup_ci==1
+				gen byte minas=1 if condocup_ci==1 & rama_ci==2
+				recode minas .=0 if condocup_ci==1
+				gen byte industria=1 if condocup_ci==1 & rama_ci==3
+				recode industria .=0 if condocup_ci==1
+				gen byte sspublicos=1 if condocup_ci==1 & rama_ci==4
+				recode sspublicos .=0 if condocup_ci==1
+				gen byte construccion=1 if condocup_ci==1 & rama_ci==5
+				recode construccion .=0 if condocup_ci==1
+				gen byte comercio=1 if condocup_ci==1 & rama_ci==6
+				recode comercio .=0 if condocup_ci==1
+				capture drop transporte
+				gen byte transporte=1 if condocup_ci==1 & rama_ci==7
+				recode transporte .=0 if condocup_ci==1
+				gen byte financiero=1 if condocup_ci==1 & rama_ci==8
+				recode financiero .=0 if condocup_ci==1
+				gen byte servicios=1 if condocup_ci==1 & rama_ci==9
+				recode servicios .=0 if condocup_ci==1		
+				
+* 8 Categorías de grandes grupos de ocupación
+
+				gen byte profestecnico=1 if condocup_ci==1 & ocupa_ci==1
+				recode profestecnico .=0 if condocup_ci==1
+				gen byte director=1 if condocup_ci==1 & ocupa_ci==2
+				recode director .=0 if condocup_ci==1
+				gen byte administrativo=1 if condocup_ci==1 & ocupa_ci==3
+				recode administrativo .=0 if condocup_ci==1
+				gen byte comerciantes=1 if condocup_ci==1 & ocupa_ci==4
+				recode comerciantes .=0 if condocup_ci==1
+				gen byte trabss=1 if condocup_ci==1 & ocupa_ci==5
+				recode trabss .=0 if condocup_ci==1
+				gen byte trabagricola=1 if condocup_ci==1 & ocupa_ci==6
+				recode trabagricola .=0 if condocup_ci==1
+				gen byte obreros=1 if condocup_ci==1 & ocupa_ci==7
+				recode obreros .=0 if condocup_ci==1
+				gen byte ffaa=1 if condocup_ci==1 & ocupa_ci==8
+				recode ffaa .=0 if condocup_ci==1
+				gen byte otrostrab=1 if condocup_ci==1 & ocupa_ci==9
+				recode otrostrab .=0 if condocup_ci==1
