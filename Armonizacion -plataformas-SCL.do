@@ -21,28 +21,27 @@ set more off
 
 * Directory Paths
 global input  	"\\Sdssrv03\surveys\harmonized"
-global output 	"C:\Users\alop\Inter-American Development Bank Group\Programas - Stata15\Armonizacion-SCL-code\Output"
-global temporal	"C:\Users\alop\Inter-American Development Bank Group\Programas - Stata15\Armonizacion-SCL-code\Input"
-global covidtmp "C:\Users\ALOP\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
+global output 	"\\Sdssrv03\surveys\Armonizacion-SCL-code\Output"
+global temporal	"\\Sdssrv03\surveys\Armonizacion-SCL-code\Input"
 
 /*====================================================================
                         1: Open dataset and Generate indicators
 ====================================================================*/
-
-
 tempfile tablas
 tempname ptablas
 
 ** Este postfile da estructura a la base:
 
+
 postfile `ptablas' str30(tiempo_id pais_id geografia_id clase clase2 nivel_id tema indicador valor muestra) using `tablas', replace
 
 ** Creo locales principales:
  
-local temas educacion  laboral  pobreza  vivienda demografia diversidad migracion  									
-local paises ARG BHS BOL BRB BLZ BOL BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN
-local anos 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019
+local temas  educacion pobreza laboral vivienda demografia /*diversidad migracion  	*/									
+local paises ARG /*BHS BOL BRB BLZ BOL BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN */
+local anos 2006 /*2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018*/
 local geografia_id total_nacional
+
 
 
 qui {
@@ -97,8 +96,11 @@ qui {
 									include "${temporal}\var_tmp_LMK.do"
 								* Pobreza, vivienda, demograficas
 									include "${temporal}\var_tmp_SOC.do"
+
 								* Inclusion
-									include "${temporal}\var_tmp_GDI.do"			
+									include "${temporal}\var_tmp_GDI.do"
+
+							
 							
 *****************************************************************************************************************************************
 					* 1.2: Indicators for each topic		
@@ -133,6 +135,7 @@ qui {
 											local muestra = `r(sum)'
 											
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("no_aplica") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											}
 							} /* cierro indicador*/
 		} /*cierro demografia */		
@@ -160,7 +163,8 @@ qui {
 											sum asis_pres 	 if `clase'==1 & asiste_ci!=. & `clase2' ==1
 											local muestra = `r(sum)'
 											
-											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Prescolar") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+  										post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Prescolar") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											}
 							
 							* Primaria   
@@ -176,6 +180,7 @@ qui {
 											local muestra = `r(sum)'
 											
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											}
 							
 							* Secundaria 
@@ -190,7 +195,9 @@ qui {
 											sum asis_seco  if `clase'==1 & edad_ci>=6 & asiste_ci!=. & `clase2' ==1
 											local muestra = `r(sum)'
 											
+
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Secundaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											}								
 											
 							*Terciaria
@@ -206,6 +213,7 @@ qui {
 											local muestra = `r(sum)'
 											
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Superior") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											
 											} /*cierro if*/
 											
@@ -226,7 +234,9 @@ qui {
 											sum asis_pres  if `clase'==1 & age_pres==1 & asiste_ci!=. & `clase2' ==1
 											local muestra = `r(sum)'
 											
+
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Prescolar") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											}
 
 							* Primaria   
@@ -241,7 +251,9 @@ qui {
 											sum asis_prim  if `clase'==1 & age_prim==1 & asiste_ci!=. & `clase2' ==1
 											local muestra = `r(sum)'
 											
+
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											}
 							
 							* Secundaria 
@@ -255,8 +267,9 @@ qui {
 											
 											sum asis_seco  if `clase'==1 & age_seco == 1 & asiste_ci!=. & `clase2' ==1
 											local muestra = `r(sum)'
-											
+
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Secundaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											}
 														
 							*Superior
@@ -272,6 +285,7 @@ qui {
 											local muestra = `r(sum)'
 											
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Superior") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											} /*cierro if*/
 							} /* cierro if indicador*/
 																								
@@ -293,7 +307,9 @@ qui {
 											sum `nivel'  if `clase'==1 & asiste_ci==1 & asiste_ci!=. & `clase2' ==1
 											local muestra = `r(sum)'
 											
+
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											}
 											
 									} /*cierro niveles*/
@@ -318,6 +334,7 @@ qui {
 											local muestra = `r(sum)'
 											
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											}
 
 
@@ -342,7 +359,9 @@ qui {
 											sum `nivel' if `clase'==1 & age_25_mas==1 & `clase2' == 1
 											local muestra = `r(sum)'
 											
+
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											}
 											
 									} /* cierro nivel */		
@@ -367,6 +386,7 @@ qui {
 											local muestra = `r(sum)'
 											
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("15-24_Años") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											}
 									} /* cierro nivel*/			
 							} /* cierro if indicador*/		
@@ -380,14 +400,15 @@ qui {
 											if _rc == 0 {
 											local pop_12_14 = `r(sum)'
 																		
-											sum tprimaria [w=factor_ci]	 if `clase'==1 & age_term_p_c !=. & tprimaria  !=. & `clase2' ==1
+											sum tprimaria [w=factor_ci]	 if `clase'==1 & age_term_p_c & tprimaria  !=. & `clase2' ==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `pop_12_14') * 100 
 											
 											sum tprimaria if `clase'==1 & age_term_p_c & tprimaria  !=. & `clase2' ==1
 											local muestra = `r(sum)'
-											
+
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											}
 							
 							*Secundaria		
@@ -403,7 +424,9 @@ qui {
 											sum tsecundaria if `clase'==1 & age_term_s_c ==1 & `clase2' ==1
 											local muestra = `r(sum)'
 											
+
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Secundaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											}							
 							} /*cierro indicador 
 																
@@ -421,7 +444,9 @@ qui {
 								sum leavers if `clase'==1 & edad_ci>=18 & edad_ci<=24 & `clase2' ==1
 								local muestra = `r(sum)'
 											
+
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Total") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											}					
 							} /*cierro indicador 
 									
@@ -440,7 +465,9 @@ qui {
 								sum asis_prim_c  if `clase'==1 & age_prim_sobre==1 & asiste_ci!=. & `clase2' ==1
 								local muestra = `r(sum)'
 								
+
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 								}				
 							} /* cierro if indicador*/ 
 				} /* cierro clase2 */
@@ -471,7 +498,9 @@ qui {
 								sum `nivel'  if `clase'==1 & condocup_ci==1  & `clase2' ==1
 								local muestra = `r(sum)'
 								
+
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 								}				
 							} /*cierro indicador*/
 							
@@ -488,7 +517,9 @@ qui {
 								sum `nivel' if `clase'==1 & condocup_ci==2 & `clase2' ==1
 								local muestra = `r(sum)'
 								
+
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 								}				
 								
 							} /*cierro indicador*/
@@ -506,7 +537,9 @@ qui {
 								sum `nivel' if `clase'==1 & pea==1 & `clase2' ==1
 								local muestra = `r(sum)'
 								
+
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 								}
 							} /*cierro indicador*/
 								
@@ -523,7 +556,9 @@ qui {
 								sum `nivel' if `clase'==1 & liv_wage ==1 & `clase2' ==1
 								local muestra = `r(sum)'
 								
+
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 								}
 							} /*cierro indicador*/
 							
@@ -537,10 +572,11 @@ qui {
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') 												
 								
-								capture sum `nivel'  if `clase'==1 & ylab_ppp!=. & `clase2' ==1
+								sum ylab_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1
 								local muestra = `r(sum)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 								}
 							} /*cierro indicador*/
 							
@@ -554,10 +590,12 @@ qui {
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') 												
 								
-								capture sum `nivel' if `clase'==1 & hwage_ppp!=. & `clase2' ==1
+								sum hwage_ppp if `clase'==1 & `nivel'==1 & `clase2' ==1
 								local muestra = `r(sum)'
 								
+
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 								}
 							} /*cierro indicador*/
 							
@@ -574,7 +612,9 @@ qui {
 								sum `nivel' if `clase'==1 & formal_ci==1 & condocup_ci==1 & `clase2' ==1
 								local muestra = `r(sum)'
 								
+
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 								}
 							} /*cierro indicador*/
 						} /*cierro niveles*/
@@ -592,8 +632,9 @@ qui {
 								
 								sum age_65_mas if `clase'==1 & pensiont_ci==1 & `clase2' ==1
 								local muestra = `r(sum)'
-								
+
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 								}
 							} /*cierro indicador*/	
 							
@@ -607,10 +648,12 @@ qui {
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') 											
 								
-								capture sum age_65_mas if `clase'==1 & ypen_ppp!=. & `clase2' ==1
-								local denominador = `r(sum)'
+								sum ypen_ppp if `clase'==1 & age_65_mas==1 & `clase2' ==1
+								local muestra = `r(sum)'
 								
+
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 								}
 							} /*cierro indicador*/	
 					}/*cierro clase2*/
@@ -621,7 +664,7 @@ qui {
 		
 			local niveles Total age_00_04 age_05_14 age_15_24 age_25_64 age_65_mas
 			local clases  Total Hombre Mujer Rural Urbano
-			local clases2 Total Hombre Mujer 
+			local clases2 Hombre Mujer 
 				
 				foreach clase of local clases{
 				foreach clase2 of local clases2 {
@@ -637,10 +680,9 @@ qui {
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
 								
-								capture sum `nivel' if `clase'==1 & `clase2' ==1
-								local muestra = `r(sum)'
-								
+
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 								}				
 							} /*cierro indicador*/		
 							
@@ -654,10 +696,9 @@ qui {
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
 								
-								capture sum `nivel' if `clase'==1  & `clase2' ==1
-								local muestra = `r(sum)'
-								
+
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 								}				
 							} /*cierro indicador*/
 							
@@ -671,10 +712,9 @@ qui {
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
 								
-								capture sum `nivel'  if `clase'==1 & `clase2' ==1
-								local muestra = `r(sum)'
-								
+
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 								}				
 							} /*cierro indicador*/	
 							
@@ -688,10 +728,9 @@ qui {
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
 								
-								capture sum `nivel' if `clase'==1 & `clase2' ==1
-								local muestra = `r(sum)'
-								
+
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 								}				
 							} /*cierro indicador*/		
 
@@ -709,10 +748,12 @@ qui {
 								if _rc == 0 {
 								local valor =`r(gini)'
 								
-								cap inequal7 pc_ytot_ch if `clase'==1 & pc_ytot_ch !=. 
+								cap inequal7 pc_ytot_ch [w=factor_ci] if `clase'==1 & pc_ytot_ch !=. 
 								local muestra = `r(gini)'
 								
+
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 								}
 							} /*cierro indicador*/
 							
@@ -741,7 +782,9 @@ qui {
 											sum Total if jefe_ci==1 & `clase'==1 & aguared_ch==1 & `clase2' ==1
 											local muestra = `r(sum)'
 											
+
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											}
 							} /* cierro indicador*/	
 							
@@ -758,7 +801,9 @@ qui {
 											sum Total if jefe_ci==1 & des2_ch==1 & `clase'==1 & `clase2' ==1
 											local muestra = `r(sum)'
 											
+
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											}
 							} /* cierro indicador*/	
 							
@@ -775,7 +820,9 @@ qui {
 											sum Total if jefe_ci==1 & `clase'==1 & luz_ch==1 & `clase2' ==1
 											local muestra = `r(sum)'
 											
+
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											}
 							} /* cierro indicador*/	
 							
@@ -791,8 +838,9 @@ qui {
 											
 											sum Total if jefe_ci==1 & `clase'==1 & dirtf==1 & `clase2' ==1
 											local muestra = `r(sum)'
-											
+
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											}
 											
 							} /* cierro indicador*/
@@ -816,10 +864,12 @@ qui {
 											sum Total if raza==1 & `clase'==1 & `clase2' ==1
 											local muestra = `r(sum)'
 											
+
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											
 							} /* cierro indicador*/
-		} /*cierro inclusion */
+		} /*cierro demografia */
 		
 																
 		if "`tema'"	== "migracion" {
@@ -835,12 +885,9 @@ qui {
 		
 								}  /*cierro indicadores*/
 						}/*Cierro temas*/
-	
-	
-
-	
+						
 					}/*Cierro if _rc*/ 
-							
+										
 					if _rc != 0  { /* Si esta base de datos no existe, entonces haga: */
 
 						foreach tema of local temas {
@@ -857,13 +904,15 @@ qui {
 									noi di in y "Calculating numbers for country: `pais' - year : `ano' - tema: `tema' - indicator: `indicador'"
 									
 									if "`tema'"	== "demografia"  {
+
 										post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("no_aplica") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") (".") (".")
+
 									} /*cierro demografia*/
 										
 									if "`tema'" == "educacion" {
 										
 										local clases  Total Hombre Mujer quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano
-										local clases2 Total Hombre Mujer Rural Urbano
+										local clases2 Hombre Mujer Rural Urbano
 										
 										foreach clase of local clases {
 											foreach clase2 of local clases2 {
@@ -878,7 +927,9 @@ qui {
 												if "`indicador'" == "leavers" 													local niveles Total 
 									  
 												foreach nivel of local niveles {
+
 													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") (".") (".")
+
 												} /* cierro niveles*/
 											} /*cierro clases2*/
 										} /*cierro clases*/
@@ -886,17 +937,21 @@ qui {
 									
 									if "`tema'" == "laboral" {
 									
+
 										 local niveles Total age_15_24 age_15_29 age_15_64 age_25_64 age_65_mas 
 										 local clases Total Hombre Mujer quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano
 										 local clases2 Total Hombre Mujer Rural Urbano
 										 
+
 										foreach clase of local clases {
 											foreach clase2 of local clases2 {
 												
 												if "`indicador'" == "pensionista_65_mas" | "`indicador'" == "ingreso_pension_65_mas"	local niveles age_65_mas
 									  
 												foreach nivel of local niveles {
+
 													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") (".") (".")
+
 												} /* cierro niveles*/
 											} /*cierro clases2*/
 										} /*cierro clases*/
@@ -905,8 +960,10 @@ qui {
 									if "`tema'" == "pobreza" {	
 										
 										local niveles Total age_00_04 age_05_14 age_15_24 age_25_64 age_65_mas
+
 										local clases  Total Hombre Mujer Rural Urbano
 										local clases2 Total Hombre Mujer
+
 										
 										if "`indicador'" == "ginihh" local niveles no_aplica
 										if "`indicador'" == "ginihh" local clases Total Rural Urbano
@@ -914,7 +971,9 @@ qui {
 										foreach clase of local clases {	
 											foreach clase2 of local clases2 {	
 												foreach nivel of local niveles {
+
 													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") (".") (".")
+
 												} /* cierro niveles*/
 											} /*cierro clases2*/
 										} /*cierro clases*/
@@ -927,14 +986,16 @@ qui {
 										
 										foreach clase of local clases {									  
 											foreach clase2 of local clases2 {	
-												
+
 													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") (".") (".")
+
 													
 											} /*cierro clases2*/
 										} /*cierro clases*/
 									} /*cierro vivienda*/
 																		
 									if "`tema'" == "inclusion" {
+
 									
 										local clases Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano
 										local clases2 Total
@@ -945,6 +1006,7 @@ qui {
 												post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") (".") (".")
 											
 									
+
 											} /*cierro clases2*/
 										} /*cierro clases*/
 									} /*cierro inclusion*/
@@ -953,7 +1015,7 @@ qui {
 						} /* cierro temas */
 					
 					}/*cierro if _rc*/
-		
+				
 				
 				
 						
@@ -977,23 +1039,18 @@ save "\\hqpnas01\EDULAC\EDW\2. Indicators\Databases\Stata\Indicadores_SCL.dta", 
 * Variables de formato 
 
 include "${temporal}\var_formato.do"
+
 order tiempo tiempo_id pais_id geografia_id clase clase_id clase2 clase2_id nivel nivel_id tema indicador tipo valor muestra
+
 
 
 /*====================================================================
                         5: Save and Export results
 ====================================================================*/
 
-/*
-export excel using "${output}\Indicadores_SCL.xlsx", first(var) sheet(Total_results) sheetreplace
+
+*export excel using "${output}\Indicadores_SCL.xlsx", first(var) sheet(Total_results) sheetreplace
 export delimited using  "${output}\indicadores_encuestas_hogares_scl.csv", replace
-unicode convertfile "${output}\indicadores_encuestas_hogares_scl.csv" "${output}\indicadores_encuestas_hogares_scl_converted.csv", dstencoding(latin1) replace */
-
-*carpeta tmp
-export delimited using  "${covidtmp}\indicadores_encuestas_hogares_scl.csv", replace
-unicode convertfile "${covidtmp}\indicadores_encuestas_hogares_scl.csv" "${output}\indicadores_encuestas_hogares_scl_converted.csv", dstencoding(latin1) replace 
-
-
 
 
 	g 		division = "soc" if tema == "demografia" | tema == "vivienda" | tema == "pobreza" 
@@ -1002,7 +1059,8 @@ unicode convertfile "${covidtmp}\indicadores_encuestas_hogares_scl.csv" "${outpu
 	replace division = "gdi" if tema == "inclusion"
 	replace division = "mig" if tema == "migracion"
 
-local divisiones soc lmk edu gdi mig											 
+
+local divisiones SOC LMK EDU GDI MIG											 
 
 foreach div of local divisiones { 
 	        

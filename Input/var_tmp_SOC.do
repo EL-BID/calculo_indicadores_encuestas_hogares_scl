@@ -106,14 +106,11 @@ Output:             Excel-DTA file
                 replace vulnerable=1 if ((pc_ytot_ch>=lp5_ci) & (pc_ytot_ch<lp31_ci*4))
 		* 2.4 Entre 12.4 y 62
 				gen middle=0 if pc_ytot_ch!=.
-				replace middle=1 if ((pc_ytot_ch>=lp31_ci*4) & (pc_ytot_ch<lp31_ci*20))
-				
+				replace middle=1 if ((pc_ytot_ch>=lp31_ci*4) & (pc_ytot_ch<lp31_ci*20))			
 
 	* 3. Vivienda 
 	            gen dirtf=(piso_ch==0)
                 replace dirtf=. if piso_ch==.
-				
-
 
 
 		
