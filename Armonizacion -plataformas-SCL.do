@@ -21,12 +21,15 @@ set more off
 
 * Directory Paths
 global input  	"\\Sdssrv03\surveys\harmonized"
-global output 	"\\Sdssrv03\surveys\Armonizacion-SCL-code\Output"
-global temporal	"\\Sdssrv03\surveys\Armonizacion-SCL-code\Input"
+global output 	"C:\Users\alop\Inter-American Development Bank Group\Programas - Stata15\Armonizacion-SCL-code\Output"
+global temporal	"C:\Users\alop\Inter-American Development Bank Group\Programas - Stata15\Armonizacion-SCL-code\Input"
+global covidtmp "C:\Users\ALOP\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
 
 /*====================================================================
                         1: Open dataset and Generate indicators
 ====================================================================*/
+
+
 tempfile tablas
 tempname ptablas
 
@@ -36,9 +39,9 @@ postfile `ptablas' str30(tiempo_id pais_id geografia_id clase clase2 nivel_id te
 
 ** Creo locales principales:
  
-local temas  educacion pobreza laboral vivienda demografia /*diversidad migracion  	*/									
-local paises ARG /*BHS BOL BRB BLZ BOL BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN */
-local anos 2006 /*2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018*/
+local temas educacion  laboral  pobreza  vivienda demografia diversidad migracion  									
+local paises ARG BHS BOL BRB BLZ BOL BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN
+local anos 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019
 local geografia_id total_nacional
 
 
@@ -95,8 +98,7 @@ qui {
 								* Pobreza, vivienda, demograficas
 									include "${temporal}\var_tmp_SOC.do"
 								* Inclusion
-									include "${temporal}\var_tmp_GDI.do"
-							
+									include "${temporal}\var_tmp_GDI.do"			
 							
 *****************************************************************************************************************************************
 					* 1.2: Indicators for each topic		
@@ -378,7 +380,7 @@ qui {
 											if _rc == 0 {
 											local pop_12_14 = `r(sum)'
 																		
-											sum tprimaria [w=factor_ci]	 if `clase'==1 & age_term_p_c & tprimaria  !=. & `clase2' ==1
+											sum tprimaria [w=factor_ci]	 if `clase'==1 & age_term_p_c !=. & tprimaria  !=. & `clase2' ==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `pop_12_14') * 100 
 											
@@ -535,7 +537,7 @@ qui {
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') 												
 								
-								sum ylab_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1
+								capture sum `nivel'  if `clase'==1 & ylab_ppp!=. & `clase2' ==1
 								local muestra = `r(sum)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
@@ -552,7 +554,7 @@ qui {
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') 												
 								
-								sum hwage_ppp if `clase'==1 & `nivel'==1 & `clase2' ==1
+								capture sum `nivel' if `clase'==1 & hwage_ppp!=. & `clase2' ==1
 								local muestra = `r(sum)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
@@ -605,8 +607,8 @@ qui {
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') 											
 								
-								sum ypen_ppp if `clase'==1 & age_65_mas==1 & `clase2' ==1
-								local muestra = `r(sum)'
+								capture sum age_65_mas if `clase'==1 & ypen_ppp!=. & `clase2' ==1
+								local denominador = `r(sum)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 								}
@@ -619,7 +621,7 @@ qui {
 		
 			local niveles Total age_00_04 age_05_14 age_15_24 age_25_64 age_65_mas
 			local clases  Total Hombre Mujer Rural Urbano
-			local clases2 Hombre Mujer 
+			local clases2 Total Hombre Mujer 
 				
 				foreach clase of local clases{
 				foreach clase2 of local clases2 {
@@ -635,6 +637,9 @@ qui {
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
 								
+								capture sum `nivel' if `clase'==1 & `clase2' ==1
+								local muestra = `r(sum)'
+								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 								}				
 							} /*cierro indicador*/		
@@ -648,6 +653,9 @@ qui {
 								sum `nivel' [w=factor_ci]	 if `clase'==1 & poor==1 & `clase2' ==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
+								
+								capture sum `nivel' if `clase'==1  & `clase2' ==1
+								local muestra = `r(sum)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 								}				
@@ -663,6 +671,9 @@ qui {
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
 								
+								capture sum `nivel'  if `clase'==1 & `clase2' ==1
+								local muestra = `r(sum)'
+								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 								}				
 							} /*cierro indicador*/	
@@ -676,6 +687,9 @@ qui {
 								sum `nivel' [w=factor_ci]	 if `clase'==1 & middle==1 & `clase2' ==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
+								
+								capture sum `nivel' if `clase'==1 & `clase2' ==1
+								local muestra = `r(sum)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 								}				
@@ -695,7 +709,7 @@ qui {
 								if _rc == 0 {
 								local valor =`r(gini)'
 								
-								cap inequal7 pc_ytot_ch [w=factor_ci] if `clase'==1 & pc_ytot_ch !=. 
+								cap inequal7 pc_ytot_ch if `clase'==1 & pc_ytot_ch !=. 
 								local muestra = `r(gini)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
@@ -805,7 +819,7 @@ qui {
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 											
 							} /* cierro indicador*/
-		} /*cierro demografia */
+		} /*cierro inclusion */
 		
 																
 		if "`tema'"	== "migracion" {
@@ -821,9 +835,12 @@ qui {
 		
 								}  /*cierro indicadores*/
 						}/*Cierro temas*/
-						
+	
+	
+
+	
 					}/*Cierro if _rc*/ 
-										
+							
 					if _rc != 0  { /* Si esta base de datos no existe, entonces haga: */
 
 						foreach tema of local temas {
@@ -846,7 +863,7 @@ qui {
 									if "`tema'" == "educacion" {
 										
 										local clases  Total Hombre Mujer quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano
-										local clases2 Hombre Mujer Rural Urbano
+										local clases2 Total Hombre Mujer Rural Urbano
 										
 										foreach clase of local clases {
 											foreach clase2 of local clases2 {
@@ -936,7 +953,7 @@ qui {
 						} /* cierro temas */
 					
 					}/*cierro if _rc*/
-				
+		
 				
 				
 						
@@ -967,9 +984,17 @@ order tiempo tiempo_id pais_id geografia_id clase clase_id clase2 clase2_id nive
                         5: Save and Export results
 ====================================================================*/
 
-
-*export excel using "${output}\Indicadores_SCL.xlsx", first(var) sheet(Total_results) sheetreplace
+/*
+export excel using "${output}\Indicadores_SCL.xlsx", first(var) sheet(Total_results) sheetreplace
 export delimited using  "${output}\indicadores_encuestas_hogares_scl.csv", replace
+unicode convertfile "${output}\indicadores_encuestas_hogares_scl.csv" "${output}\indicadores_encuestas_hogares_scl_converted.csv", dstencoding(latin1) replace */
+
+*carpeta tmp
+export delimited using  "${covidtmp}\indicadores_encuestas_hogares_scl.csv", replace
+unicode convertfile "${covidtmp}\indicadores_encuestas_hogares_scl.csv" "${output}\indicadores_encuestas_hogares_scl_converted.csv", dstencoding(latin1) replace 
+
+
+
 
 	g 		division = "soc" if tema == "demografia" | tema == "vivienda" | tema == "pobreza" 
 	replace division = "lmk" if tema == "laboral" 													 
@@ -977,7 +1002,7 @@ export delimited using  "${output}\indicadores_encuestas_hogares_scl.csv", repla
 	replace division = "gdi" if tema == "inclusion"
 	replace division = "mig" if tema == "migracion"
 
-local divisiones SOC LMK EDU GDI MIG											 
+local divisiones soc lmk edu gdi mig											 
 
 foreach div of local divisiones { 
 	        
