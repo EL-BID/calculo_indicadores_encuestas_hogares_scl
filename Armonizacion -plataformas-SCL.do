@@ -20,16 +20,18 @@ set more off
 * ssc install inequal7
 
 * Directory Paths
-global input  	"\\Sdssrv03\surveys\harmonized"
-global output 	"C:\Users\alop\Inter-American Development Bank Group\Programas - Stata15\Armonizacion-SCL-code\Output"
-global temporal	"C:\Users\alop\Inter-American Development Bank Group\Programas - Stata15\Armonizacion-SCL-code\Input"
-global covidtmp "C:\Users\ALOP\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
+global input  	 "\\Sdssrv03\surveys\harmonized"
+global output 	 "C:\Users\alop\Inter-American Development Bank Group\Programas - Stata15\Armonizacion-SCL-code\Output"
+global temporal	 "C:\Users\alop\Inter-American Development Bank Group\Programas - Stata15\Armonizacion-SCL-code\Input"
+global covidtmp  "C:\Users\ALOP\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
+global microdata "C:\Users\alop\Desktop\GitRepositories\calculo_microdatos_encuestas_hogares_scl"
 
 /*====================================================================
                         1: Open dataset and Generate indicators
 ====================================================================*/
 
-
+include "${microdata}\calculo_microdatos_scl.do"
+						
 tempfile tablas
 tempname ptablas
 
@@ -39,7 +41,7 @@ postfile `ptablas' str30(tiempo_id pais_id geografia_id clase clase2 nivel_id te
 
 ** Creo locales principales:
  
-local temas educacion  laboral  pobreza  vivienda demografia diversidad migracion  									
+local temas educacion laboral  pobreza  vivienda demografia diversidad migracion 								
 local paises ARG BHS BOL BRB BLZ BOL BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN
 local anos 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019
 local geografia_id total_nacional
@@ -98,8 +100,11 @@ qui {
 								* Pobreza, vivienda, demograficas
 									include "${temporal}\var_tmp_SOC.do"
 								* Inclusion
-									include "${temporal}\var_tmp_GDI.do"			
-							
+									include "${temporal}\var_tmp_GDI.do"	
+									
+							* base de datos de microdatos con variables intermedias
+						include "${microdata}\append_calculo_microdatos_scl.do"											
+						
 *****************************************************************************************************************************************
 					* 1.2: Indicators for each topic		
 *****************************************************************************************************************************************
