@@ -42,7 +42,7 @@ postfile `ptablas' str30(tiempo_id pais_id geografia_id clase clase2 nivel_id te
 ** Creo locales principales:
  
 local temas educacion laboral  pobreza  vivienda demografia diversidad migracion 								
-local paises ARG BHS BOL BRB BLZ BOL BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN
+local paises ARG BHS BOL BRB BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN
 local anos 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019
 local geografia_id total_nacional
 
