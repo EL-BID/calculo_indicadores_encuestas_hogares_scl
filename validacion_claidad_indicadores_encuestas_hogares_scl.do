@@ -85,7 +85,7 @@ sort indicador pais_id nivel_id
 tostring tiempo_id, replace	
 
 
-reshape wide valor Z , i(indicador pais_id nivel_id clase_id) j(tiempo_id) s
+reshape wide valor Z muestra, i(indicador pais_id nivel_id clase_id tema tipo) j(tiempo_id) s
 
 
 
