@@ -487,17 +487,12 @@ qui {
 					
 							if "`indicador'" == "tasa_ocupacion" {																						 
 				  
-								capture sum `nivel' [w=factor_ci] if `clase'==1 & pet==1 & `clase2' ==1
 								if _rc == 0 {
-								local denominador = `r(sum)'
-												
-								sum `nivel' [w=factor_ci]	 if `clase'==1 & condocup_ci==1  & `clase2' ==1
-								local numerador = `r(sum)'
-								local valor = (`numerador' / `denominador') * 100 
-								
-								sum `nivel'  if `clase'==1 & condocup_ci==1  & `clase2' ==1
-								local muestra = `r(sum)'
-								
+								estpost tabulate condocup_ci [w=factor_ci] if `clase'==1 & `clase2' ==1
+								mat a = e(pct)
+								mat b = e(b)
+								local valor=a[1,1]
+								local muestra=b[1,1]				
 
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 
@@ -1479,21 +1474,25 @@ qui {
 							
 								if "`indicador'" == "formalidad_4" {	
 							
-								capture sum `nivel' [w=factor_ci] if `clase'==1 & condocup_ci==1 & categopri_ci==2 & `clase2' ==1
-								if _rc == 0 {
-								local denominador = `r(sum)'
-												
-								sum `nivel' [w=factor_ci]	 if `clase'==1 & formal_ci==1 & categopri_ci==2 & condocup_ci==1 & `clase2' ==1
-								local numerador = `r(sum)'
-								local valor = (`numerador' / `denominador') * 100												
+
+								sum ylab_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								local valor = `r(mean)' 												
 								
-								sum `nivel' if `clase'==1 & formal_ci==1 & categopri_ci==2 & condocup_ci==1 & `clase2' ==1
-								local muestra = `r(sum)'
+								sum ylab_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								local muestra = `r(N)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 								}
 							} /*cierro indicador*/
 							
+
+							if "`indicador'" == "ingreso_hor_prom" {	
+												
+								sum hwage_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								local valor = `r(mean)'												
+								
+								sum hwage_ppp if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+
 						} /*cierro niveles*/
 					
 							if "`indicador'" == "pensionista_65_mas" {	
@@ -1507,6 +1506,7 @@ qui {
 								local valor = (`numerador' / `denominador') * 100												
 								
 								sum age_65_mas if `clase'==1 & pensiont_ci==1 & `clase2' ==1
+
 								local muestra = `r(sum)'
 
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
@@ -2029,9 +2029,9 @@ order tiempo tiempo_id pais_id geografia_id clase clase_id clase2 clase2_id nive
 
 
 
-/*====================================================================
+/*====================================================================*/
                         5: Save and Export results
-====================================================================*/
+/*====================================================================*/
 
 
 *export excel using "${output}\Indicadores_SCL.xlsx", first(var) sheet(Total_results) sheetreplace
