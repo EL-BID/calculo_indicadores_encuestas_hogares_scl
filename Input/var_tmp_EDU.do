@@ -61,6 +61,12 @@ Output:             Excel-DTA file
 				g leavers=.
 				replace leavers = 1 if age_18_24 == 1 & (aedu_ci > 0 & aedu_ci<=9) & asiste_ci == 0
 				
+	* Ninis 
+	
+				g nini=.
+				replace nini = 1 if asiste_ci==0 & condocup_ci == 3
+
+				
 * 4. Nivel educativo de la poblacion  
  
 				gen anos_0 			= 1 if  aedu_ci==0  & (aedu_ci !=. | edad_ci !=.)
@@ -69,6 +75,7 @@ Output:             Excel-DTA file
 				gen anos_7_11 		= 1 if (aedu_ci>=7  & aedu_ci <=11) & (aedu_ci !=. | edad_ci !=.) 
 				gen anos_12 		= 1	if  aedu_ci==12 & (aedu_ci !=. | edad_ci !=.)
 				gen anos_13_o_mas	= 1 if  aedu_ci>=13 & (aedu_ci !=. | edad_ci !=.)
+	
 * ==========================================================================================================================================
 *                                                                 Edades y niveles costumizados 
 * ==========================================================================================================================================				
