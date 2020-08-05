@@ -19,15 +19,20 @@ set more off
 *ssc install quantiles
 * ssc install inequal7
 
-* Directory Paths
-global input  	"\\Sdssrv03\surveys\harmonized"
-global output "C:\Users\DANIELAZU\Documents\Armonizacion-SCL-code\Output" 
-global temporal	"C:\Users\DANIELAZU\Documents\Armonizacion-SCL-code\Input"
-global covidtmp "C:\Users\DANIELAZU\Documents\Armonizacion-SCL-code\Input\Bases_tmp"
+
+global input  	 "\\Sdssrv03\surveys\harmonized"
+global output 	 "C:\Users\alop\Inter-American Development Bank Group\Programas - Stata15\Armonizacion-SCL-code\Output"
+global temporal	 "C:\Users\alop\Inter-American Development Bank Group\Programas - Stata15\Armonizacion-SCL-code\Input"
+global covidtmp  "C:\Users\ALOP\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
+global microdata "C:\Users\alop\Desktop\GitRepositories\calculo_microdatos_encuestas_hogares_scl"
+
 
 /*====================================================================
                         1: Open dataset and Generate indicators
 ====================================================================*/
+
+include "${microdata}\calculo_microdatos_scl.do"
+						
 tempfile tablas
 tempname ptablas
 
@@ -37,9 +42,11 @@ postfile `ptablas' str30(tiempo_id pais_id geografia_id clase clase2 nivel_id te
 
 ** Creo locales principales:
  
-local temas educacion  laboral  pobreza  vivienda demografia diversidad migracion  									
-local paises COL CRI PER /*ARG BHS BOL BRB BLZ BOL BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN */
-local anos 2008 2012 2018 /*2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018*/
+
+local temas educacion laboral  pobreza  vivienda demografia diversidad migracion 								
+local paises ARG BHS BOL BRB BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN
+local anos 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019
+
 local geografia_id total_nacional
 
 
@@ -96,9 +103,12 @@ qui {
 								* Pobreza, vivienda, demograficas
 									include "${temporal}\var_tmp_SOC.do"
 								* Inclusion
-									include "${temporal}\var_tmp_GDI.do"
-							
-							
+									include "${temporal}\var_tmp_GDI.do"	
+									
+							* base de datos de microdatos con variables intermedias
+						include "${microdata}\append_calculo_microdatos_scl.do"											
+						
+
 *****************************************************************************************************************************************
 					* 1.2: Indicators for each topic		
 *****************************************************************************************************************************************
@@ -107,7 +117,6 @@ qui {
 							if "`tema'" == "demografia" local indicadores jefa_ch jefaecon_ch pobfem_ci union_ci miembro6_ch miembro6y16_ch miembro65_ch unip_ch nucl_ch ampl_ch comp_ch corres_ch  pob18_ci pob65_ci urbano_ci pobedad_ci 
 							if "`tema'" == "pobreza"    local indicadores pobreza31 pobreza vulnerable middle rich ginihh gini theilhh theil indexrem ylmfem_ch
 							if "`tema'" == "educacion"  local indicadores tasa_neta_asis tasa_asis_edad Años_Escolaridad_25_mas Ninis_2 leavers tasa_terminacion_c tasa_sobre_edad
-
 							if "`tema'" == "vivienda"   local indicadores aguared_ch des2_ch luz_ch dirtf_ch refrig_ch auto_ch internet_ch cel_ch parednp_ch techonp_ch hacinamiento_ch estable_ch
 						  if "`tema'" == "laboral"    local indicadores tasa_ocupacion tasa_desocupacion tasa_participacion ocup_suf_salario ingreso_mens_prom ingreso_hor_prom formalidad_2 pensionista_65_mas y_pen_cont_ppp horas_trabajadas salminmes_ppp sal_menor_salmin dura_desempleo empleo_publico y_pen_cont y_pen_nocont y_pen_total salminhora_ppp salmin_hora salmin_mes tasa_asalariados tasa_independientes tasa_patrones tasa_sinremuneracion subempleo inglaboral_ppp_formales inglaboral_ppp_informales inglaboral_formales inglaboral_informales nivel_asalariados nivel_independientes nivel_patrones nivel_sinremuneracion nivel_subempleo tasa_agro nivel_agro tasa_minas nivel_minas tasa_industria nivel_industria tasa_sspublicos nivel_sspublicos tasa_construccion nivel_construccion tasa_comercio nivel_comercio tasa_transporte nivel_transporte tasa_financiero nivel_financiero tasa_servicios nivel_servicios tasa_profestecnico nivel_profestecnico tasa_director nivel_director tasa_administrativo nivel_administrativo tasa_comerciantes nivel_comerciantes tasa_trabss nivel_trabss tasa_trabagricola nivel_trabagricola tasa_obreros nivel_obreros tasa_ffaa nivel_ffaa tasa_otrostrab nivel_otrostrab 
 							if "`tema'" == "diversidad" local indicadores pdis_ci
@@ -137,7 +146,7 @@ qui {
 											
 											sum Total  if jefa_ch==1 & `clase'==1 & `clase2'==1
 											local muestra = `r(sum)'
-											
+
 											post `ptablas' ("`ano'") ("`pais'") ("`geography_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 											}
 							} /* cierro indicador*/
@@ -528,65 +537,50 @@ qui {
 							* Tasa de Asistencia Neta
 							if "`indicador'" == "tasa_neta_asis" {	
 
-							* Prescolar   
-											capture sum age_pres [w=factor_ci]	 if `clase'==1 & asiste_ci!=. & `clase2' ==1
-											if _rc == 0 {
-											local pop_pres = `r(sum)'
-											
-											sum asis_pres [w=factor_ci]	 if `clase'==1 & age_pres==1 & asiste_ci!=. & `clase2' ==1
-											local numerador = `r(sum)'
-											local valor = (`numerador' / `pop_pres') * 100 
-											
-											sum asis_pres  if `clase'==1 & age_pres==1 & asiste_ci!=. & `clase2' ==1
-											local muestra = `r(sum)'
-											
+							* Prescolar   						
+											estpost tab asis_pres [w=factor_ci] 	if age_pres == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
+											mat proporcion = e(pct)
+											local valor = proporcion[1,2]
+										
+											estpost tab asis_pres				if age_pres == 1 & asiste_ci !=. & `clase'==1  & `clase2' ==1, m
+											mat nivel = e(b)
+											local muestra = nivel[1,2]
+																						
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Prescolar") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-											}
 
 							* Primaria   
-											capture sum age_prim [w=factor_ci]	 if `clase'==1 & asiste_ci!=. & `clase2' ==1 
-											if _rc == 0 {
-											local pop_prim = `r(sum)'
-											
-											sum asis_prim [w=factor_ci]	 if `clase'==1 & age_prim==1 & asiste_ci!=. & `clase2' ==1
-											local numerador = `r(sum)'
-											local valor = (`numerador' / `pop_prim') * 100 
-											
-											sum asis_prim  if `clase'==1 & age_prim==1 & asiste_ci!=. & `clase2' ==1
-											local muestra = `r(sum)'
+											estpost tab asis_prim [w=factor_ci] 	if age_prim == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
+											mat proporcion = e(pct)
+											local valor = proporcion[1,1]
+										
+											estpost tab asis_prim				if age_prim == 1 & asiste_ci !=. & `clase'==1  & `clase2' ==1, m
+											mat nivel = e(b)
+											local muestra = nivel[1,1]
 											
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-											}
-							
+			
 							* Secundaria 
-											capture sum age_seco [w=factor_ci]	if `clase'==1 & asiste_ci!=. & `clase2' ==1
-											if _rc == 0 {
-											local pop_seco = `r(sum)'	
+											estpost tab asis_seco [w=factor_ci] 	if age_seco == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
+											mat proporcion = e(pct)
+											local valor = proporcion[1,1]
 											
-											sum asis_seco [w=factor_ci]	 if `clase'==1 & age_seco == 1 & asiste_ci!=. & `clase2' ==1
-											local numerador = `r(sum)'
-											local valor = (`numerador' / `pop_seco') * 100 
-											
-											sum asis_seco  if `clase'==1 & age_seco == 1 & asiste_ci!=. & `clase2' ==1
-											local muestra = `r(sum)'
-											
+											estpost tab asis_seco				if age_seco == 1 & asiste_ci !=. & `clase'==1  & `clase2' ==1, m
+											mat nivel = e(b)
+											local muestra = nivel[1,1]							
+																					
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Secundaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-											}
-														
-							*Superior
-											capture sum age_tert [w=factor_ci]	if `clase'==1 & asiste_ci!=. & `clase2' ==1
-											if _rc == 0 {
-											local pop_tert = `r(sum)'	
-											
-											sum asis_tert [w=factor_ci]	 if `clase'==1 & age_tert == 1 & asiste_ci!=. & `clase2' ==1
-											local numerador = `r(sum)'
-											local valor = (`numerador' / `pop_tert') * 100 
-											
-											sum asis_tert  if `clase'==1 & age_tert == 1 & asiste_ci!=. & `clase2' ==1
-											local muestra = `r(sum)'
+																									
+							 *Superior						
+											estpost tab asis_tert [w=factor_ci] 	if age_tert == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
+											mat proporcion = e(pct)
+											local valor = proporcion[1,1]
+                      
+											estpost tab asis_tert				if age_tert == 1 & asiste_ci !=. & `clase'==1  & `clase2' ==1, m
+											mat nivel = e(b)
+											local muestra = nivel[1,1]																	
 											
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Superior") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-											} /*cierro if*/
+
 							} /* cierro if indicador*/
 																								
 							* Tasa Asistencia grupo etario							
@@ -594,22 +588,18 @@ qui {
 								
 								local niveles age_4_5 age_6_11 age_12_14 age_15_17 age_18_23
 								
-									foreach nivel of local niveles {								
+									foreach nivel of local niveles {	
+										
+										estpost tab asiste_ci [w=factor_ci] if `nivel' ==1 & `clase'==1
+										mat proporcion = e(pct)
+										local valor = proporcion[1,2]
+										
+										estpost tab asiste_ci 				if `nivel' ==1 & `clase'==1
+										mat nivel = e(b)
+										local muestra = nivel[1,2]
+																					
+										post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 
-											capture sum `nivel'  [w=factor_ci]	if `clase'==1 & asiste_ci!=. & `clase2' ==1
-											if _rc == 0 {
-											local denominador = `r(sum)'	
-																						
-											sum `nivel'  [w=factor_ci]	 if `clase'==1 & asiste_ci==1 & asiste_ci!=. & `clase2' ==1
-											local numerador = `r(sum)'
-											local valor = (`numerador' / `denominador') * 100 
-											
-											sum `nivel'  if `clase'==1 & asiste_ci==1 & asiste_ci!=. & `clase2' ==1
-											local muestra = `r(sum)'
-											
-											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-											}
-											
 									} /*cierro niveles*/
 							} /* cierro if indicador*/
 
@@ -620,22 +610,17 @@ qui {
 								
 									foreach nivel of local niveles {
 						 
-											capture sum `nivel' [w=factor_ci] if `clase'==1 & asiste_ci!=. & `clase2' ==1
-											if _rc == 0 {
-											local denominador = `r(sum)'
+										estpost tab asiste_ci [w=factor_ci] if `nivel' ==1 & `clase'==1
+										mat proporcion = e(pct)
+										local valor = proporcion[1,1]
+										
+										estpost tab asiste_ci 				if `nivel' ==1 & `clase'==1
+										mat nivel = e(b)
+										local muestra = nivel[1,1]
 											
-											sum `nivel' [w=factor_ci]	 if `clase'==1 & asiste_ci==0  & `clase2' ==1
-											local numerador = `r(sum)'
-											local valor = (`numerador' / `denominador') * 100 
-											
-											sum `nivel' if `clase'==1 & asiste_ci==0  & `clase2' ==1
-											local muestra = `r(sum)'
-											
-											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-											}
+										post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 
-
-								} /*cierro niveles*/
+									} /*cierro niveles*/
 							} /* cierro if indicador*/
 									
 							* Años_Escolaridad y Años_Escuela
@@ -644,21 +629,17 @@ qui {
 								local niveles anos_0 anos_1_5 anos_6 anos_7_11 anos_12 anos_13_o_mas
 								
 									foreach nivel of local niveles {
-										
-											sum age_25_mas [w=factor_ci] if `clase'==1 & (aedu_ci !=. | edad_ci !=.) & `clase2' ==1
-											if _rc == 0 {
-											local pop_25_mas = `r(sum)'
-											
-											sum `nivel' [w=factor_ci]	if `clase'==1 & age_25_mas==1 & `clase2' ==1
-											local numerador = `r(sum)'
-											local valor = (`numerador' / `pop_25_mas') * 100 
-											
-											sum `nivel' if `clase'==1 & age_25_mas==1 & `clase2' == 1
-											local muestra = `r(sum)'
-											
-											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-											}
-											
+																					
+										estpost tab `nivel' [w=factor_ci] if  age_25_mas==1 & `clase'==1 & (aedu_ci !=. | edad_ci !=.)
+										mat proporcion = e(pct)
+										local valor = proporcion[1,1]
+
+										estpost tab `nivel' 				if age_25_mas==1 & `clase'==1 & (aedu_ci !=. | edad_ci !=.)
+										mat nivel = e(b)
+										local muestra = nivel[1,1]
+																					
+										post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 									} /* cierro nivel */		
 							} /* cierro if indicador*/		
 										
@@ -668,94 +649,80 @@ qui {
 								local niveles age_15_24 age_15_29
 									
 									foreach nivel of local niveles {
+																					
+										estpost tab nini [w=factor_ci] 	if `nivel' == 1 & `clase'==1  & edad_ci !=. & `clase2' ==1, m
+										mat proporcion = e(pct)
+										local valor = proporcion[1,1]
+										
+										estpost tab nini 				if `nivel' == 1 & `clase'==1 & edad_ci !=. & `clase2' ==1, m
+										mat nivel = e(b)
+										local muestra = nivel[1,1]
 											
-											sum `nivel' [w=factor_ci]	 if `clase'==1 & edad_ci !=. & `clase2' ==1
-											if _rc == 0 {
-											local pop_15_24 = `r(sum)'
-											
-											sum `nivel' [w=factor_ci]	 if `clase'==1 & asiste_ci==0 & condocup_ci == 3 & edad_ci !=. & `clase2' ==1
-											local numerador = `r(sum)'
-											local valor = (`numerador' / `pop_15_24') * 100 
-											
-											sum `nivel'  if `clase'==1 & asiste_ci==0 & condocup_ci == 3 & edad_ci !=. & `clase2' ==1
-											local muestra = `r(sum)'
-											
-											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("15-24_Años") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-											}
+										post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("15-24_Años") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 									} /* cierro nivel*/			
 							} /* cierro if indicador*/		
 
 							* Tasa de terminación
 							if "`indicador'" == "tasa_terminacion_c" {	
 										
-							*Primaria
+								*Primaria
+							
+										estpost tab tprimaria [w=factor_ci] if age_term_p_c == 1 & tprimaria !=. & `clase'==1  & edad_ci !=. & `clase2' ==1, m
+										mat proporcion = e(pct)
+										local valor = proporcion[1,2]
+										
+										estpost tab tprimaria 				if age_term_p_c == 1 & tprimaria !=. & `clase'==1  & edad_ci !=. & `clase2' ==1, m
+										mat nivel = e(b)
+										local muestra = nivel[1,2]
+								
+										post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")											
+								
+                *Secundaria		
+							
+										estpost tab tsecundaria [w=factor_ci] 	if age_term_s_c == 1 & tprimaria !=. & `clase'==1  & edad_ci !=. & `clase2' ==1, m
+										mat proporcion = e(pct)
+										local valor = proporcion[1,2]
+										
+										estpost tab tsecundaria 				if age_term_s_c == 1 & tprimaria !=. & `clase'==1  & edad_ci !=. & `clase2' ==1, m
+										mat nivel = e(b)
+										local muestra = nivel[1,2]
+											
+										post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Secundaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 
-											capture sum age_term_p_c [w=factor_ci]	 if `clase'==1 & tprimaria !=. & `clase2' ==1
-											if _rc == 0 {
-											local pop_12_14 = `r(sum)'
-																		
-											sum tprimaria [w=factor_ci]	 if `clase'==1 & age_term_p_c & tprimaria  !=. & `clase2' ==1
-											local numerador = `r(sum)'
-											local valor = (`numerador' / `pop_12_14') * 100 
-											
-											sum tprimaria if `clase'==1 & age_term_p_c & tprimaria  !=. & `clase2' ==1
-											local muestra = `r(sum)'
-											
-											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-											}
-							
-							*Secundaria		
-							
-											capture sum age_term_s_c [w=factor_ci]	 if `clase'==1  & `clase2' ==1
-											if _rc == 0 {
-											local pop_18_20 = `r(sum)'
-											
-											sum tsecundaria [w=factor_ci]	 if `clase'==1 & age_term_s_c ==1 & `clase2' ==1
-											local numerador = `r(sum)'
-											local valor = (`numerador' / `pop_18_20') * 100 
-											
-											sum tsecundaria if `clase'==1 & age_term_s_c ==1 & `clase2' ==1
-											local muestra = `r(sum)'
-											
-											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Secundaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-											}							
 							} /*cierro indicador 
 																
 							* Tasa de abandono escolar temprano "Leavers"  */
 							if "`indicador'" == "leavers" {
 																						
-								cap sum age_18_24 [w=factor_ci]	 if `clase'==1  & `clase2' ==1
-								if _rc == 0 {
-								local pop_18_24 = `r(sum)' 
-											
-								sum leavers [w=factor_ci] if `clase'==1 & edad_ci>=18 & edad_ci<=24 & `clase2' ==1
-								local numerador = `r(sum)'
-								local valor = (`numerador' / `pop_18_24') * 100
-								
-								sum leavers if `clase'==1 & edad_ci>=18 & edad_ci<=24 & `clase2' ==1
-								local muestra = `r(sum)'
-											
-								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Total") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-											}					
+										estpost tab leavers [w=factor_ci] 	if age_18_24 == 1 & edad_ci !=. & `clase'==1 & `clase2' ==1, m
+										mat proporcion = e(pct)
+										local valor = proporcion[1,1]
+										
+										estpost tab leavers 				if age_18_24 == 1 & edad_ci !=. & `clase'==1  & `clase2' ==1, m
+										mat nivel = e(b)
+										local muestra = nivel[1,1]
+																				
+										post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Total") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 							} /*cierro indicador 
 									
 							* Tasa de abandono sobreedad"  */
 							if "`indicador'" == "tasa_sobre_edad" {								
-				*Primaria
+								
 
-								capture sum asis_prim_c [w=factor_ci]	 if `clase'==1 & asiste_ci!=. & `clase2' ==1
-								if _rc == 0 {
-								local pop_prim = `r(sum)'
-															
-								sum asis_prim_c [w=factor_ci]	 if `clase'==1 & age_prim_sobre==1 & asiste_ci!=. & `clase2' ==1
-								local numerador = `r(sum)'
-								local valor = (`numerador' / `pop_prim') * 100 
-								
-								sum asis_prim_c  if `clase'==1 & age_prim_sobre==1 & asiste_ci!=. & `clase2' ==1
-								local muestra = `r(sum)'
-								
-								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}				
+								*Primaria
+										
+										estpost tab age_prim_sobre [w=factor_ci] 	if asis_prim_c == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
+										mat proporcion = e(pct)
+										local valor = proporcion[1,1]
+										
+										estpost tab age_prim_sobre				if asis_prim_c == 1 & asiste_ci !=. & `clase'==1  & `clase2' ==1, m
+										mat nivel = e(b)
+										local muestra = nivel[1,1]
+
+										post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 							} /* cierro if indicador*/ 
 				} /* cierro clase2 */
 			}	/* cierro clase */			
@@ -774,19 +741,14 @@ qui {
 					
 							if "`indicador'" == "tasa_ocupacion" {																						 
 				  
-								capture sum `nivel' [w=factor_ci] if `clase'==1 & pet==1 & `clase2' ==1
-								if _rc == 0 {
-								local denominador = `r(sum)'
-												
-								sum `nivel' [w=factor_ci]	 if `clase'==1 & condocup_ci==1  & `clase2' ==1
-								local numerador = `r(sum)'
-								local valor = (`numerador' / `denominador') * 100 
-								
-								sum `nivel'  if `clase'==1 & condocup_ci==1  & `clase2' ==1
-								local muestra = `r(sum)'
-								
+								estpost tabulate condocup_ci [w=factor_ci] if `clase'==1 & `clase2' ==1
+								mat a = e(pct)
+								mat b = e(b)
+								local valor=a[1,1]
+								local muestra=b[1,1]				
+
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}				
+											
 							} /*cierro indicador*/
 							
 							if "`indicador'" == "tasa_desocupacion" {	
@@ -929,8 +891,7 @@ qui {
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 								}
-							} /*cierro indicador*/
-							
+							} /*cierro indicador*/							
 														
 							if "`indicador'" == "salminhora_ppp" {	
 							
@@ -961,20 +922,19 @@ qui {
 							if "`indicador'" == "salmin_hora" {	
 							
 								capture sum hsmin_ci [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & hsmin_ci!=.
-								if _rc == 0 {
 								local valor = `r(mean)'												
 								
 								sum hsmin_ci if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & hsmin_ci!=.
 								local muestra = `r(N)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 
 							if "`indicador'" == "tasa_asalariados" {	
 							
 								capture estpost tab asalariado [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -983,13 +943,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "tasa_independientes" {	
 							
 								capture estpost tab ctapropia [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -998,28 +957,26 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "tasa_patrones" {	
 							
 								capture estpost tab patron [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+	
 								mat a = e(pct)
-								local valor=a[1,2]
-								
+								local valor=a[1,2]							
 								estpost tab patron if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat b = e(b)					
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "tasa_sinremuneracion" {	
 							
-								capture estpost tab sinremuner [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+								estpost tab sinremuner [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1028,13 +985,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/							
 							
 							if "`indicador'" == "subempleo" {	
 							
 								capture estpost tab subemp_ci [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1043,33 +999,32 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/		
 							
 							if "`indicador'" == "inglaboral_ppp_formales" {	
 							
-								capture sum ylab_ppp [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2'==1 & condocup_ci==1 & formal_ci==1
-								if _rc == 0 {
+								sum ylab_ppp [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2'==1 & condocup_ci==1 & formal_ci==1
 								local valor = `r(mean)'												
 								
 								sum ylab_ppp if `clase'==1 & `nivel'==1 & `clase2'==1 & condocup_ci==1 & formal_ci==1
 								local muestra = `r(N)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
-							} /*cierro indicador*/
+							
+              } /*cierro indicador*/
 							
 							if "`indicador'" == "inglaboral_ppp_informales" {	
 							
 								capture sum ylab_ppp [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2'==1 & condocup_ci==1 & formal_ci==0
-								if _rc == 0 {
+		
 								local valor = `r(mean)'												
 								
 								sum ylab_ppp if `clase'==1 & `nivel'==1 & `clase2'==1 & condocup_ci==1 & formal_ci==0
 								local muestra = `r(N)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/
 							
 							if "`indicador'" == "inglaboral_formales" {	
@@ -1116,7 +1071,7 @@ qui {
 							if "`indicador'" == "nivel_independientes" {	
 							
 								capture estpost tab ctapropia [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1125,13 +1080,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "nivel_patrones" {	
 							
 								capture estpost tab patron [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1140,13 +1094,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 
 							if "`indicador'" == "nivel_sinremuneracion" {	
 							
-								capture estpost tab sinremuner [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+								estpost tab sinremuner [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1155,13 +1108,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/		
 							
 							if "`indicador'" == "nivel_subempleo" {	
 							
 								capture estpost tab subemp_ci [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1170,13 +1122,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 
 							if "`indicador'" == "tasa_agro" {	
 							
 								capture estpost tab agro [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1185,13 +1136,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "nivel_agro" {	
 							
 								capture estpost tab agro [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1200,13 +1150,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "tasa_minas" {	
 							
 								capture estpost tab minas [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1215,13 +1164,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+						
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "nivel_minas" {	
 							
-								capture estpost tab minas [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+								estpost tab minas [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1230,13 +1178,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/			
 
 							if "`indicador'" == "tasa_industria" {	
 							
 								capture estpost tab industria [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1245,13 +1192,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+							
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "nivel_industria" {	
 							
-								capture estpost tab industria [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+								estpost tab industria [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1260,13 +1206,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/								
 							
 							if "`indicador'" == "tasa_sspublicos" {	
 							
 								capture estpost tab sspublicos [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1275,13 +1220,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "nivel_sspublicos" {	
 							
 								capture estpost tab sspublicos [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1290,13 +1234,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/						
 							
 							if "`indicador'" == "tasa_construccion" {	
 							
-								capture estpost tab construccion [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+								estpost tab construccion [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1305,13 +1248,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "nivel_construccion" {	
 							
-								capture estpost tab construccion [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+								estpost tab construccion [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1320,13 +1262,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/		
 							
 							if "`indicador'" == "tasa_comercio" {	
 							
-								capture estpost tab comercio [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+								estpost tab comercio [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1335,13 +1276,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "nivel_comercio" {	
 							
-								capture estpost tab comercio [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+								estpost tab comercio [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1350,13 +1290,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/								
 							
 							if "`indicador'" == "tasa_transporte" {	
 							
 								capture estpost tab transporte [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1365,13 +1304,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "nivel_transporte" {	
 							
 								capture estpost tab transporte [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1380,13 +1318,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/								
 							
 							if "`indicador'" == "tasa_financiero" {	
 							
-								capture estpost tab financiero [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+								estpost tab financiero [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1395,13 +1332,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "nivel_financiero" {	
 							
-								capture estpost tab financiero [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+								estpost tab financiero [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1410,13 +1346,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "tasa_servicios" {	
 							
-								capture estpost tab servicios [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+								estpost tab servicios [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1425,13 +1360,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "nivel_servicios" {	
 							
 								capture estpost tab servicios [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1441,14 +1375,11 @@ qui {
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 
-
-								}
 							} /*cierro indicador*/
 				
 							if "`indicador'" == "tasa_profestecnico" {	
 							
-								capture estpost tab profestecnico [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+								estpost tab profestecnico [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1457,12 +1388,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+					
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "nivel_profestecnico" {	
 							
-								capture estpost tab profestecnico [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								estpost tab profestecnico [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								if _rc == 0 {
 								mat a = e(b)
 								local valor=a[1,2]
@@ -1472,13 +1403,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "tasa_director" {	
 							
 								capture estpost tab director [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1487,13 +1417,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "nivel_director" {	
 							
-								capture estpost tab director [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+								estpost tab director [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1502,13 +1431,13 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								}				
+
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "tasa_administrativo" {	
 							
 								capture estpost tab administrativo [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1517,13 +1446,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "nivel_administrativo" {	
 							
 								capture estpost tab administrativo [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1532,13 +1460,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/								
 							
 							if "`indicador'" == "tasa_comerciantes" {	
 							
 								capture estpost tab comerciantes [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1547,13 +1474,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "nivel_comerciantes" {	
 							
 								capture estpost tab comerciantes [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1562,13 +1488,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/							
 							
 							if "`indicador'" == "tasa_trabss" {	
 							
-								capture estpost tab trabss [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+								estpost tab trabss [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1577,13 +1502,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "nivel_trabss" {	
 							
 								capture estpost tab trabss [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1592,13 +1516,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/			
 							
 							if "`indicador'" == "tasa_trabagricola" {	
 							
 								capture estpost tab trabagricola [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1607,13 +1530,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "nivel_trabagricola" {	
 							
 								capture estpost tab trabagricola [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1622,13 +1544,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/								
 							
 							if "`indicador'" == "tasa_obreros" {	
 							
 								capture estpost tab obreros [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1637,13 +1558,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "nivel_obreros" {	
 							
-								capture estpost tab obreros [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+								estpost tab obreros [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1652,13 +1572,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 
 							if "`indicador'" == "tasa_ffaa" {	
 							
-								capture estpost tab ffaa [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+								estpost tab ffaa [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1667,13 +1586,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "nivel_ffaa" {	
 							
-								capture estpost tab ffaa [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+								estpost tab ffaa [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1682,13 +1600,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 
 							if "`indicador'" == "tasa_otrostrab" {	
 							
-								capture estpost tab otrostrab [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+								estpost tab otrostrab [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1697,13 +1614,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "nivel_otrostrab" {	
 							
 								capture estpost tab otrostrab [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
 								mat a = e(b)
 								local valor=a[1,2]
 								
@@ -1712,13 +1628,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "empleo_publico" {	
 							
-								capture estpost tab spublico_ci [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
-								if _rc == 0 {
+								estpost tab spublico_ci [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								mat a = e(pct)
 								local valor=a[1,2]
 								
@@ -1727,13 +1642,12 @@ qui {
 								local muestra=b[1,2]
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "formalidad_2" {	
 							
-								capture sum `nivel' [w=factor_ci] if `clase'==1 & condocup_ci==1 & `clase2' ==1
-								if _rc == 0 {
+								sum `nivel' [w=factor_ci] if `clase'==1 & condocup_ci==1 & `clase2' ==1
 								local denominador = `r(sum)'
 												
 								sum `nivel' [w=factor_ci]	 if `clase'==1 & formal_ci==1 & condocup_ci==1 & `clase2' ==1
@@ -1744,14 +1658,53 @@ qui {
 								local muestra = `r(sum)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
+							} /*cierro indicador*/
+							
+							if "`indicador'" == "formalidad_3" {	
+							
+								capture sum `nivel' [w=factor_ci] if `clase'==1 & condocup_ci==1 & categopri_ci==3 & `clase2' ==1
+								local denominador = `r(sum)'
+												
+								sum `nivel' [w=factor_ci]	 if `clase'==1 & formal_ci==1 & categopri_ci==3 & condocup_ci==1 & `clase2' ==1
+								local numerador = `r(sum)'
+								local valor = (`numerador' / `denominador') * 100												
+								
+								sum `nivel' if `clase'==1 & formal_ci==1 & condocup_ci==1 & `clase2' ==1
+								local muestra = `r(sum)'
+								
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								
+							} /*cierro indicador*/
+							
+							if "`indicador'" == "formalidad_4" {	
+							
+								sum ylab_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								local valor = `r(mean)' 												
+								
+								sum ylab_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								local muestra = `r(N)'
+								
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+				
+							} /*cierro indicador*/
+							
+							if "`indicador'" == "ingreso_hor_prom" {	
+												
+								sum hwage_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								local valor = `r(mean)'												
+								
+								sum hwage_ppp if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								
+								
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								
 							} /*cierro indicador*/
 						} /*cierro niveles*/
 					
 							if "`indicador'" == "pensionista_65_mas" {	
 							
 								capture sum age_65_mas [w=factor_ci] if `clase'==1 & `clase2' ==1
-								if _rc == 0 {
 								local denominador = `r(sum)'
 												
 								sum age_65_mas [w=factor_ci]	 if `clase'==1 & pensiont_ci==1 & `clase2' ==1
@@ -1762,13 +1715,74 @@ qui {
 								local muestra = `r(sum)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
+							if "`indicador'" == "num_pensionista_65_mas" {	
+							
+								sum age_65_mas [w=factor_ci] if `clase'==1 & pensiont_ci==1 & `clase2' ==1
+								local valor = `r(sum)'
+
+								sum age_65_mas if `clase'==1 & pensiont_ci==1 & `clase2' ==1
+								local muestra = `r(sum)'
+
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
+								
+							} /*cierro indicador*/								
+							
+							if "`indicador'" == "pensionista_cont_65_mas" {	
+							
+								capture sum age_65_mas [w=factor_ci] if `clase'==1 & `clase2' ==1
+								local denominador = `r(sum)'
+												
+								sum age_65_mas [w=factor_ci]	 if `clase'==1 & pension_ci==1 & `clase2' ==1
+								local numerador = `r(sum)'
+								local valor = (`numerador' / `denominador') * 100												
+								
+								sum age_65_mas if `clase'==1 & pension_ci==1 & `clase2' ==1
+								local muestra = `r(sum)'
+
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
+								
+							} /*cierro indicador*/	
+						
+							if "`indicador'" == "pensionista_nocont_65_mas" {	
+							
+								capture sum age_65_mas [w=factor_ci] if `clase'==1 & `clase2' ==1
+								local denominador = `r(sum)'
+												
+								sum age_65_mas [w=factor_ci]	 if `clase'==1 & pensionsub_ci==1 & `clase2' ==1
+								local numerador = `r(sum)'
+								local valor = (`numerador' / `denominador') * 100												
+								
+								sum age_65_mas if `clase'==1 & pensionsub_ci==1 & `clase2' ==1
+								local muestra = `r(sum)'
+
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
+							} /*cierro indicador*/	
+							
+							if "`indicador'" == "pensionista_ocup_65_mas" {	
+							
+								capture sum age_65_mas [w=factor_ci] if `clase'==1 & `clase2' ==1
+								local denominador = `r(sum)'
+												
+								sum age_65_mas [w=factor_ci]	 if `clase'==1 & condocup_ci==1 & (pension_ci==1 | pensionsub_ci==1) & `clase2' ==1
+								local numerador = `r(sum)'
+								local valor = (`numerador' / `denominador') * 100												
+								
+								sum age_65_mas if `clase'==1 & condocup_ci==1 & (pension_ci==1 | pensionsub_ci==1) & `clase2' ==1
+								local muestra = `r(sum)'
+								
+								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								
+							} /*cierro indicador*/	
+																				
 							if "`indicador'" == "y_pen_cont_ppp" {	
 							
 								capture sum age_65_mas [w=factor_ci] if `clase'==1 & ypen_ppp!=. & `clase2' ==1
-								if _rc == 0 {
 								local denominador = `r(sum)'
 												
 								sum ypen_ppp [w=factor_ci]	 if `clase'==1 & age_65_mas==1 & `clase2' ==1
@@ -1780,26 +1794,23 @@ qui {
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 
-								}
 							} /*cierro indicador*/
 							
 							if "`indicador'" == "y_pen_cont" {	
 							
 								capture sum ypen_ci [w=factor_ci] if `clase'==1 & ypen_ci!=. & `clase2' ==1 & age_65_mas==1
-								if _rc == 0 {
 								local valor = `r(mean)'											
 								
 								sum ypen_ci if `clase'==1 & ypen_ci!=. & `clase2' ==1 & age_65_mas==1
 								local muestra = `r(N)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/	
 							
 							if "`indicador'" == "y_pen_nocont" {	
 							
 								capture sum ypensub_ci [w=factor_ci] if `clase'==1 & ypensub_ci!=. & `clase2' ==1 & age_65_mas==1
-								if _rc == 0 {
 								local valor = `r(mean)'											
 								
 								sum ypensub_ci if `clase'==1 & ypensub_ci!=. & `clase2' ==1 & age_65_mas==1
@@ -1807,20 +1818,18 @@ qui {
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 
-								}
 							} /*cierro indicador*/	
 						
 							if "`indicador'" == "y_pen_total" {	
 							
 								capture sum ypent_ci [w=factor_ci] if `clase'==1 & ypent_ci!=. & `clase2' ==1 & age_65_mas==1
-								if _rc == 0 {
 								local valor = `r(mean)'											
 								
 								sum ypent_ci if `clase'==1 & ypent_ci!=. & `clase2' ==1 & age_65_mas==1
 								local muestra = `r(N)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("age_65_mas") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+
 							} /*cierro indicador*/	
 
 					}/*cierro clase2*/
@@ -1848,9 +1857,10 @@ qui {
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
 								
-
+								capture sum `nivel' if `clase'==1 & `clase2' ==1
+								local muestra = `r(sum)'
+								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-
 								}				
 							} /*cierro indicador*/		
 							
@@ -1865,9 +1875,10 @@ qui {
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
 								
-
+								capture sum `nivel' if `clase'==1  & `clase2' ==1
+								local muestra = `r(sum)'
+								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-
 								}				
 							} /*cierro indicador*/
 							
@@ -1882,9 +1893,10 @@ qui {
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
 								
-
+								capture sum `nivel'  if `clase'==1 & `clase2' ==1
+								local muestra = `r(sum)'
+								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-
 								}				
 							} /*cierro indicador*/	
 							
@@ -1899,15 +1911,16 @@ qui {
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
 								
-
+								capture sum `nivel' if `clase'==1 & `clase2' ==1
+								local muestra = `r(sum)'
+								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-
 								}				
 							} /*cierro indicador*/	
 							
 							/* Porcentaje de la población con ingresos mayores 64 USD diarios per capita*/
 							
-                            if "`indicador'" == "rich" {																						 
+                 if "`indicador'" == "rich" {																						 
 				  
 								capture sum `nivel' [w=factor_ci] if `clase'==1 & `clase2' ==1
 								if _rc == 0 {
@@ -1932,30 +1945,26 @@ qui {
 							if "`indicador'" == "ginihh" {
 							
 								cap inequal7 pc_ytot_ch [w=factor_ci] if `clase'==1 & pc_ytot_ch !=. & pc_ytot_ch>0 & (edad_ci>=15 & edad_ci<=64) & factor_ci!=. & jefe_ci==1
-								if _rc == 0 {
 								local valor =`r(gini)'
 								
 								cap inequal7 pc_ytot_ch if `clase'==1 & pc_ytot_ch !=. & pc_ytot_ch>0 & (edad_ci>=15 & edad_ci<=64) & factor_ci!=. & jefe_ci==1
 								local muestra = `r(gini)'
 								
-
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-
-								}
+								
 							} /*cierro indicador*/
 							
 							/* Coeficiente de Gini para salarios por hora*/
 							if "`indicador'" == "gini" {
 							
 								cap inequal7 ylmprixh [w=factor_ci] if `clase'==1 & ylmprixh!=. & ylmprixh>0 & (edad_ci>=15 & edad_ci<=64) & factor_ci!=. 
-								if _rc == 0 {
 								local valor =`r(gini)'
 								
 								cap inequal7 ylmprixh if `clase'==1 & ylmprixh!=. & ylmprixh>0 & (edad_ci>=15 & edad_ci<=64) & factor_ci!=. 
 								local muestra = `r(gini)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geography_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-								}
+								
 							} /*cierro indicador*/
 							
 							  /* Coeficiente de theil para el ingreso per cápita del hogar*/
@@ -2042,7 +2051,6 @@ qui {
 							if "`indicador'" == "aguared_ch" {
 	
 											capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1 & aguared_ch!=. & `clase2'==1
-											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
 											sum Total [w=factor_ci]	 if jefe_ci==1 & `clase'==1 & aguared_ch==1 & `clase2' ==1
@@ -2051,16 +2059,15 @@ qui {
 											
 											sum Total if jefe_ci==1 & `clase'==1 & aguared_ch==1 & `clase2' ==1
 											local muestra = `r(sum)'
-											
+
 											post `ptablas' ("`ano'") ("`pais'") ("`geography_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-											}
+
 							} /* cierro indicador*/	
 							
 							/* % de hogares con acceso a servicios de saneamiento mejorados*/
 							if "`indicador'" == "des2_ch" {
 	
 											capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1  & des2_ch!=. & `clase2' ==1
-											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
 											sum Total [w=factor_ci]	 if jefe_ci==1 & des2_ch==1 & `clase'==1 & `clase2' ==1
@@ -2069,16 +2076,15 @@ qui {
 											
 											sum Total if jefe_ci==1 & des2_ch==1 & `clase'==1 & `clase2' ==1
 											local muestra = `r(sum)'
-											
+
 											post `ptablas' ("`ano'") ("`pais'") ("`geography_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-											}
+
 							} /* cierro indicador*/	
 							
 							/* % de hogares con electricidad */
 							if "`indicador'" == "luz_ch" {
 	
 											capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1 & luz_ch!=. & `clase2' ==1
-											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
 											sum Total [w=factor_ci]	 if jefe_ci==1 & `clase'==1 & luz_ch==1 & `clase2' ==1
@@ -2087,9 +2093,9 @@ qui {
 											
 											sum Total if jefe_ci==1 & `clase'==1 & luz_ch==1 & `clase2' ==1
 											local muestra = `r(sum)'
-											
+
 											post `ptablas' ("`ano'") ("`pais'") ("`geography_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-											}
+
 							} /* cierro indicador*/	
 							
 							/* % hogares con pisos de tierra */
@@ -2105,7 +2111,6 @@ qui {
 											
 											sum Total if jefe_ci==1 & `clase'==1 & dirtf_ch==1 & `clase2' ==1
 											local muestra = `r(sum)'
-											
 											post `ptablas' ("`ano'") ("`pais'") ("`geography_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 											}
 											
@@ -2258,6 +2263,7 @@ qui {
 											local muestra = `r(sum)'
 											
 											post `ptablas' ("`ano'") ("`pais'") ("`geography_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+
 											}
 											
 							} /* cierro indicador*/
@@ -2300,9 +2306,12 @@ qui {
 		
 								}  /*cierro indicadores*/
 						}/*Cierro temas*/
-						
+	
+	
+
+	
 					}/*Cierro if _rc*/ 
-										
+							
 					if _rc != 0  { /* Si esta base de datos no existe, entonces haga: */
 
 						foreach tema of local temas {
@@ -2318,7 +2327,8 @@ qui {
 							foreach indicador of local indicadores {
 									noi di in y "Calculating numbers for country: `pais' - year : `ano' - tema: `tema' - indicator: `indicador'"
 									
-                                   if "`tema'"	== "demografia"  {
+
+              if "`tema'"	== "demografia"  {
 									
 										local clases Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano
 			                              local clases2 Total Rural Urbano
@@ -2336,6 +2346,7 @@ qui {
 									
 											} /*cierro clases2*/
 										} /*cierro clases*/
+
 									} /*cierro demografia*/
 										
 									if "`tema'" == "educacion" {
@@ -2383,10 +2394,8 @@ qui {
 									if "`tema'" == "pobreza" {	
 										
 										local niveles Total age_00_04 age_05_14 age_15_24 age_25_64 age_65_mas
-
 										local clases  Total Hombre Mujer Rural Urbano
 										local clases2 Total Hombre Mujer
-
 										
 										if "`indicador'" == "ginihh" | "`indicador'" == "gini" | "`indicador'" == "theilhh" |"`indicador'" == "theil" |"`indicador'" == "ylmfem_ch" | "`indicador'" == "indexrem" local niveles no_aplica
 										if "`indicador'" == "ginihh" | "`indicador'" == "gini" | "`indicador'" == "theilhh" |"`indicador'" == "theil" |"`indicador'" == "ylmfem_ch" | "`indicador'" == "indexrem"   local clases2 no_aplica
@@ -2396,9 +2405,7 @@ qui {
 										foreach clase of local clases {	
 											foreach clase2 of local clases2 {	
 												foreach nivel of local niveles {
-
 													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") (".") (".")
-
 												} /* cierro niveles*/
 											} /*cierro clases2*/
 										} /*cierro clases*/
@@ -2411,9 +2418,8 @@ qui {
 										
 										foreach clase of local clases {									  
 											foreach clase2 of local clases2 {	
-
+												
 													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") (".") (".")
-
 													
 											} /*cierro clases2*/
 										} /*cierro clases*/
@@ -2438,7 +2444,7 @@ qui {
 						} /* cierro temas */
 					
 					}/*cierro if _rc*/
-			
+
 				
 				
 						
@@ -2466,22 +2472,18 @@ order tiempo tiempo_id pais_id geografia_id clase clase_id clase2 clase2_id nive
 
 
 /*====================================================================
+
                         5: Save and Export results
 ====================================================================*/
 
-
-*export excel using "${output}\Indicadores_SCL.xlsx", first(var) sheet(Total_results) sheetreplace
+/*
+export excel using "${output}\Indicadores_SCL.xlsx", first(var) sheet(Total_results) sheetreplace
 export delimited using  "${output}\indicadores_encuestas_hogares_scl.csv", replace
-unicode convertfile "${output}\indicadores_encuestas_hogares_scl.csv" "${output}\indicadores_encuestas_hogares_scl_converted.csv", dstencoding(latin1) replace
 
-keep if clase2 ==  "Total" | clase2 ==  "no_aplica"  
-drop clase2 clase2_id 
-drop if pais_id == "VEN"
-replace muestra = 0 if indicador == "ginihh"
+unicode convertfile "${output}\indicadores_encuestas_hogares_scl.csv" "${output}\indicadores_encuestas_hogares_scl_converted.csv", dstencoding(latin1) replace */
 
 *carpeta tmp
 
-export excel using "${covidtmp}\Indicadores_SCL.xlsx", first(var) sheet(Total_results) sheetreplace
 export delimited using  "${covidtmp}\indicadores_encuestas_hogares_scl.csv", replace
 unicode convertfile "${covidtmp}\indicadores_encuestas_hogares_scl.csv" "${output}\indicadores_encuestas_hogares_scl_converted.csv", dstencoding(latin1) replace 
 

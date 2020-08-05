@@ -107,6 +107,7 @@ Output:             Excel-DTA file
 		* 2.5 Porcentaje de la población con ingresos entre $12.4 y $62 per capita por día
 				gen middle=0 if pc_ytot_ch!=.
 				replace middle=1 if ((pc_ytot_ch>=lp31_ci*4) & (pc_ytot_ch<lp31_ci*20))
+
 		* 2.6 Porcentaje de la población con ingresos mayores a 64 USD per capita por día
 				gen rich=0 if pc_ytot_ch!=.
 				replace rich=1 if (pc_ytot_ch>=lp31_ci*20)
@@ -114,6 +115,7 @@ Output:             Excel-DTA file
 				gen indexrem=(remesas_ch>0 & remesas_ch!=.)
 		* 2.8 Salarios por hora	
 				gen ylmprixh = ylmpri_ci/(horaspri_ci * 4.34)
+
 
 	* 3. Vivienda 
 	
@@ -125,12 +127,14 @@ Output:             Excel-DTA file
 	    * 3.3 Hogares con pisos de tierra			
 	            gen dirtf=(piso_ch==0)
                 replace dirtf=. if piso_ch==.
+
 		* 3.4 Hogares con techo no permanentes	
 				gen techonp=(techo_ch==0)
                 replace techonp=. if techo_ch==.
 		* 3.5 Hogares con paredes no permanentes					
                 gen parednp=(pared_ch==0)
                 replace parednp=. if pared_ch==.
+
 				
 
 
