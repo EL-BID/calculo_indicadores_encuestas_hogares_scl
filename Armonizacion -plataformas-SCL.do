@@ -219,6 +219,7 @@ qui {
 							* Tasa de Asistencia Neta
 							if "`indicador'" == "tasa_neta_asis" {	
 
+
 							* Prescolar   						
 											estpost tab asis_pres [w=factor_ci] 	if age_pres == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
 											mat proporcion = e(pct)
@@ -262,7 +263,7 @@ qui {
 											local muestra = nivel[1,1]																	
 											
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Superior") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-										
+
 							} /* cierro if indicador*/
 																								
 							* Tasa Asistencia grupo etario							
@@ -281,8 +282,7 @@ qui {
 										local muestra = nivel[1,2]
 																					
 										post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-											
-											
+										
 									} /*cierro niveles*/
 							} /* cierro if indicador*/
 
@@ -322,7 +322,7 @@ qui {
 										local muestra = nivel[1,1]
 																					
 										post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																						
+
 									} /* cierro nivel */		
 							} /* cierro if indicador*/		
 										
@@ -360,7 +360,8 @@ qui {
 										local muestra = nivel[1,2]
 								
 										post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")											
-								*Secundaria		
+								
+                *Secundaria		
 							
 										estpost tab tsecundaria [w=factor_ci] 	if age_term_s_c == 1 & tprimaria !=. & `clase'==1  & edad_ci !=. & `clase2' ==1, m
 										mat proporcion = e(pct)
@@ -377,7 +378,6 @@ qui {
 							* Tasa de abandono escolar temprano "Leavers"  */
 							if "`indicador'" == "leavers" {
 																						
-								
 										estpost tab leavers [w=factor_ci] 	if age_18_24 == 1 & edad_ci !=. & `clase'==1 & `clase2' ==1, m
 										mat proporcion = e(pct)
 										local valor = proporcion[1,1]
@@ -387,7 +387,7 @@ qui {
 										local muestra = nivel[1,1]
 																				
 										post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Total") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-															
+
 							} /*cierro indicador 
 									
 							* Tasa de abandono sobreedad"  */
@@ -402,9 +402,9 @@ qui {
 										estpost tab age_prim_sobre				if asis_prim_c == 1 & asiste_ci !=. & `clase'==1  & `clase2' ==1, m
 										mat nivel = e(b)
 										local muestra = nivel[1,1]
-								
+
 										post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-											
+
 							} /* cierro if indicador*/ 
 				} /* cierro clase2 */
 			}	/* cierro clase */			
