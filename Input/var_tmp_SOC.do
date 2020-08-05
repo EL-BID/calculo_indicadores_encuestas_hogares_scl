@@ -44,7 +44,7 @@ Output:             Excel-DTA file
 			* 1.9 Ingreso laboral generado por mujeres
 			    by idh_ch, sort: egen yLwomen=sum(ylmpri18) if sexo_ci==2
                 bys idh_ch: egen hhyLwomen=max(yLwomen)
-                gen ShareYLMfem_ch=hhyLwomen/hhylmpri
+                gen shareylmfem_ch=hhyLwomen/hhylmpri
 			* 1.10 Union civil formal o informal
 			    gen union_ci=(civil_ci==2)
 				replace union_ci=. if civil_ci==.
@@ -77,41 +77,64 @@ Output:             Excel-DTA file
 			    bys idh_ch: egen perceptor_ci=sum(miembros_ci) if ytot_ci>0 & ytot_ci!=.
 				bys idh_ch: egen perceptor_ch=max(perceptor_ci)
 				gen depen_ch=nmiembros_ch/perceptor_ch
-			* 1.20 Porcentaje pob menor de 18 años
+			* 1.20 Porcentaje poblacion menor de 18 años
 			    gen pob18_ci=(edad_ci<18)
 				replace pob18_ci=. if edad_ci==.
-			* 1.21 Porcentaje pob 65+ años
+			* 1.21 Porcentaje poblacion 65+ años
 			    gen pob65_ci=(edad_ci>=65 & edad_ci!=.)
 				replace pob65_ci=. if edad_ci==.
-			* 1.22 Porcentaje pob que reside en zonas urbanas
+			* 1.22 Porcentaje poblacion que reside en zonas urbanas
 			   capture gen urbano_ci=(zona_c==1)
                replace urbano_ci=. if zona_c==.		
 				
 					
 	* 2. Pobreza 
 	
-		* 1.Edades niveles de desagregación indicadores de pobreza y desigualdad
+		* 2.1 Edades niveles de desagregación indicadores de pobreza y desigualdad
 			
 				gen age_00_04  = inrange(edad_ci,0,4) 
 				gen age_05_14  = inrange(edad_ci,5,14) 
-		* 2.1 Menos de 3.1 dolares 		
+		* 2.2 Porcentaje poblacion que vive con menos de 3.1 dolares diarios		
 				gen     poor31 =0 if pc_ytot_ch!=.
 				replace poor31 =1 if pc_ytot_ch<lp31_ci
 				
-		* 2.2 Menos de 5 dolares
+		* 2.3 Porcentaje poblacion que vive con menos de 5 usd diarios
 				gen      poor =0 if pc_ytot_ch!=.
 				replace  poor =1 if pc_ytot_ch<lp5_ci
-		* 2.3 Entre 5 - 12 USD
+		* 2.4 Porcentaje de la población con ingresos entre 5 y 12.4 usd per capita por día
 				gen vulnerable=0 if pc_ytot_ch!=.
                 replace vulnerable=1 if ((pc_ytot_ch>=lp5_ci) & (pc_ytot_ch<lp31_ci*4))
-		* 2.4 Entre 12.4 y 62
+		* 2.5 Porcentaje de la población con ingresos entre $12.4 y $62 per capita por día
 				gen middle=0 if pc_ytot_ch!=.
 				replace middle=1 if ((pc_ytot_ch>=lp31_ci*4) & (pc_ytot_ch<lp31_ci*20))
-				
+
+		* 2.6 Porcentaje de la población con ingresos mayores a 64 USD per capita por día
+				gen rich=0 if pc_ytot_ch!=.
+				replace rich=1 if (pc_ytot_ch>=lp31_ci*20)
+		* 2.7 Porcentaje de hogares que reciben remesas del exterior
+				gen indexrem=(remesas_ch>0 & remesas_ch!=.)
+		* 2.8 Salarios por hora	
+				gen ylmprixh = ylmpri_ci/(horaspri_ci * 4.34)
+
 
 	* 3. Vivienda 
+	
+	    * 3.1 Hacinamiento
+		        gen hacinamiento_ch=nmiembros_ch/cuartos_ch
+	    * 3.2 Estatus residencial estable
+		        gen estable_ch=(viviprop_ch<=2)
+				replace estable_ch=. if viviprop_ch==.
+	    * 3.3 Hogares con pisos de tierra			
 	            gen dirtf=(piso_ch==0)
                 replace dirtf=. if piso_ch==.
+
+		* 3.4 Hogares con techo no permanentes	
+				gen techonp=(techo_ch==0)
+                replace techonp=. if techo_ch==.
+		* 3.5 Hogares con paredes no permanentes					
+                gen parednp=(pared_ch==0)
+                replace parednp=. if pared_ch==.
+
 				
 
 
