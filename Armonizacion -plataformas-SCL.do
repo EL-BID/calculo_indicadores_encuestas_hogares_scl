@@ -136,11 +136,11 @@ qui {
 							/* Porcentaje de hogares con jefatura femenina */
 							if "`indicador'" == "jefa_ch" {
 	
-											capture sum Total [w=factor_ci]	 if jefe_ci ==1 & sexo_ci!=. & `clase'==1 & `clase2'==1
+											capture sum Total [w=round(factor_ci)]	 if jefe_ci ==1 & sexo_ci!=. & `clase'==1 & `clase2'==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											cap sum Total [w=factor_ci]	 if jefa_ch==1 & `clase'==1 & `clase2'==1
+											cap sum Total [w=round(factor_ci)]	 if jefa_ch==1 & `clase'==1 & `clase2'==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -154,11 +154,11 @@ qui {
 						    /* Porcentaje de hogares con jefatura económica femenina */
 							if "`indicador'" == "jefaecon_ch" {
 	
-                                            capture sum Total [w=factor_ci]	 if jefe_ci ==1 & sexo_ci!=. & `clase'==1 & `clase2'==1
+                                            capture sum Total [w=round(factor_ci)]	 if jefe_ci ==1 & sexo_ci!=. & `clase'==1 & `clase2'==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											cap sum Total [w=factor_ci]	 if hhfem_ch==1 & `clase'==1 & `clase2'==1
+											cap sum Total [w=round(factor_ci)]	 if hhfem_ch==1 & `clase'==1 & `clase2'==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -171,11 +171,11 @@ qui {
 							
 							 if "`indicador'" == "pobfem_ci" {
 	
-											capture sum Total [w=factor_ci]	 if jefe_ci ==1 & sexo_ci!=. & `clase'==1 & `clase2'==1 
+											capture sum Total [w=round(factor_ci)]	 if jefe_ci ==1 & sexo_ci!=. & `clase'==1 & `clase2'==1 
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											cap sum Total [w=factor_ci]	 if  sexo_ci==2 & `clase'==1 & `clase2'==1
+											cap sum Total [w=round(factor_ci)]	 if  sexo_ci==2 & `clase'==1 & `clase2'==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -189,11 +189,11 @@ qui {
 							/* Porcentaje de hogares con al menos un miembro de 0-5 años*/
 							if "`indicador'" == "miembro6_ch" {
 	
-                                            capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1 & `clase2'==1
+                                            capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & `clase'==1 & `clase2'==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											cap sum Total [w=factor_ci]	 if miembro6_ch==1 & `clase'==1 & `clase2'==1
+											cap sum Total [w=round(factor_ci)]	 if miembro6_ch==1 & `clase'==1 & `clase2'==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -207,11 +207,11 @@ qui {
 							/* Porcentaje de hogares con al menos un miembro entre 6-16 años*/
 							if "`indicador'" == "miembro6y16_ch" {
 	
-                                            capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1 & `clase2'==1
+                                            capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & `clase'==1 & `clase2'==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											cap sum Total [w=factor_ci]	 if miembro6y16_ch==1 & `clase'==1 & `clase2'==1
+											cap sum Total [w=round(factor_ci)]	 if miembro6y16_ch==1 & `clase'==1 & `clase2'==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -225,11 +225,11 @@ qui {
 							/* Porcentaje de hogares con al menos un miembro de 65 años o más*/
 							if "`indicador'" == "miembro65_ch" {
 	
-                                            capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1 & `clase2'==1
+                                            capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & `clase'==1 & `clase2'==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											cap sum Total [w=factor_ci]	 if miembro65_ch==1 & `clase'==1 & `clase2'==1
+											cap sum Total [w=round(factor_ci)]	 if miembro65_ch==1 & `clase'==1 & `clase2'==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -243,11 +243,11 @@ qui {
 							/* Porcentaje de hogares unipersonales*/
 							if "`indicador'" == "unip_ch" {
 	
-                                            capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1 & `clase2'==1
+                                            capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & `clase'==1 & `clase2'==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if unip_ch==1 & `clase'==1 & `clase2'==1
+											sum Total [w=round(factor_ci)]	 if unip_ch==1 & `clase'==1 & `clase2'==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -261,11 +261,11 @@ qui {
 							/* Porcentaje de hogares nucleares*/
 							if "`indicador'" == "nucl_ch" {
 	
-                                            capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1 & `clase2'==1
+                                            capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & `clase'==1 & `clase2'==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if nucl_ch==1 & `clase'==1 & `clase2'==1
+											sum Total [w=round(factor_ci)]	 if nucl_ch==1 & `clase'==1 & `clase2'==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -279,11 +279,11 @@ qui {
 							/* Porcentaje de hogares ampliados*/
 							if "`indicador'" == "ampl_ch" {
 	
-                                            capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1 & `clase2'==1
+                                            capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & `clase'==1 & `clase2'==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if ampl_ch==1 & `clase'==1 & `clase2'==1
+											sum Total [w=round(factor_ci)]	 if ampl_ch==1 & `clase'==1 & `clase2'==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -297,11 +297,11 @@ qui {
 							/* Porcentaje de hogares compuestos*/
 							if "`indicador'" == "comp_ch" {
 	
-                                            capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1 & `clase2'==1
+                                            capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & `clase'==1 & `clase2'==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if comp_ch==1 & `clase'==1 & `clase2'==1
+											sum Total [w=round(factor_ci)]	 if comp_ch==1 & `clase'==1 & `clase2'==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -315,11 +315,11 @@ qui {
 							/* Porcentaje de hogares corresidentes*/
 							if "`indicador'" == "corres_ch" {
 	
-                                            capture sum Total [w=factor_ci]	if jefe_ci==1 & `clase'==1 & `clase2'==1
+                                            capture sum Total [w=round(factor_ci)]	if jefe_ci==1 & `clase'==1 & `clase2'==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if corres_ch==1 & `clase'==1 & `clase2'==1
+											sum Total [w=round(factor_ci)]	 if corres_ch==1 & `clase'==1 & `clase2'==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -333,7 +333,7 @@ qui {
 							 /*Razón de dependencia*/
 							if "`indicador'" == "depen_ch" {
 	
-                                            capture sum depen_ch [w=factor_ci] if jefe_ci==1 & `clase'==1 & `clase2'==1
+                                            capture sum depen_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1
 											if _rc == 0 {
 											local num_hog = `r(mean)'
 											local valor = (`num_hog')* 100 
@@ -348,7 +348,7 @@ qui {
 							/* Número promedio de miembros del hogar*/
 							if "`indicador'" == "tamh_ch" {
 	
-                                            capture sum nmiembros_ch [w=factor_ci] if jefe_ci==1 & `clase'==1 & `clase2'==1
+                                            capture sum nmiembros_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1
 											if _rc == 0 {
 											local num_hog = `r(mean)'
 											local valor = (`num_hog') * 100 
@@ -363,11 +363,11 @@ qui {
 							/* Porcentaje de población menor de 18 años*/
 							if "`indicador'" == "pob18_ci" {
 	
-                                            capture sum Total [w=factor_ci]	if `clase'==1 & `clase2'==1
+                                            capture sum Total [w=round(factor_ci)]	if `clase'==1 & `clase2'==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if pob18_ci==1 & `clase'==1 & `clase2'==1
+											sum Total [w=round(factor_ci)]	 if pob18_ci==1 & `clase'==1 & `clase2'==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -381,11 +381,11 @@ qui {
 							/* Porcentaje de población de 65+ años*/
 							if "`indicador'" == "pob65_ci" {
 	
-                                            capture sum Total [w=factor_ci]	if  `clase'==1 & `clase2'==1
+                                            capture sum Total [w=round(factor_ci)]	if  `clase'==1 & `clase2'==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if pob65_ci==1 & `clase'==1 & `clase2'==1
+											sum Total [w=round(factor_ci)]	 if pob65_ci==1 & `clase'==1 & `clase2'==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -400,11 +400,11 @@ qui {
 							/* Porcentaje de individuos en union formal o informal*/
 							if "`indicador'" == "union_ci" {
 	
-                                            capture sum Total [w=factor_ci]	if `clase'==1 & `clase2'==1
+                                            capture sum Total [w=round(factor_ci)]	if `clase'==1 & `clase2'==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if union_ci==1 & `clase'==1 & `clase2'==1
+											sum Total [w=round(factor_ci)]	 if union_ci==1 & `clase'==1 & `clase2'==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -419,7 +419,7 @@ qui {
 							/* Edad mediana de la población en años */
 							if "`indicador'" == "pobedad_ci_ch" {
 	
-                                            capture sum edad_ci [w=factor_ci] if `clase'==1 & `clase2'==1
+                                            capture sum edad_ci [w=round(factor_ci)] if `clase'==1 & `clase2'==1
 											if _rc == 0 {
 											local num_hog = `r(mean)'
 																		
@@ -440,11 +440,11 @@ qui {
 						/* Porcentaje de población que reside en zonas urbanas*/
 							if "`indicador'" == "urbano_ci"  {
 	
-                                            capture sum Total [w=factor_ci]	if  `clase'==1 
+                                            capture sum Total [w=round(factor_ci)]	if  `clase'==1 
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if urbano_ci==1 & `clase'==1 
+											sum Total [w=round(factor_ci)]	 if urbano_ci==1 & `clase'==1 
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -472,11 +472,11 @@ qui {
 							if "`indicador'" == "tasa_bruta_asis" {
 																						 
 							* Prescolar   
-											capture sum age_pres [w=factor_ci]	 if `clase'==1 & asiste_ci!=. & `clase2' ==1
+											capture sum age_pres [w=round(factor_ci)]	 if `clase'==1 & asiste_ci!=. & `clase2' ==1
 											if _rc == 0 {
 											local pop_pres = `r(sum)'
 											
-											sum asis_pres [w=factor_ci]	 if `clase'==1 & asiste_ci!=. & `clase2' ==1
+											sum asis_pres [w=round(factor_ci)]	 if `clase'==1 & asiste_ci!=. & `clase2' ==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `pop_pres') * 100 
 											
@@ -487,11 +487,11 @@ qui {
 											}
 							
 							* Primaria   
-											capture sum age_prim [w=factor_ci]	 if `clase'==1 & asiste_ci!=. & `clase2' ==1
+											capture sum age_prim [w=round(factor_ci)]	 if `clase'==1 & asiste_ci!=. & `clase2' ==1
 											if _rc == 0 {
 											local pop_prim = `r(sum)'
 											
-											sum asis_prim [w=factor_ci]	 if `clase'==1 & edad_ci>=6 & asiste_ci!=. & `clase2' ==1
+											sum asis_prim [w=round(factor_ci)]	 if `clase'==1 & edad_ci>=6 & asiste_ci!=. & `clase2' ==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `pop_prim') * 100 
 											
@@ -502,11 +502,11 @@ qui {
 											}
 							
 							* Secundaria 
-											capture sum age_seco [w=factor_ci]	if `clase'==1 & asiste_ci!=. & `clase2' ==1
+											capture sum age_seco [w=round(factor_ci)]	if `clase'==1 & asiste_ci!=. & `clase2' ==1
 											if _rc == 0 {
 											local pop_seco = `r(sum)'	
 							
-											sum asis_seco [w=factor_ci]	 if `clase'==1 & edad_ci>=6 & asiste_ci!=. & `clase2' ==1
+											sum asis_seco [w=round(factor_ci)]	 if `clase'==1 & edad_ci>=6 & asiste_ci!=. & `clase2' ==1
 											local numerador = `r(sum)'
 											local valor = (`numerador'/ `pop_seco') * 100 
 											
@@ -517,11 +517,11 @@ qui {
 											}								
 											
 							*Terciaria
-											capture sum age_tert [w=factor_ci]	if `clase'==1 & asiste_ci!=. & `clase2' ==1
+											capture sum age_tert [w=round(factor_ci)]	if `clase'==1 & asiste_ci!=. & `clase2' ==1
 											if _rc == 0 {
 											local pop_tert = `r(sum)'	
 											
-											sum asis_tert [w=factor_ci]	 if `clase'==1 & edad_ci>=6 & asiste_ci!=. & `clase2' ==1
+											sum asis_tert [w=round(factor_ci)]	 if `clase'==1 & edad_ci>=6 & asiste_ci!=. & `clase2' ==1
 											local numerador = `r(sum)'
 											local valor = (`numerador'/ `pop_tert') * 100 
 											
@@ -538,7 +538,7 @@ qui {
 							if "`indicador'" == "tasa_neta_asis" {	
 
 							* Prescolar   						
-											cap estpost tab asis_pres [w=factor_ci] 	if age_pres == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
+											cap estpost tab asis_pres [w=round(factor_ci)] 	if age_pres == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
 											if _rc == 0 {
 											mat proporcion = e(pct)
 											local valor = proporcion[1,2]
@@ -551,7 +551,7 @@ qui {
 											}
 											
 							* Primaria   
-											cap estpost tab asis_prim [w=factor_ci] 	if age_prim == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
+											cap estpost tab asis_prim [w=round(factor_ci)] 	if age_prim == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
 											if _rc == 0 {
 												mat proporcion = e(pct)
 												local valor = proporcion[1,1]
@@ -564,7 +564,7 @@ qui {
 											}
 			
 							* Secundaria 
-											cap estpost tab asis_seco [w=factor_ci] 	if age_seco == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
+											cap estpost tab asis_seco [w=round(factor_ci)] 	if age_seco == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
 											if _rc == 0 {
 												mat proporcion = e(pct)
 												local valor = proporcion[1,1]
@@ -577,7 +577,7 @@ qui {
 											}
 											
 							 *Superior						
-											cap estpost tab asis_tert [w=factor_ci] 	if age_tert == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
+											cap estpost tab asis_tert [w=round(factor_ci)] 	if age_tert == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
 											if _rc == 0 {
 												mat proporcion = e(pct)
 												local valor = proporcion[1,1]
@@ -598,7 +598,7 @@ qui {
 								
 									foreach nivel of local niveles {	
 										
-										cap estpost tab asiste_ci [w=factor_ci] if `nivel' ==1 & `clase'==1
+										cap estpost tab asiste_ci [w=round(factor_ci)] if `nivel' ==1 & `clase'==1
 										if _rc == 0 {
 											mat proporcion = e(pct)
 											local valor = proporcion[1,2]
@@ -619,7 +619,7 @@ qui {
 								
 									foreach nivel of local niveles {
 						 
-										cap estpost tab asiste_ci [w=factor_ci] if `nivel' ==1 & `clase'==1
+										cap estpost tab asiste_ci [w=round(factor_ci)] if `nivel' ==1 & `clase'==1
 										if _rc == 0 {
 										mat proporcion = e(pct)
 										local valor = proporcion[1,1]
@@ -641,7 +641,7 @@ qui {
 								
 									foreach nivel of local niveles {
 																					
-										cap estpost tab `nivel' [w=factor_ci] if  age_25_mas==1 & `clase'==1 & (aedu_ci !=. | edad_ci !=.), m
+										cap estpost tab `nivel' [w=round(factor_ci)] if  age_25_mas==1 & `clase'==1 & (aedu_ci !=. | edad_ci !=.), m
 										if _rc == 0 {
 										mat proporcion = e(pct)
 										local valor = proporcion[1,1]
@@ -663,7 +663,7 @@ qui {
 									
 									foreach nivel of local niveles {
 																					
-										cap estpost tab nini [w=factor_ci] 	if `nivel' == 1 & `clase'==1  & edad_ci !=. & `clase2' ==1, m
+										cap estpost tab nini [w=round(factor_ci)] 	if `nivel' == 1 & `clase'==1  & edad_ci !=. & `clase2' ==1, m
 										if _rc == 0 {
 										mat proporcion = e(pct)
 										local valor = proporcion[1,1]
@@ -682,7 +682,7 @@ qui {
 										
 								*Primaria
 							
-										cap estpost tab tprimaria [w=factor_ci] if age_term_p_c == 1 & tprimaria !=. & `clase'==1  & edad_ci !=. & `clase2' ==1, m
+										cap estpost tab tprimaria [w=round(factor_ci)] if age_term_p_c == 1 & tprimaria !=. & `clase'==1  & edad_ci !=. & `clase2' ==1, m
 										if _rc == 0 {
 										mat proporcion = e(pct)
 										local valor = proporcion[1,2]
@@ -697,7 +697,7 @@ qui {
 								
 								*Secundaria		
 							
-										cap estpost tab tsecundaria [w=factor_ci] 	if age_term_s_c == 1 & tprimaria !=. & `clase'==1  & edad_ci !=. & `clase2' ==1, m
+										cap estpost tab tsecundaria [w=round(factor_ci)] 	if age_term_s_c == 1 & tprimaria !=. & `clase'==1  & edad_ci !=. & `clase2' ==1, m
 										if _rc == 0 {
 										mat proporcion = e(pct)
 										local valor = proporcion[1,2]
@@ -715,7 +715,7 @@ qui {
 							* Tasa de abandono escolar temprano "Leavers"  */
 							if "`indicador'" == "leavers" {
 																						
-										cap estpost tab leavers [w=factor_ci] 	if age_18_24 == 1 & edad_ci !=. & `clase'==1 & `clase2' ==1, m
+										cap estpost tab leavers [w=round(factor_ci)] 	if age_18_24 == 1 & edad_ci !=. & `clase'==1 & `clase2' ==1, m
 										if _rc == 0 {
 										mat proporcion = e(pct)
 										local valor = proporcion[1,1]
@@ -735,7 +735,7 @@ qui {
 
 								*Primaria
 										
-										cap estpost tab age_prim_sobre [w=factor_ci] 	if asis_prim_c == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
+										cap estpost tab age_prim_sobre [w=round(factor_ci)] 	if asis_prim_c == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
 										if _rc == 0 {
 										mat proporcion = e(pct)
 										local valor = proporcion[1,1]
@@ -765,7 +765,7 @@ qui {
 					
 							if "`indicador'" == "tasa_ocupacion" {																						 
 				  
-								cap estpost tabulate condocup_ci [w=factor_ci] if `clase'==1 & `clase2' ==1
+								cap estpost tabulate condocup_ci [w=round(factor_ci)] if `clase'==1 & `clase2' ==1
 								if _rc == 0 {
 								mat a = e(pct)
 								mat b = e(b)
@@ -779,11 +779,11 @@ qui {
 							
 							if "`indicador'" == "tasa_desocupacion" {	
 							
-								capture sum `nivel' [w=factor_ci] if `clase'==1 & pea==1 & `clase2' ==1
+								capture sum `nivel' [w=round(factor_ci)] if `clase'==1 & pea==1 & `clase2' ==1
 								if _rc == 0 {
 								local denominador = `r(sum)'
 												
-								sum `nivel' [w=factor_ci]	 if `clase'==1 & condocup_ci==2 & `clase2' ==1
+								sum `nivel' [w=round(factor_ci)]	 if `clase'==1 & condocup_ci==2 & `clase2' ==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
 								
@@ -797,11 +797,11 @@ qui {
 							
 							if "`indicador'" == "tasa_participacion" {	
 							
-								capture sum `nivel' [w=factor_ci] if `clase'==1 & pet==1 & `clase2' ==1
+								capture sum `nivel' [w=round(factor_ci)] if `clase'==1 & pet==1 & `clase2' ==1
 								if _rc == 0 {
 								local denominador = `r(sum)'
 												
-								sum `nivel' [w=factor_ci]	 if `clase'==1 & pea==1 & `clase2' ==1
+								sum `nivel' [w=round(factor_ci)]	 if `clase'==1 & pea==1 & `clase2' ==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
 								
@@ -815,11 +815,11 @@ qui {
 								
 							if "`indicador'" == "ocup_suf_salario" {	
 							
-								capture sum `nivel' [w=factor_ci] if `clase'==1 & liv_wage !=. & `clase2' ==1 & condocup_ci==1
+								capture sum `nivel' [w=round(factor_ci)] if `clase'==1 & liv_wage !=. & `clase2' ==1 & condocup_ci==1
 								if _rc == 0 {
 								local denominador = `r(sum)'
 												
-								sum `nivel' [w=factor_ci]	 if `clase'==1 & liv_wage ==1 & `clase2' ==1 & condocup_ci==1
+								sum `nivel' [w=round(factor_ci)]	 if `clase'==1 & liv_wage ==1 & `clase2' ==1 & condocup_ci==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
 								
@@ -833,16 +833,16 @@ qui {
 							
 							if "`indicador'" == "ingreso_mens_prom" {	
 							
-								capture sum `nivel' [w=factor_ci] if `clase'==1 & ylab_ppp!=. & `clase2' ==1 & condocup_ci==1
+								capture sum `nivel' [w=round(factor_ci)] if `clase'==1 & ylab_ppp!=. & `clase2' ==1 & condocup_ci==1
 								if _rc == 0 {
 								local denominador = `r(sum)'
 												
-								sum ylab_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								sum ylab_ppp [w=round(factor_ci)]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') 												
 								
 
-								sum ylab_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								sum ylab_ppp [w=round(factor_ci)]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								local muestra = `r(sum)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
@@ -852,11 +852,11 @@ qui {
 							
 							if "`indicador'" == "ingreso_hor_prom" {	
 							
-								capture sum `nivel' [w=factor_ci] if `clase'==1 & hwage_ppp!=. & `clase2' ==1 & condocup_ci==1
+								capture sum `nivel' [w=round(factor_ci)] if `clase'==1 & hwage_ppp!=. & `clase2' ==1 & condocup_ci==1
 								if _rc == 0 {
 								local denominador = `r(sum)'
 												
-								sum hwage_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								sum hwage_ppp [w=round(factor_ci)]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') 												
 								
@@ -870,7 +870,7 @@ qui {
 							
 							if "`indicador'" == "horas_trabajadas" {	
 							
-								capture sum horastot_ci [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & horastot_ci!=.
+								capture sum horastot_ci [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & horastot_ci!=.
 								if _rc == 0 {
 								cap local valor = `r(mean)'												
 								
@@ -883,7 +883,7 @@ qui {
 
 							if "`indicador'" == "dura_desempleo" {	
 							
-								capture sum durades_ci [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==2 & durades_ci!=.
+								capture sum durades_ci [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==2 & durades_ci!=.
 								if _rc == 0 {
 								cap local valor = `r(mean)'												
 								
@@ -896,7 +896,7 @@ qui {
 
 							if "`indicador'" == "salminmes_ppp" {	
 							
-								capture sum salmm_ppp [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & salmm_ppp!=.
+								capture sum salmm_ppp [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & salmm_ppp!=.
 								if _rc == 0 {
 								cap local valor = `r(mean)'												
 								
@@ -924,7 +924,7 @@ qui {
 														
 							if "`indicador'" == "salminhora_ppp" {	
 							
-								capture sum hsmin_ppp [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & hsmin_ppp!=.
+								capture sum hsmin_ppp [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & hsmin_ppp!=.
 								if _rc == 0 {
 								cap local valor = `r(mean)'												
 								
@@ -937,7 +937,7 @@ qui {
 							
 							if "`indicador'" == "salmin_mes" {	
 							
-								capture sum salmm_ci [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & salmm_ci!=.
+								capture sum salmm_ci [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & salmm_ci!=.
 								if _rc == 0 {
 								cap local valor = `r(mean)'												
 								
@@ -950,7 +950,7 @@ qui {
 							
 							if "`indicador'" == "salmin_hora" {	
 							
-								capture sum hsmin_ci [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & hsmin_ci!=.
+								capture sum hsmin_ci [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1 & hsmin_ci!=.
 								if _rc == 0 {
 								cap local valor = `r(mean)'												
 								
@@ -1038,7 +1038,7 @@ qui {
 							
 							if "`indicador'" == "inglaboral_ppp_formales" {	
 							
-								cap sum ylab_ppp [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2'==1 & condocup_ci==1 & formal_ci==1
+								cap sum ylab_ppp [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2'==1 & condocup_ci==1 & formal_ci==1
 								if _rc == 0 {
 								cap local valor = `r(mean)'												
 								
@@ -1052,7 +1052,7 @@ qui {
 							
 							if "`indicador'" == "inglaboral_ppp_informales" {	
 							
-								capture sum ylab_ppp [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2'==1 & condocup_ci==1 & formal_ci==0
+								capture sum ylab_ppp [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2'==1 & condocup_ci==1 & formal_ci==0
 								if _rc == 0 {
 								cap local valor = `r(mean)'												
 								
@@ -1065,7 +1065,7 @@ qui {
 							
 							if "`indicador'" == "inglaboral_formales" {	
 							
-								capture sum ylab_ci [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2'==1 & condocup_ci==1 & formal_ci==1
+								capture sum ylab_ci [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2'==1 & condocup_ci==1 & formal_ci==1
 								if _rc == 0 {
 								cap local valor = `r(mean)'												
 								
@@ -1078,7 +1078,7 @@ qui {
 							
 							if "`indicador'" == "inglaboral_informales" {	
 							
-								capture sum ylab_ci [w=factor_ci] if `clase'==1 & `nivel'==1 & `clase2'==1 & condocup_ci==1 & formal_ci==0
+								capture sum ylab_ci [w=round(factor_ci)] if `clase'==1 & `nivel'==1 & `clase2'==1 & condocup_ci==1 & formal_ci==0
 								if _rc == 0 {
 								cap local valor = `r(mean)'												
 								
@@ -1751,11 +1751,11 @@ qui {
 							
 							if "`indicador'" == "formalidad_2" {	
 							
-								cap sum `nivel' [w=factor_ci] if `clase'==1 & condocup_ci==1 & `clase2' ==1
+								cap sum `nivel' [w=round(factor_ci)] if `clase'==1 & condocup_ci==1 & `clase2' ==1
 								if _rc == 0 {
 								local denominador = `r(sum)'
 												
-								sum `nivel' [w=factor_ci]	 if `clase'==1 & formal_ci==1 & condocup_ci==1 & `clase2' ==1
+								sum `nivel' [w=round(factor_ci)]	 if `clase'==1 & formal_ci==1 & condocup_ci==1 & `clase2' ==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100												
 								
@@ -1769,11 +1769,11 @@ qui {
 							
 							if "`indicador'" == "formalidad_3" {	
 							
-								capture sum `nivel' [w=factor_ci] if `clase'==1 & condocup_ci==1 & categopri_ci==3 & `clase2' ==1
+								capture sum `nivel' [w=round(factor_ci)] if `clase'==1 & condocup_ci==1 & categopri_ci==3 & `clase2' ==1
 								if _rc == 0 {
 								local denominador = `r(sum)'
 												
-								sum `nivel' [w=factor_ci]	 if `clase'==1 & formal_ci==1 & categopri_ci==3 & condocup_ci==1 & `clase2' ==1
+								sum `nivel' [w=round(factor_ci)]	 if `clase'==1 & formal_ci==1 & categopri_ci==3 & condocup_ci==1 & `clase2' ==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100												
 								
@@ -1787,11 +1787,11 @@ qui {
 							
 							if "`indicador'" == "formalidad_4" {	
 							
-								cap sum ylab_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								cap sum ylab_ppp [w=round(factor_ci)]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								if _rc == 0 {
 								local valor = `r(mean)' 												
 								
-								sum ylab_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								sum ylab_ppp [w=round(factor_ci)]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								local muestra = `r(N)'
 								
 								post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
@@ -1801,7 +1801,7 @@ qui {
 							
 							if "`indicador'" == "ingreso_hor_prom" {	
 												
-								cap sum hwage_ppp [w=factor_ci]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
+								cap sum hwage_ppp [w=round(factor_ci)]	 if `clase'==1 & `nivel'==1 & `clase2' ==1 & condocup_ci==1
 								if _rc == 0 {
 								cap local valor = `r(mean)'												
 								
@@ -1814,11 +1814,11 @@ qui {
 					
 							if "`indicador'" == "pensionista_65_mas" {	
 							
-								capture sum age_65_mas [w=factor_ci] if `clase'==1 & `clase2' ==1
+								capture sum age_65_mas [w=round(factor_ci)] if `clase'==1 & `clase2' ==1
 								if _rc == 0 {
 								local denominador = `r(sum)'
 												
-								sum age_65_mas [w=factor_ci]	 if `clase'==1 & pensiont_ci==1 & `clase2' ==1
+								sum age_65_mas [w=round(factor_ci)]	 if `clase'==1 & pensiont_ci==1 & `clase2' ==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100												
 								
@@ -1832,7 +1832,7 @@ qui {
 							
 							if "`indicador'" == "num_pensionista_65_mas" {	
 							
-								cap sum age_65_mas [w=factor_ci] if `clase'==1 & pensiont_ci==1 & `clase2' ==1
+								cap sum age_65_mas [w=round(factor_ci)] if `clase'==1 & pensiont_ci==1 & `clase2' ==1
 								if _rc == 0 {
 								local valor = `r(sum)'
 
@@ -1846,11 +1846,11 @@ qui {
 							
 							if "`indicador'" == "pensionista_cont_65_mas" {	
 							
-								capture sum age_65_mas [w=factor_ci] if `clase'==1 & `clase2' ==1
+								capture sum age_65_mas [w=round(factor_ci)] if `clase'==1 & `clase2' ==1
 								if _rc == 0 {
 								local denominador = `r(sum)'
 												
-								sum age_65_mas [w=factor_ci]	 if `clase'==1 & pension_ci==1 & `clase2' ==1
+								sum age_65_mas [w=round(factor_ci)]	 if `clase'==1 & pension_ci==1 & `clase2' ==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100												
 								
@@ -1864,11 +1864,11 @@ qui {
 						
 							if "`indicador'" == "pensionista_nocont_65_mas" {	
 							
-								capture sum age_65_mas [w=factor_ci] if `clase'==1 & `clase2' ==1
+								capture sum age_65_mas [w=round(factor_ci)] if `clase'==1 & `clase2' ==1
 								if _rc == 0 {
 								local denominador = `r(sum)'
 												
-								sum age_65_mas [w=factor_ci]	 if `clase'==1 & pensionsub_ci==1 & `clase2' ==1
+								sum age_65_mas [w=round(factor_ci)]	 if `clase'==1 & pensionsub_ci==1 & `clase2' ==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100												
 								
@@ -1881,11 +1881,11 @@ qui {
 							
 							if "`indicador'" == "pensionista_ocup_65_mas" {	
 							
-								capture sum age_65_mas [w=factor_ci] if `clase'==1 & `clase2' ==1
+								capture sum age_65_mas [w=round(factor_ci)] if `clase'==1 & `clase2' ==1
 								if _rc == 0 {
 								local denominador = `r(sum)'
 												
-								sum age_65_mas [w=factor_ci]	 if `clase'==1 & condocup_ci==1 & (pension_ci==1 | pensionsub_ci==1) & `clase2' ==1
+								sum age_65_mas [w=round(factor_ci)]	 if `clase'==1 & condocup_ci==1 & (pension_ci==1 | pensionsub_ci==1) & `clase2' ==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100												
 								
@@ -1899,11 +1899,11 @@ qui {
 																				
 							if "`indicador'" == "y_pen_cont_ppp" {	
 							
-								capture sum age_65_mas [w=factor_ci] if `clase'==1 & ypen_ppp!=. & `clase2' ==1
+								capture sum age_65_mas [w=round(factor_ci)] if `clase'==1 & ypen_ppp!=. & `clase2' ==1
 								if _rc == 0 {
 								local denominador = `r(sum)'
 												
-								sum ypen_ppp [w=factor_ci]	 if `clase'==1 & age_65_mas==1 & `clase2' ==1
+								sum ypen_ppp [w=round(factor_ci)]	 if `clase'==1 & age_65_mas==1 & `clase2' ==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') 											
 								
@@ -1916,7 +1916,7 @@ qui {
 							
 							if "`indicador'" == "y_pen_cont" {	
 							
-								capture sum ypen_ci [w=factor_ci] if `clase'==1 & ypen_ci!=. & `clase2' ==1 & age_65_mas==1
+								capture sum ypen_ci [w=round(factor_ci)] if `clase'==1 & ypen_ci!=. & `clase2' ==1 & age_65_mas==1
 								if _rc == 0 {
 								cap local valor = `r(mean)'											
 								
@@ -1930,7 +1930,7 @@ qui {
 							
 							if "`indicador'" == "y_pen_nocont" {	
 							
-								capture sum ypensub_ci [w=factor_ci] if `clase'==1 & ypensub_ci!=. & `clase2' ==1 & age_65_mas==1
+								capture sum ypensub_ci [w=round(factor_ci)] if `clase'==1 & ypensub_ci!=. & `clase2' ==1 & age_65_mas==1
 								if _rc == 0 {
 								cap local valor = `r(mean)'											
 								
@@ -1944,7 +1944,7 @@ qui {
 						
 							if "`indicador'" == "y_pen_total" {	
 							
-								capture sum ypent_ci [w=factor_ci] if `clase'==1 & ypent_ci!=. & `clase2' ==1 & age_65_mas==1
+								capture sum ypent_ci [w=round(factor_ci)] if `clase'==1 & ypent_ci!=. & `clase2' ==1 & age_65_mas==1
 								if _rc == 0 {
 								cap local valor = `r(mean)'											
 								
@@ -1973,11 +1973,11 @@ qui {
 							/* Porcentaje poblacion que vive con menos de 3.1 USD diarios per capita*/
 							if "`indicador'" == "pobreza31" {																						 
 				  
-								capture sum `nivel' [w=factor_ci] if `clase'==1 & `clase2' ==1
+								capture sum `nivel' [w=round(factor_ci)] if `clase'==1 & `clase2' ==1
 								if _rc == 0 {
 								local denominador = `r(sum)'
 												
-								sum `nivel' [w=factor_ci]	 if `clase'==1 & poor31==1 & `clase2' ==1
+								sum `nivel' [w=round(factor_ci)]	 if `clase'==1 & poor31==1 & `clase2' ==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
 								
@@ -1991,11 +1991,11 @@ qui {
 							/* Porcentaje poblacion que vive con menos de 5 USD diarios per capita*/
 							if "`indicador'" == "pobreza" {																						 
 				  
-								capture sum `nivel' [w=factor_ci] if `clase'==1  & `clase2' ==1
+								capture sum `nivel' [w=round(factor_ci)] if `clase'==1  & `clase2' ==1
 								if _rc == 0 {
 								local denominador = `r(sum)'
 												
-								sum `nivel' [w=factor_ci]	 if `clase'==1 & poor==1 & `clase2' ==1
+								sum `nivel' [w=round(factor_ci)]	 if `clase'==1 & poor==1 & `clase2' ==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
 								
@@ -2009,11 +2009,11 @@ qui {
 							/* Porcentaje de la población con ingresos entre 5 y 12.4 USD diarios per capita*/
 							if "`indicador'" == "vulnerable" {																						 
 				  
-								capture sum `nivel' [w=factor_ci] if `clase'==1 & `clase2' ==1
+								capture sum `nivel' [w=round(factor_ci)] if `clase'==1 & `clase2' ==1
 								if _rc == 0 {
 								local denominador = `r(sum)'
 												
-								sum `nivel' [w=factor_ci]	 if `clase'==1 & vulnerable==1 & `clase2' ==1
+								sum `nivel' [w=round(factor_ci)]	 if `clase'==1 & vulnerable==1 & `clase2' ==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
 								
@@ -2027,11 +2027,11 @@ qui {
 							/* Porcentaje de la población con ingresos entre 12.4 y 64 USD diarios per capita*/
 							if "`indicador'" == "middle" {																						 
 				  
-								capture sum `nivel' [w=factor_ci] if `clase'==1 & `clase2' ==1
+								capture sum `nivel' [w=round(factor_ci)] if `clase'==1 & `clase2' ==1
 								if _rc == 0 {
 								local denominador = `r(sum)'
 												
-								sum `nivel' [w=factor_ci]	 if `clase'==1 & middle==1 & `clase2' ==1
+								sum `nivel' [w=round(factor_ci)]	 if `clase'==1 & middle==1 & `clase2' ==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
 								
@@ -2046,11 +2046,11 @@ qui {
 							
 							if "`indicador'" == "rich" {																						 
 				  
-								capture sum `nivel' [w=factor_ci] if `clase'==1 & `clase2' ==1
+								capture sum `nivel' [w=round(factor_ci)] if `clase'==1 & `clase2' ==1
 								if _rc == 0 {
 								local denominador = `r(sum)'
 												
-								sum `nivel' [w=factor_ci]	 if `clase'==1 & rich==1 & `clase2' ==1
+								sum `nivel' [w=round(factor_ci)]	 if `clase'==1 & rich==1 & `clase2' ==1
 								local numerador = `r(sum)'
 								local valor = (`numerador' / `denominador') * 100 
 								
@@ -2068,7 +2068,7 @@ qui {
 				            /* Coeficiente de Gini para el ingreso per cápita del hogar*/			
 							if "`indicador'" == "ginihh" {
 							
-								cap inequal7 pc_ytot_ch [w=factor_ci] if `clase'==1 & pc_ytot_ch !=. & pc_ytot_ch>0 & (edad_ci>=15 & edad_ci<=64) & factor_ci!=. & jefe_ci==1
+								cap inequal7 pc_ytot_ch [w=round(factor_ci)] if `clase'==1 & pc_ytot_ch !=. & pc_ytot_ch>0 & (edad_ci>=15 & edad_ci<=64) & factor_ci!=. & jefe_ci==1
 								if _rc == 0 {
 								local valor =`r(gini)'
 								
@@ -2083,7 +2083,7 @@ qui {
 							/* Coeficiente de Gini para salarios por hora*/
 							if "`indicador'" == "gini" {
 							
-								cap inequal7 ylmprixh [w=factor_ci] if `clase'==1 & ylmprixh!=. & ylmprixh>0 & (edad_ci>=15 & edad_ci<=64) & factor_ci!=. 
+								cap inequal7 ylmprixh [w=round(factor_ci)] if `clase'==1 & ylmprixh!=. & ylmprixh>0 & (edad_ci>=15 & edad_ci<=64) & factor_ci!=. 
 								if _rc == 0 {
 								local valor =`r(gini)'
 								
@@ -2098,7 +2098,7 @@ qui {
 							  /* Coeficiente de theil para el ingreso per cápita del hogar*/
 							  if "`indicador'" == "theilhh" {
 							
-								cap inequal7 pc_ytot_ch [w=factor_ci] if `clase'==1 & pc_ytot_ch !=. & pc_ytot_ch>0 & (edad_ci>=15 & edad_ci<=64) & factor_ci!=. & jefe_ci==1
+								cap inequal7 pc_ytot_ch [w=round(factor_ci)] if `clase'==1 & pc_ytot_ch !=. & pc_ytot_ch>0 & (edad_ci>=15 & edad_ci<=64) & factor_ci!=. & jefe_ci==1
 								if _rc == 0 {
 								local valor =`r(theil)'
 								
@@ -2112,7 +2112,7 @@ qui {
 							/* Coeficiente de theil para salarios por hora*/
 							 if "`indicador'" == "theil" {
 							
-								cap inequal7 ylmprixh [w=factor_ci] if `clase'==1 & ylmprixh!=. & ylmprixh>0 & (edad_ci>=15 & edad_ci<=64) & factor_ci!=. 
+								cap inequal7 ylmprixh [w=round(factor_ci)] if `clase'==1 & ylmprixh!=. & ylmprixh>0 & (edad_ci>=15 & edad_ci<=64) & factor_ci!=. 
 								if _rc == 0 {
 								local valor =`r(theil)'
 								
@@ -2126,15 +2126,15 @@ qui {
 						    /* Porcentaje del ingreso laboral del hogar contribuido por las mujeres */
 							if "`indicador'" == "ylmfem_ch" {
 	
-											capture sum hhylmpri [w=factor_ci]	if jefe_ci ==1 & sexo_ci!=. & `clase'==1
+											capture sum hhylmpri [w=round(factor_ci)]	if jefe_ci ==1 & sexo_ci!=. & `clase'==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum  hhyLwomen [w=factor_ci] if jefe_ci ==1 & `clase'==1 
+											sum  hhyLwomen [w=round(factor_ci)] if jefe_ci ==1 & `clase'==1 
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
-											sum hhyLwomen [w=factor_ci] if jefe_ci ==1 & `clase'==1 
+											sum hhyLwomen [w=round(factor_ci)] if jefe_ci ==1 & `clase'==1 
 											local muestra = `r(sum)'
 											
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
@@ -2149,15 +2149,15 @@ qui {
 		                  /* Porcentaje de hogares que reciben remesas del exterior */
 							if "`indicador'" == "indexrem" {
 	
-											capture sum Total [w=factor_ci]	if jefe_ci ==1 & sexo_ci!=. & `clase'==1
+											capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & sexo_ci!=. & `clase'==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum  Total  [w=factor_ci] if jefe_ci ==1 & indexrem==1 & `clase'==1 
+											sum  Total  [w=round(factor_ci)] if jefe_ci ==1 & indexrem==1 & `clase'==1 
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
-											sum Total [w=factor_ci] if jefe_ci ==1 & indexrem==1 & `clase'==1 
+											sum Total [w=round(factor_ci)] if jefe_ci ==1 & indexrem==1 & `clase'==1 
 											local muestra = `r(sum)'
 											
 											post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
@@ -2178,11 +2178,11 @@ qui {
 							/* % de hogares con servicio de agua de acueducto*/
 							if "`indicador'" == "aguared_ch" {
 	
-											capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1 & aguared_ch!=. & `clase2'==1
+											capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & `clase'==1 & aguared_ch!=. & `clase2'==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if jefe_ci==1 & `clase'==1 & aguared_ch==1 & `clase2' ==1
+											sum Total [w=round(factor_ci)]	 if jefe_ci==1 & `clase'==1 & aguared_ch==1 & `clase2' ==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -2197,11 +2197,11 @@ qui {
 							/* % de hogares con acceso a servicios de saneamiento mejorados*/
 							if "`indicador'" == "des2_ch" {
 	
-											capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1  & des2_ch!=. & `clase2' ==1
+											capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & `clase'==1  & des2_ch!=. & `clase2' ==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if jefe_ci==1 & des2_ch==1 & `clase'==1 & `clase2' ==1
+											sum Total [w=round(factor_ci)]	 if jefe_ci==1 & des2_ch==1 & `clase'==1 & `clase2' ==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -2216,11 +2216,11 @@ qui {
 							/* % de hogares con electricidad */
 							if "`indicador'" == "luz_ch" {
 	
-											capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1 & luz_ch!=. & `clase2' ==1
+											capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & `clase'==1 & luz_ch!=. & `clase2' ==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if jefe_ci==1 & `clase'==1 & luz_ch==1 & `clase2' ==1
+											sum Total [w=round(factor_ci)]	 if jefe_ci==1 & `clase'==1 & luz_ch==1 & `clase2' ==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -2235,11 +2235,11 @@ qui {
 							/* % hogares con pisos de tierra */
 							if "`indicador'" == "dirtf_ch" {
 	
-											capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1 & dirtf_ch!=. & `clase2' ==1
+											capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & `clase'==1 & dirtf_ch!=. & `clase2' ==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if jefe_ci==1 & `clase'==1 & dirtf_ch==1 & `clase2' ==1
+											sum Total [w=round(factor_ci)]	 if jefe_ci==1 & `clase'==1 & dirtf_ch==1 & `clase2' ==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -2253,11 +2253,11 @@ qui {
 							/* % de hogares con refrigerador */
 							if "`indicador'" == "refrig_ch" {
 	
-											capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1 & refrig_ch!=. & `clase2' ==1
+											capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & `clase'==1 & refrig_ch!=. & `clase2' ==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if jefe_ci==1 & `clase'==1 & refrig_ch==1 & `clase2' ==1
+											sum Total [w=round(factor_ci)]	 if jefe_ci==1 & `clase'==1 & refrig_ch==1 & `clase2' ==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -2272,11 +2272,11 @@ qui {
 							/* % de hogares con carro particular */
 							if "`indicador'" == "auto_ch" {
 	
-											capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1 & auto_ch!=. & `clase2' ==1
+											capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & `clase'==1 & auto_ch!=. & `clase2' ==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if jefe_ci==1 & `clase'==1 & auto_ch==1 & `clase2' ==1
+											sum Total [w=round(factor_ci)]	 if jefe_ci==1 & `clase'==1 & auto_ch==1 & `clase2' ==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -2291,11 +2291,11 @@ qui {
 							/* % de hogares con acceso a internet */
 							if "`indicador'" == "internet_ch" {
 	
-											capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1 & internet_ch!=. & `clase2' ==1
+											capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & `clase'==1 & internet_ch!=. & `clase2' ==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if jefe_ci==1 & `clase'==1 & internet_ch==1 & `clase2' ==1
+											sum Total [w=round(factor_ci)]	 if jefe_ci==1 & `clase'==1 & internet_ch==1 & `clase2' ==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -2310,11 +2310,11 @@ qui {
 							/* % de hogares con teléfono celular*/
 							if "`indicador'" == "cel_ch" {
 	
-											capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1 & cel_ch!=. & `clase2' ==1
+											capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & `clase'==1 & cel_ch!=. & `clase2' ==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if jefe_ci==1 & `clase'==1 & cel_ch==1 & `clase2' ==1
+											sum Total [w=round(factor_ci)]	 if jefe_ci==1 & `clase'==1 & cel_ch==1 & `clase2' ==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -2328,11 +2328,11 @@ qui {
 							/* % de hogares con techos de materiales no permanentes*/
 							if "`indicador'" == "techonp_ch" {
 	
-											capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1 & techonp_ch!=. & `clase2' ==1
+											capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & `clase'==1 & techonp_ch!=. & `clase2' ==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if jefe_ci==1 & `clase'==1 & techonp_ch==1 & `clase2' ==1
+											sum Total [w=round(factor_ci)]	 if jefe_ci==1 & `clase'==1 & techonp_ch==1 & `clase2' ==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -2347,11 +2347,11 @@ qui {
 							/* % de hogares con paredes de materiales no permanentes*/
 							if "`indicador'" == "parednp_ch" {
 	
-											capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1 & parednp_ch!=. & `clase2' ==1
+											capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & `clase'==1 & parednp_ch!=. & `clase2' ==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if jefe_ci==1 & `clase'==1 & parednp_ch==1 & `clase2' ==1
+											sum Total [w=round(factor_ci)]	 if jefe_ci==1 & `clase'==1 & parednp_ch==1 & `clase2' ==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -2366,11 +2366,11 @@ qui {
 							/* Número de miembros por cuarto*/
 							if "`indicador'" == "hacinamiento_ch" {
 	
-											capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1  & `clase2' ==1
+											capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & `clase'==1  & `clase2' ==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if jefe_ci==1 & `clase'==1  & `clase2' ==1
+											sum Total [w=round(factor_ci)]	 if jefe_ci==1 & `clase'==1  & `clase2' ==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -2385,11 +2385,11 @@ qui {
 							/*% de hogares con estatus residencial estable */
 							if "`indicador'" == "estable_ch" {
 	
-											capture sum Total [w=factor_ci]	if jefe_ci ==1 & `clase'==1 & estable_ch!=. & `clase2' ==1
+											capture sum Total [w=round(factor_ci)]	if jefe_ci ==1 & `clase'==1 & estable_ch!=. & `clase2' ==1
 											if _rc == 0 {
 											local num_hog = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if jefe_ci==1 & `clase'==1 & estable_ch==1 & `clase2' ==1
+											sum Total [w=round(factor_ci)]	 if jefe_ci==1 & `clase'==1 & estable_ch==1 & `clase2' ==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `num_hog') * 100 
 											
@@ -2411,11 +2411,11 @@ qui {
 							/* [inserte nombre extrendidpo del indicador] */
 							if "`indicador'" == "[inserte nombre corto indicador]" {
 	
-											capture sum Total [w=factor_ci]	 if `clase'==1 & `clase2' ==1
+											capture sum Total [w=round(factor_ci)]	 if `clase'==1 & `clase2' ==1
 											if _rc == 0 {
 											local denominador = `r(sum)'
 											
-											sum Total [w=factor_ci]	 if raza==1 & `clase'==1 & `clase2' ==1
+											sum Total [w=round(factor_ci)]	 if raza==1 & `clase'==1 & `clase2' ==1
 											local numerador = `r(sum)'
 											local valor = (`numerador' / `denominador') * 100 
 											
