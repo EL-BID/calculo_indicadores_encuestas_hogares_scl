@@ -1,6 +1,22 @@
 ﻿# calculo_indicadores_encuestas_hogares_scl
 Este código armoniza el cálculo de los indicadores de las plataformas del sector social del BID.
 
+# Descripción
+
+Este repositorio contiene los scripts para el cálculo de los indicadores de las plataformas del sector social del BID. Estos tienen como fuente de información las encuestas a hogares armonizadas del sector social. Los indicadores de estas bases de datos son construidas bajo un enfoque y estructura común, con nombres, definiciones y desagregaciones estandarizadas y almacenadas en un solo archivo para todos los años y países. Actualmente, se calculan 106 indicadores para 26 países de LAC de 2006 a 2019. 
+
+# Ubicación
+TBC
+
+# Estructura
+
+El repositorio contiene dos subcarpetas: Input y Output, así como dos dofiles: Armonizacion -plataformas-SCL y validacion_claidad_indicadores_encuestas_hogares_scl, que aún se encuentra en contrucción.
+
+La subcarpeta Input contiene los scripts insumo para la creación de de la base de datos. Estos son: i) El directorio de cada encuesta (país, ronda, anio), ii) variables intermedias para el cálculo de los indicadores; se compone de varios scripts (uno por división) y iii) el script para el formato de la base final.
+La subcarpeta Output contiene la versión final de la base de datos en formato dta. 
+
+El srcipt principal del repositorio es Armonizacion -plataformas-SCL y para su uso y comprensión hemos creado la siguiente guía y recomendaciones:
+
 A.	Reglas y gúia básica del código 
 
 Nuestro do-file principal está compuesto por 3 secciones: 1) el program set up, 2) la sección de creación de variables e indicadores y la sección 3) exportar resultados. 
@@ -9,14 +25,15 @@ Nuestro do-file principal está compuesto por 3 secciones: 1) el program set up,
 Es en esta sección y solo en esta sección se incorpora cualquier comando adicional que necesitemos descargar para el funcionamiento del programa. Por ejemplo, el comando inequal7 que fue el utilizado para calcular el índice de GINI.
 El programa trabaja con tres rutas principales: 
 
-i)	input donde se encuentra las bases de datos armonizadas insumo para los indicadores.
-ii)	output que usamos para exportar las bases y resultados de los cálculos.
-iii)	temporal donde se encuentra la información adicional necesaria para crear nuestros indicadores. Acá se encuentran los do-files de creación de las variables intermedias de cada división, variables de formato de la base de datos. 
+i)	source donde se encuentra las bases de datos armonizadas insumo para los indicadores.
+ii)	input donde se encuentra la información adicional necesaria para crear nuestros indicadores. Acá se encuentran los do-files de creación de las variables intermedias de cada división, variables de formato de la base de datos. 
 Esta sección no debe ser modificada a menos que exista la necesidad de descargar un comando o modificar alguna ruta en específico.
+iii) output que usamos para exportar las bases y resultados de los cálculos.
 
 2.	Creación de variables e indicadores
 En esta sección van a interactuar todas las divisiones del Sector. Esto debe hacerse de forma ordenada, teniendo en cuenta la estructura del programa. 
-El programa crea una base de datos desde muchas fuentes de información o diferentes contenidos en el proceso (las encuestas a hogares de la región). El comando postfile permite hacer esto a través del uso de bases temporales que se van construyendo de forma simultánea. 
+
+El programa crea una base de datos desde muchas fuentes de información o diferentes contenidos en el proceso (las encuestas a hogares armonizadas de la región). El comando postfile permite hacer esto a través del uso de bases temporales que se van construyendo de forma simultánea. 
 En nuestro programa, la estructura de esta base se hace evidente con la sentencia postfile `ptablas' donde se nombran 10 variables que se construyen desde las encuestas a hogares del sector para los países y años que se encuentren enunciados en las locales pais ano, y calcula los indicadores correspondientes a los temas de cada división enunciados en la local temas (líneas 39 – 41).  
 Esta sección tiene 3 funciones principales con consideraciones específicas:
 i)	Llamar cada una de las bases de datos por país – año – ronda
