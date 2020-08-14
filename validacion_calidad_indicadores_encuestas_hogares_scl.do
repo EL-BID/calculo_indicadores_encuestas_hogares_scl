@@ -37,7 +37,7 @@ use "${source}\indicadores_encuestas_hogares_scl_converted_final.dta"
 
 preserve
  
-*keep if tema == "educacion"
+keep if tema == "educacion"
 keep tiempo_id pais_id clase_id nivel_id tema indicador tipo valor muestra 
 
 local paises ARG BHS BRB BLZ BOL BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN
@@ -106,14 +106,5 @@ restore
 exit
 /* End of do-file */
 
-><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><
-
-Notes:
-1.
-2.
-3.
-
-
-Version Control:
 
 
