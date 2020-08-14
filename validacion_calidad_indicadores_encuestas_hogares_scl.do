@@ -35,7 +35,7 @@ use "${source}\indicadores_encuestas_hogares_scl_converted_final.dta"
               2: creación valores Z
 ==================================================*/
 
-*preserve
+preserve
  
 *keep if tema == "educacion"
 keep tiempo_id pais_id clase_id nivel_id tema indicador tipo valor muestra 
