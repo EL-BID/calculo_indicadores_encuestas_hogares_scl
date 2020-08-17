@@ -30,7 +30,7 @@ Output:
 		replace nivel_id = "5-14_años" 	if nivel_id == "age_05_14"
 		replace nivel_id = "12-14_años" if nivel_id == "age_12_14"
 		replace nivel_id = "15-17_años" if nivel_id == "age_15_17"
-		replace nivel_id = "15-24_años" if nivel_id == "age_15_24" |  nivel_id == "15-24_Años"
+		replace nivel_id = "15-24_años" if nivel_id == "age_15_24" 
 		replace nivel_id = "15-29_años" if nivel_id == "age_15_29"
 		replace nivel_id = "15-64_años" if nivel_id == "age_15_64"
 		replace nivel_id = "18-23_años" if nivel_id == "age_18_23"

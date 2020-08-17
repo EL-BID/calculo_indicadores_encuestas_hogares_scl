@@ -18,24 +18,24 @@ Output:
 version 16.1
 drop _all
 
-global input  	 "\\Sdssrv03\surveys\harmonized"
-global output 	 "C:\Users\alop\Inter-American Development Bank Group\Programas - Stata15\Armonizacion-SCL-code\Output"
-global temporal	 "C:\Users\alop\Inter-American Development Bank Group\Programas - Stata15\Armonizacion-SCL-code\Input"
+global source  	 "C:\Users\ALOP\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
+global output 	 "C:\Users\alop\Desktop\GitRepositories\calculo_indicadores_encuestas_hogares_scl\Output"
+
 global covidtmp  "C:\Users\ALOP\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
-global microdata "C:\Users\alop\Desktop\GitRepositories\calculo_microdatos_encuestas_hogares_scl"
+
 
 /*==================================================
               1: Abre base a analizar 
 ==================================================*/
 
-import delimited "${output}\indicadores_encuestas_hogares_scl_converted.csv"
-duplicates drop 
+use "${source}\indicadores_encuestas_hogares_scl_converted_final.dta"
+
 
 /*==================================================
               2: creación valores Z
 ==================================================*/
 
-*preserve
+preserve
  
 keep if tema == "educacion"
 keep tiempo_id pais_id clase_id nivel_id tema indicador tipo valor muestra 
@@ -81,20 +81,22 @@ foreach indicador of local indicadores {
 } /*cierro indicadores*/	
 
 replace Z= (valor-media)/desvest
-sort indicador pais_id nivel_id 
-tostring tiempo_id, replace	
+sort tiempo_id indicador pais_id nivel_id 
+order pais_id indicador clase_id nivel_id
 
+tostring tiempo_id, replace	
+duplicates drop tiempo_id indicador pais_id nivel_id clase_id tema tipo , force
 
 reshape wide valor Z muestra, i(indicador pais_id nivel_id clase_id tema tipo) j(tiempo_id) s
 
 
 
 /*==================================================
-              3: 
+              3: Export results
 ==================================================*/
 
 
-export excel using "${output}\validacion_indicadores_encuestas_hogares_scl_converted.xlsx", first(var) sheet(Total_results) sheetreplace
+export excel using "${covidtmp}\validacion_indicadores_encuestas_hogares_scl_converted.xlsx", first(var) sheet(Total_results) sheetreplace
 sleep 1000
 restore
 
@@ -104,14 +106,5 @@ restore
 exit
 /* End of do-file */
 
-><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><
-
-Notes:
-1.
-2.
-3.
-
-
-Version Control:
 
 
