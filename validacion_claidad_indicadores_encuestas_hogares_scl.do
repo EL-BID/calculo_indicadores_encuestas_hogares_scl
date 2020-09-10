@@ -18,9 +18,10 @@ Output:
 version 16.1
 drop _all
 
-global input  	 "\\Sdssrv03\surveys\harmonized"
-global output 	 "C:\Users\alop\Inter-American Development Bank Group\Programas - Stata15\Armonizacion-SCL-code\Output"
-global temporal	 "C:\Users\alop\Inter-American Development Bank Group\Programas - Stata15\Armonizacion-SCL-code\Input"
+global source  	 "\\Sdssrv03\surveys\harmonized"
+global output 	 "C:\Users\alop\Desktop\GitRepositories\calculo_indicadores_encuestas_hogares_scl\Output"
+global input	 "C:\Users\alop\Desktop\GitRepositories\calculo_indicadores_encuestas_hogares_scl\Input"
+
 global covidtmp  "C:\Users\ALOP\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
 global microdata "C:\Users\alop\Desktop\GitRepositories\calculo_microdatos_encuestas_hogares_scl"
 
