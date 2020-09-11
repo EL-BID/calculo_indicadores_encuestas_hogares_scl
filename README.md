@@ -8,6 +8,11 @@ Este repositorio contiene los scripts para el cálculo de los indicadores de las
 # Ubicación
 TBC
 
+# Paquetes necesarios para su funcionamiento
+
+estout
+inequal7
+
 # Estructura
 
 El repositorio contiene dos subcarpetas: Input y Output, así como dos dofiles: Armonizacion -plataformas-SCL y validacion_claidad_indicadores_encuestas_hogares_scl, que aún se encuentra en contrucción.
