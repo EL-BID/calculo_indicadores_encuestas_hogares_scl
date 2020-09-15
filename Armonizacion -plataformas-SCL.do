@@ -16,23 +16,23 @@ Output:             Excel-DTA file
 version 15.1
 drop _all 
 set more off 
-*ssc install quantiles
-*ssc install inequal7
-
+*ssc install quantiles inequal7
+cap ssc install estout
+cap ssc install inequal7
 
 global source  	 "\\Sdssrv03\surveys\harmonized"
-global input	 "C:\Users\alop\Desktop\GitRepositories\calculo_indicadores_encuestas_hogares_scl\Input"
-global output 	 "C:\Users\alop\Desktop\GitRepositories\calculo_indicadores_encuestas_hogares_scl\Output"
 
+global input	 "C:\Users\ALOP\Desktop\Git_repositories\calculo_indicadores_encuestas_hogares_scl\Input"
+global output 	 "C:\Users\ALOP\Desktop\Git_repositories\calculo_indicadores_encuestas_hogares_scl\Input"
 global covidtmp  "C:\Users\ALOP\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
-global microdata "C:\Users\alop\Desktop\GitRepositories\calculo_microdatos_encuestas_hogares_scl"
+
 **
 
 /*====================================================================
                         1: Open dataset and Generate indicators
 ====================================================================*/
 
-include "${microdata}\calculo_microdatos_scl.do"
+include "${input}\calculo_microdatos_scl.do"
 						
 tempfile tablas
 tempname ptablas
@@ -45,8 +45,8 @@ postfile `ptablas' str30(tiempo_id pais_id geografia_id clase clase2 nivel_id te
  
 
 local temas educacion /*laboral pobreza  vivienda demografia diversidad migracion */							
-local paises ARG /* BHS BOL BRB BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN */
-local anos 2006 /*2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 */
+local paises ARG BHS BOL BRB BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY /* VEN */
+local anos /*2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016*/ 2017 2018 2019 
 
 local geografia_id total_nacional
 
@@ -107,7 +107,7 @@ qui {
 									include "${input}\var_tmp_GDI.do"	
 									
 							* base de datos de microdatos con variables intermedias
-						include "${microdata}\append_calculo_microdatos_scl.do"											
+						include "${input}\append_calculo_microdatos_scl.do"											
 						
 
 *****************************************************************************************************************************************
@@ -2530,7 +2530,7 @@ qui {
 											
 							if "`tema'" == "demografia" local indicadores jefa_ch jefaecon_ch pobfem_ci union_ci miembro6_ch miembro6y16_ch miembro65_ch unip_ch nucl_ch ampl_ch comp_ch corres_ch  pob18_ci pob65_ci urbano_ci pobedad_ci 
 							if "`tema'" == "pobreza"    local indicadores pobreza31 pobreza vulnerable middle rich ginihh gini theilhh theil indexrem ylmfem_ch
-							if "`tema'" == "educacion"  local indicadores tasa_neta_asis tasa_asis_edad Años_Escolaridad_25_mas Ninis_2 leavers tasa_terminacion_c tasa_sobre_edad
+							if "`tema'" == "educacion"  local indicadores tasa_bruta_asis tasa_neta_asis tasa_asis_edad tasa_no_asis_edad Años_Escolaridad_25_mas Ninis_2 leavers tasa_terminacion_c tasa_sobre_edad
 							if "`tema'" == "vivienda"   local indicadores aguared_ch des2_ch luz_ch dirtf_ch refrig_ch auto_ch internet_ch cel_ch parednp_ch techonp_ch hacinamiento_ch estable_ch
 							if "`tema'" == "laboral"    local indicadores tasa_ocupacion tasa_desocupacion tasa_participacion ocup_suf_salario ingreso_mens_prom ingreso_hor_prom formalidad_2 pensionista_65_mas y_pen_cont_ppp 
 							if "`tema'" == "inclusion"  local indicadores 
@@ -2683,11 +2683,11 @@ save `tablas', replace
 
 
 * guardo el archivo temporal
-save "${temporal}\Indicadores_SCL.dta", replace
+save "${input}\Indicadores_SCL.dta", replace
 
 * Variables de formato 
 
-include "${temporal}\var_formato.do"
+include "${input}\var_formato.do"
 order tiempo tiempo_id pais_id geografia_id clase clase_id clase2 clase2_id nivel nivel_id tema indicador tipo valor muestra
 
 
@@ -2702,7 +2702,7 @@ unicode convertfile "${output}\indicadores_encuestas_hogares_scl.csv" "${output}
 export delimited using  "${covidtmp}\indicadores_encuestas_hogares_scl.csv", replace
 unicode convertfile "${covidtmp}\indicadores_encuestas_hogares_scl.csv" "${output}\indicadores_encuestas_hogares_scl_converted.csv", dstencoding(latin1) replace 
 
-
+/*
 
 
 	g 		division = "soc" if tema == "demografia" | tema == "vivienda" | tema == "pobreza" 
@@ -2724,12 +2724,10 @@ foreach div of local divisiones {
 			sleep 1000
 			restore
 						
+} 
+ */
  
- 
- 
- 
-
-}		
+ 		
 exit
 /* End of do-file */
 
