@@ -22,8 +22,8 @@ cap ssc install inequal7
 
 global source  	 "\\Sdssrv03\surveys\harmonized"
 
-global input	 "C:\Users\ALOP\Desktop\Git_repositories\calculo_indicadores_encuestas_hogares_scl\Input"
-global output 	 "C:\Users\ALOP\Desktop\Git_repositories\calculo_indicadores_encuestas_hogares_scl\Input"
+global input	 "C:\Users\alop\Desktop\GitRepositories\calculo_indicadores_encuestas_hogares_scl\Input"
+global output 	 "C:\Users\alop\Desktop\GitRepositories\calculo_indicadores_encuestas_hogares_scl\Onput"
 global covidtmp  "C:\Users\ALOP\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
 
 **
@@ -45,8 +45,8 @@ postfile `ptablas' str30(tiempo_id pais_id geografia_id clase clase2 nivel_id te
  
 
 local temas educacion /*laboral pobreza  vivienda demografia diversidad migracion */							
-local paises ARG BHS BOL BRB BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY /* VEN */
-local anos /*2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016*/ 2017 2018 2019 
+local paises ARG BHS BOL BRB BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN
+local anos 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 
 
 local geografia_id total_nacional
 
@@ -722,7 +722,7 @@ qui {
 													
 													else {
 															
-													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") (".") (".")
+													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") (".") (".")
 														
 													} /* cierro else */
 													
@@ -772,7 +772,7 @@ qui {
 													
 													else {
 															
-													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") (".") (".")
+													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Secundaria") ("`tema'") ("`indicador'") (".") (".")
 														
 													} /* cierro else */
 													
@@ -795,7 +795,7 @@ qui {
 													
 													else {
 															
-													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") (".") (".")
+													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Total") ("`tema'") ("`indicador'") (".") (".")
 														
 													} /* cierro else */
 													
@@ -2701,6 +2701,8 @@ unicode convertfile "${output}\indicadores_encuestas_hogares_scl.csv" "${output}
 
 export delimited using  "${covidtmp}\indicadores_encuestas_hogares_scl.csv", replace
 unicode convertfile "${covidtmp}\indicadores_encuestas_hogares_scl.csv" "${output}\indicadores_encuestas_hogares_scl_converted.csv", dstencoding(latin1) replace 
+save "${covidtmp}\indicadores_encuestas_hogares_scl.dta", replace
+
 
 /*
 
