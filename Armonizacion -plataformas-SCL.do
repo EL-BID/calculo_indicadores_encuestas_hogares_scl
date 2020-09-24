@@ -22,8 +22,8 @@ cap ssc install inequal7
 
 global source  	 "\\Sdssrv03\surveys\harmonized"
 
-global input	 "C:\Users\alop\Desktop\GitRepositories\calculo_indicadores_encuestas_hogares_scl\Input"
-global output 	 "C:\Users\alop\Desktop\GitRepositories\calculo_indicadores_encuestas_hogares_scl\Onput"
+global input	 "C:\Users\ALOP\Desktop\Git_repositories\calculo_indicadores_encuestas_hogares_scl\Input"
+global output 	 "C:\Users\ALOP\Desktop\Git_repositories\calculo_indicadores_encuestas_hogares_scl\Onput"
 global covidtmp  "C:\Users\ALOP\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
 
 **
@@ -78,7 +78,7 @@ qui {
 								}
 										
 								* Generando Quintiles de acuerdo a SUMMA y toda la división 
-												
+								cap destring idh_ch, replace			
 								cap egen    ytot_ci= rsum(ylm_ci ylnm_ci ynlm_ci ynlnm_ci) if miembros_ci==1
 								replace ytot_ci= .   if ylm_ci==. & ylnm_ci==. & ynlm_ci==. & ynlnm_ci==.
 								cap bys		idh_ch: egen ytot_ch= sum(ytot_ci) if miembros_ci==1
