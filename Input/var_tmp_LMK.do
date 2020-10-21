@@ -101,7 +101,13 @@ Output:             Excel-DTA file
 				egen ypent_ci = rsum(ypen_ci ypensub_ci), missing
 				replace ypent_ci=. if edad_ci<65 | pension_ci==0
 				label var ypent_ci "Valor de todas las pensiones que recibe"
-				
+	*3.8 Cuociente salario mínimo mensual/ingreso ocupación principal mensual
+     gen sm_smeanm_ci= salmm_ci/ylmpri_ci
+	*3.9 Cuociente salario mínimo por hora/ingreso ocupación principal por hora
+     gen sm_smeanh_ci= hsmin_ci/hwage_ci
+	
+	
+	
 * 4 Formalidad laboral 
 				gen 	formal_aux=1 if cotizando_ci==1
 				replace formal_aux=1 if afiliado_ci==1 & (cotizando_ci!=1 | cotizando_ci!=0) & condocup_ci==1 & pais_c=="URY" & anio_c<=2000
@@ -168,3 +174,40 @@ Output:             Excel-DTA file
 				recode ffaa .=0 if condocup_ci==1
 				gen byte otrostrab=1 if condocup_ci==1 & ocupa_ci==9
 				recode otrostrab .=0 if condocup_ci==1
+	
+*9 Categorías
+
+				gen byte asalariado=1 if condocup_ci==1 & categopri_ci==3
+				recode asalariado .=0 if condocup_ci==1
+				gen byte ctapropia=1 if condocup_ci==1 & categopri_ci==2
+				recode ctapropia .=0 if condocup_ci==1 
+				gen byte patron=1 if condocup_ci==1 & categopri_ci==1
+				recode patron .=0 if condocup_ci==1 
+				gen byte sinremuner=1 if condocup_ci==1 & categopri_ci==4
+				recode sinremuner .=0 if condocup_ci==1							
+
+*10 Categoría por tipo de contrato
+				gen byte contratoindef=1 if condocup_ci==1 & tipocontrato_ci==1 & categopri_ci==3
+				recode contratoindef .=0 if condocup_ci==1 & tipocontrato_ci !=. & categopri_ci==3
+				gen byte contratofijo=1 if condocup_ci==1 & tipocontrato_ci==2 & categopri_ci==3
+				recode contratofijo .=0 if condocup_ci==1 & tipocontrato_ci !=. & categopri_ci==3
+				gen byte sincontrato=1 if condocup_ci==1 & tipocontrato_ci==3 & categopri_ci==3
+				recode sincontrato .=0 if condocup_ci==1 & tipocontrato_ci !=. & categopri_ci==3
+
+*11 Tasa de desempleo de larga duración
+				recode durades_ci (12/max=1) (else=0), gen(desemplp_ci)
+				cap replace desemplp_ci=1 if durades1_ci==5 & pais_c=="ARG" & anio_c>=2003
+				cap recode desemplp_ci .=0 if condocup_ci==2 & pais_c=="ARG" & anio_c>=2003
+				*9/24 mod MLO
+				egen aux_n=mean(desemplp_ci)
+				recode desemplp_ci 0=. if aux_n==0
+				drop aux_n
+
+				replace desemplp_ci=. if condocup_ci !=2 
+				label var desemplp_ci "Desempleo de larga duracion"
+
+				*9/24 mod MLO
+				egen aux_n=mean(durades_ci)
+				recode durades_ci 0=. if aux_n==0
+				drop aux_n
+
