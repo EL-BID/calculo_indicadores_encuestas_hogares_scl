@@ -17,8 +17,8 @@ version 16.0
 drop _all 
 set more off 
 *ssc install quantiles inequal7
-cap ssc install estout
-cap ssc install inequal7
+* cap ssc install estout
+* cap ssc install inequal7
 
 
 /**** if composition utility function ****************************
@@ -72,10 +72,11 @@ program scl_pct
   /* create the "if" part of the command
     combining with the "if" set when calling
 	the program (if any) */
-  scl_if_compose `clase1' `clase2' `clase3' `if'
+  scl_if_compose `if'
   local xif `"`s(xif)'"'
   sreturn clear
    
+  noisily {
   display `"$tema - `indname'"' 
   capture quietly estpost tab `indvar' [w=round(factor_ch)] `xif', m
   
@@ -92,6 +93,7 @@ program scl_pct
    /* generate a line with missing value */
 	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"% `indvar'==`indcat'"') (.)
   }
+  } //noisily
 end
 
 
@@ -116,10 +118,11 @@ program scl_nivel
   local clase2 : word 5 of $current_slice
   local clase3 : word 6 of $current_slice
   
-  scl_if_compose `clase1' `clase2' `clase3' `if'
+  scl_if_compose `if'
   local xif `"`s(xif)'"'
   sreturn clear
  
+  noisily {
   display `"$tema - `indname'"'
   capture quietly sum `indvar' [w=round(factor_ch)] `xif'
   
@@ -133,6 +136,7 @@ program scl_nivel
    /* generate a line with missing value */
 	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"sum of `indvar'"') (.)
   }
+  } //noisily
 end
 
 
@@ -157,15 +161,18 @@ program scl_mean
   local clase2 : word 5 of $current_slice
   local clase3 : word 6 of $current_slice
   
-  scl_if_compose `clase1' `clase2' `clase3' `if'
+  scl_if_compose `if'
   local xif `"`s(xif)'"'
   sreturn clear
  
+  noisily {
   display `"$tema - `indname'"'
   capture quietly sum `indvar' [w=round(factor_ch)] `xif'
   
   if _rc == 0 {
     capture local valor = `r(mean)'
+	
+	if ""=="`valor'" local valor = .
 	
 	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"mean of `indvar'"') (`valor')
 	
@@ -174,14 +181,15 @@ program scl_mean
    /* generate a line with missing value */
 	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"mean of `indvar'"') (.)
   }
+  } //noisily
 end
 
 
 /*
 * Do files will be loaded relative to current directory. Set current directory to the GitHub folder
-*  using command "dir" before running the code 
+*  using command "cd" before running the code 
 */
-global mydir = c(pwd)
+local mydir = c(pwd)
 global source  	 "C:\Users\clins\OneDrive - Inter-American Development Bank Group\Documents\Cesar\Consultorias\Datasets Workspace\MECOVI" /*if you have a local copy of the .dta files, change here to use your local copy */
 
 global input	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Input"
@@ -195,7 +203,7 @@ global covidtmp "`mydir'\Bases tmp" //Temporary files will be saved in your GitH
                         1: Open dataset and Generate indicators
 ====================================================================*/
 
-include "${input}\calculo_microdatos_scl.do"
+*************** >> include "${input}\calculo_microdatos_scl.do"
 						
 tempfile tablas
 tempname ptablas
@@ -204,14 +212,14 @@ global output `ptablas'
 ** Este postfile da estructura a la base:
 
 * postfile `ptablas' str30(tiempo_id pais_id geografia_id clase1 clase2 nivel_id tema indicador valor muestra) using `tablas', replace
-postfile `ptablas' str4 tiempo_id str3 pais_id str20(geografia_id clase1 clase2 clase3 tema indicador description) valor /* muestra */
+postfile `ptablas' str4 tiempo_id str3 pais_id str20(geografia_id clase1 clase2 clase3 tema indicador description) valor /* muestra */ using `tablas', replace
 
 ** Creo locales principales:
  
 
 *local temas educacion /*laboral pobreza  vivienda demografia diversidad migracion */							
-local paises /*ARG BHS BOL BRB BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO*/ URY VEN
-local anos /*2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 */ 2017 2018 2019 
+local paises GTM PRY /*ARG BHS BOL BRB BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN */
+local anos /*2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 */ 2019 
 
 local geografia_id total_nacional
 
@@ -221,65 +229,72 @@ qui {
 		foreach ano of local anos {
 			
 			* En este dofile de encuentra el diccionario de encuestas y rondas de la región
-			include "${input}\Directorio HS LAC.do" 
+			* include "${input}\Directorio HS LAC.do" 
 
-			foreach encuesta of local encuestas {					
-				foreach ronda of local rondas {					
+			*foreach encuesta of local encuestas {					
+				*foreach ronda of local rondas {	
+				
+				local files : dir "${source}" files "`pais'_`ano'*.dta"
+				local foundfile : word 1 of `files'
+				
+				*cap use "${source}\\`pais'\\`encuesta'\data_arm\\`pais'_`ano'`ronda'_BID.dta" , clear
+				cap use "${source}\\`foundfile'", clear
+					
+				if _rc == 0 { 
+					//* Si esta base de datos existe, entonces haga: */
+					noisily display "Calculando `foundfile'..."		
+														
+						* variables de clase
 							
-					cap use "${source}\\`pais'\\`encuesta'\data_arm\\`pais'_`ano'`ronda'_BID.dta" , clear
+					cap {
+						gen Total  =  1
+						gen Primaria  =  1
+						gen Secundaria  =  1
+						gen Superior  =  1
+						gen Prescolar  =  1
+						gen Hombre = (sexo_ci==1)  
+						gen Mujer  = (sexo_ci==2)
+						gen Urbano = (zona_c==1)
+						gen Rural  = (zona_c==0)
 					
-					if _rc == 0 { //* Si esta base de datos existe, entonces haga: */
-										
-							* variables de clase
-							
-								cap {
-									gen Total  =  1
-									gen Primaria  =  1
-									gen Secundaria  =  1
-									gen Superior  =  1
-									gen Prescolar  =  1
-									gen Hombre = (sexo_ci==1)  
-									gen Mujer  = (sexo_ci==2)
-									gen Urbano = (zona_c==1)
-									gen Rural  = (zona_c==0)
-								}
-								
-								if "`pais'" == "HND" | ("`pais'" == "NIC" & "`ano'" == "2009")  {
-									drop quintil 
-								}
-										
-								* Generando Quintiles de acuerdo a SUMMA y toda la división 
-								cap destring idh_ch, replace			
-								cap egen    ytot_ci= rsum(ylm_ci ylnm_ci ynlm_ci ynlnm_ci) if miembros_ci==1
-								replace ytot_ci= .   if ylm_ci==. & ylnm_ci==. & ynlm_ci==. & ynlnm_ci==.
-								cap bys		idh_ch: egen ytot_ch= sum(ytot_ci) if miembros_ci==1
-								replace ytot_ch=. if ytot_ch<=0
-								cap gen 	pc_ytot_ch=ytot_ch/nmiembros_ch	
-								sort 	pc_ytot_ch idh_ch idp_ci
-								cap gen 	suma1=sum(factor_ci) if ytot_ch>0 & ytot_ch!=.
-								cap qui su  suma1
-								local 	ppquintil2 = r(max)/5 
-
-								cap gen quintil_1=1 if suma1>=0 & suma1<=1*`ppquintil2'
-								cap gen quintil_2=1 if suma1>1*`ppquintil2' & suma1<=2*`ppquintil2'
-								cap gen quintil_3=1 if suma1>2*`ppquintil2' & suma1<=3*`ppquintil2'
-								cap gen quintil_4=1 if suma1>3*`ppquintil2' & suma1<=4*`ppquintil2'
-								cap gen quintil_5=1 if suma1>4*`ppquintil2' & suma1<=5*`ppquintil2'						
-					
-							* Variables intermedias 
-					
-								* Educación: niveles y edades teóricas cutomizadas  
-									include "${input}\var_tmp_EDU.do"
-								* Mercado laboral 
-									include "${input}\var_tmp_LMK.do"
-								* Pobreza, vivienda, demograficas
-									include "${input}\var_tmp_SOC.do"
-								* Inclusion
-									include "${input}\var_tmp_GDI.do"	
-									
-							* base de datos de microdatos con variables intermedias
-					    	include "${input}\append_calculo_microdatos_scl.do"								
 						
+						if "`pais'" == "HND" | ("`pais'" == "NIC" & "`ano'" == "2009")  {
+							drop quintil 
+						}
+								
+						* Generando Quintiles de acuerdo a SUMMA y toda la división 
+						 destring idh_ch, replace			
+						 egen    ytot_ci= rsum(ylm_ci ylnm_ci ynlm_ci ynlnm_ci) if miembros_ci==1
+						replace ytot_ci= .   if ylm_ci==. & ylnm_ci==. & ynlm_ci==. & ynlnm_ci==.
+						 bys		idh_ch: egen ytot_ch= sum(ytot_ci) if miembros_ci==1
+						replace ytot_ch=. if ytot_ch<=0
+						 gen 	pc_ytot_ch=ytot_ch/nmiembros_ch	
+						sort 	pc_ytot_ch idh_ch idp_ci
+						 gen 	suma1=sum(factor_ci) if ytot_ch>0 & ytot_ch!=.
+						 qui su  suma1
+						local 	ppquintil2 = r(max)/5 
+
+						 gen quintil_1=1 if suma1>=0 & suma1<=1*`ppquintil2'
+						 gen quintil_2=1 if suma1>1*`ppquintil2' & suma1<=2*`ppquintil2'
+						 gen quintil_3=1 if suma1>2*`ppquintil2' & suma1<=3*`ppquintil2'
+						 gen quintil_4=1 if suma1>3*`ppquintil2' & suma1<=4*`ppquintil2'
+						 gen quintil_5=1 if suma1>4*`ppquintil2' & suma1<=5*`ppquintil2'						
+			
+					* Variables intermedias 
+			
+						* Educación: niveles y edades teóricas cutomizadas  
+							include "${input}\var_tmp_EDU.do"
+						* Mercado laboral 
+							include "${input}\var_tmp_LMK.do"
+						* Pobreza, vivienda, demograficas
+							include "${input}\var_tmp_SOC.do"
+						* Inclusion
+						**	include "${input}\var_tmp_GDI.do"	
+							
+					* base de datos de microdatos con variables intermedias
+					********** >>> include "${input}\append_calculo_microdatos_scl.do"	
+					
+					} //end capture
 				}
 				else {
 				
@@ -290,9 +305,16 @@ qui {
 					  already capturing it and will generate the missing values accordingly
 					  whenever the indicator cannot be calculated.
 					  */
-					  display "`pais'\\`encuesta'\data_arm\\`pais'_`ano'`ronda'_BID.dta - non existe. Generando missing values..."
+					  *display "`pais'\\`encuesta'\data_arm\\`pais'_`ano'`ronda'_BID.dta - non existe. Generando missing values..."
+					  noisily display "`pais'_`ano' - no se encontró ningún archivo .dta. Generando missing values..."
 					  
+					  /* use an empty file which contains all variables */
+					  use "${source}\\template.dta", clear
+					
 				}
+				
+				
+					
 *****************************************************************************************************************************************
 					* 1.2: Indicators for each topic		
 *****************************************************************************************************************************************
@@ -304,7 +326,7 @@ qui {
 						// Authors: ...
 						************************************************
 					
-						local clases Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano
+						local clases Total quintil_1 /*quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano*/
 						local clases2 Total Rural Urbano
 		
 						foreach clase1 of local clases {
@@ -314,8 +336,8 @@ qui {
 								
 								/* Parameters of current disaggregation levels, used by all commands */
 								global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
-										
-										
+								noisily display "$tema: $current_slice"
+								
 								//======== CALCULATE INDICATORS ================================================
 								
 										
@@ -695,19 +717,19 @@ qui {
 							
 							local clases Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 
 															
-							foreach clase of local clases {
+							foreach clase1 of local clases {
 								local clase2 Total
 								local clase3 Total							
 								
 								
 								/* Parameters of current disaggregation levels, used by all commands */
 								global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
-										
+								noisily display "$tema: $current_slice"	
 										
 								//======== CALCULATE INDICATORS ================================================
 								
 								/* Porcentaje de población que reside en zonas urbanas*/
-								scl_pct
+								scl_pct ///
 									urbano_ci urbano_ci "1" if urbano_ci!=. 
 									
 													/*
@@ -746,7 +768,7 @@ qui {
 							local clases2 Total Hombre Mujer Rural Urbano
 							
 							
-							foreach clase of local clases {	
+							foreach clase1 of local clases {	
 								foreach clase2 of local clases2 {
 								
 								
@@ -757,7 +779,7 @@ qui {
 									
 										/* Parameters of current disaggregation levels, used by all commands */
 										global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
-										
+										noisily display "$tema: $current_slice"
 
 										//======== CALCULATE INDICATORS ================================================
 										local sfix ""
@@ -928,7 +950,7 @@ qui {
 											
 												/* Parameters of current disaggregation levels, used by all commands */
 												global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
-												
+												noisily display "$tema: $current_slice"
 
 												//======== CALCULATE INDICATORS ================================================	
 												
@@ -1157,14 +1179,14 @@ qui {
 								local clases2 Total Hombre Mujer Rural Urbano
 								local clases3 Total age_15_24 age_15_29 age_15_64 age_25_64 age_65_mas 
 							
-								foreach clase of local clases {
+								foreach clase1 of local clases {
 									foreach clase2 of local clases2 {
 										foreach clase3 of local clases3 {
 										
 										
 											/* Parameters of current disaggregation levels, used by all commands */
 											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
-													
+											noisily display "$tema: $current_slice"	
 
 											//======== CALCULATE INDICATORS ================================================
 													
@@ -2796,17 +2818,19 @@ qui {
 				
 				
 						
-					} /* cierro rondas */		
-				} /* cierro encuestas */
+					*} /* cierro rondas */		
+				*} /* cierro encuestas */
 			} /* cierro anos */
 		} /* cierro paises */
-	} /* cierro quietly */
+} /* cierro quietly */
  
 
+ 
 postclose `ptablas'
+
 use `tablas', clear
 * destring valor muestra, replace
-recode valor 0=.
+* recode valor 0=.
 * recode muestra 0=.
 save `tablas', replace 
 
@@ -2835,9 +2859,9 @@ unicode convertfile "${output}\indicadores_encuestas_hogares_scl.csv" "${output}
 
 *carpeta tmp
 
-export delimited using  "${covidtmp}\indicadores_encuestas_hogares_scl.csv", replace
-unicode convertfile "${covidtmp}\indicadores_encuestas_hogares_scl.csv" "${output}\indicadores_encuestas_hogares_scl_converted.csv", dstencoding(latin1) replace 
-save "${covidtmp}\indicadores_encuestas_hogares_scl.dta", replace
+***** export delimited using  "${covidtmp}\indicadores_encuestas_hogares_scl.csv", replace
+***** unicode convertfile "${covidtmp}\indicadores_encuestas_hogares_scl.csv" "${output}\indicadores_encuestas_hogares_scl_converted.csv", dstencoding(latin1) replace 
+***** save "${covidtmp}\indicadores_encuestas_hogares_scl.dta", replace
 
 
 /*
