@@ -259,7 +259,7 @@ local mydir = c(pwd) /* GitHub folder */
 * If $source is empty, then by default the shared folder will be used (must be at the IDB or
 * connected to the VPN)
 */
-if $source=="" {
+if "${source}"=="" {
 	global source  	 "\\Sdssrv03\surveys\harmonized" /*if you have a local copy of the .dta files, change here to use your local copy */
 }
 
