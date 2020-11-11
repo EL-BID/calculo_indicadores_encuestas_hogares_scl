@@ -391,7 +391,7 @@ qui {
 					  noisily display "`pais'_`ano'`rondas'_BID.dta - no se encontró el archivo. Generando missing values..."
 					  
 					  /* use an empty file which contains all variables */
-					  use "${source}\\template.dta", clear
+					  use "${covidtmp}\\template.dta", clear
 					
 				}
 				
