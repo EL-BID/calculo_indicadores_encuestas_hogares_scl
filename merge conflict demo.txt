@@ -1,0 +1,8 @@
+File for demonstrating conflict resolution.
+
+This is the initial version of the document.
+Neither Cesar or Nathalia or Antonella made any changes.
+
+tab raza_ci [w=round(factor_ci)]
+
+Thanks!
