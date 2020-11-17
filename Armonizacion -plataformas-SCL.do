@@ -16,6 +16,7 @@ Output:             Excel-DTA file
 version 16.0
 drop _all 
 set more off 
+cd "C:\Users\FENRIQUEM\Documents\GitHub\calculo_indicadores_encuestas_hogares_scl"
 *ssc install quantiles inequal7
 * cap ssc install estout
 * cap ssc install inequal7
@@ -252,13 +253,13 @@ end
 */
 local mydir = c(pwd) /* GitHub folder */
 
-/*
-* source = Location of the harmonized surveys databases.
+
+glo source = "C:\Users\FENRIQUEM\Documents\OneDrive - Inter-American Development Bank Group\Fernando\Migration\Documents\"
 *
 * If you want to set a local folder instead, set this global macro before running the code.
 * If $source is empty, then by default the shared folder will be used (must be at the IDB or
 * connected to the VPN)
-*/
+
 if "${source}"=="" {
 	global source  	 "\\Sdssrv03\surveys\harmonized" /*if you have a local copy of the .dta files, change here to use your local copy */
 }
@@ -274,7 +275,7 @@ global output 	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Onput"
 * 
 * NOTE: template.dta must be in this folder.
 */
-global covidtmp  "C:\Users\\`= c(username)'\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
+global covidtmp  "C:\Users\\`= c(username)'\Documents\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
 
 
 
@@ -315,13 +316,13 @@ qui {
 			 /* 
 			   Alternatively, if you want to test a certain collection of .dta files,
 			   uncomment the code below which will search for all .dta files in the $source
-			   folder, that start with the name PAIS_ANO.
+			   folder, that start with the name PAIS_ANO. */
 			   
-			  *local files : dir "${source}" files "`pais'_`ano'*.dta"
-			  *local foundfile : word 1 of `files'
-			  *cap use "${source}\\`foundfile'", clear
+			  local files : dir "${source}" files "`pais'_`ano'*.dta"
+			  local foundfile : word 1 of `files'
+			  cap use "${source}\\`foundfile'", clear
 			
-			  */	
+			  	
 				if _rc == 0 { 
 					//* Si esta base de datos existe, entonces haga: */
 					noisily display "Calculando \\`pais'\\`encuestas'\data_arm\\`pais'_`ano'`rondas'_BID.dta..."		
@@ -396,7 +397,7 @@ qui {
 				}
 				
 				
-					
+/*					
 *****************************************************************************************************************************************
 					* 1.2: Indicators for each topic		
 *****************************************************************************************************************************************
@@ -2953,15 +2954,15 @@ qui {
 										} /*cierro clases2*/
 								} /*cierro clases*/
 								
-								
+*/								
 								************************************************
 								  global tema "migracion"
 								************************************************
 								// Division: MIG
 								// Authors: Fernando Morales Velandia
 								************************************************
-								local clases 	Total Hombre Mujer
-								local clases2 	Total Rural Urbano
+								local clases 	Total /* Hombre Mujer */
+								local clases2 	Total /* Rural Urbano */
 								local clases3	Total
 								
 								foreach clase1 of local clases {
@@ -2972,25 +2973,22 @@ qui {
 											noisily display "$tema: $current_slice"	
 											
 								
-											/* Indicadores Migración */
-								
-								
+											/* Porcentaje de migrantes en el pais */
+											scl_pct ///
+												migrante_ci migrante_ci "1" 
+																				
+											/* Porcentaje de migrantes antiguos (5 años o mas) en el pais */
+											scl_pct ///
+												migantiguo5_ci migantiguo5_ci "1"
+												
+											/* Porcentaje de migrantes LAC en el pais */
+											scl_pct ///
+												migrantelac_ci migrantelac_ci "1" 
+
 											}/*cierro clases3*/		
 										} /*cierro clases2*/
 								} /*cierro clases*/
-								
-								
-								
-	
-	
-
-	
 							
-					
-					
-
-				
-				
 						
 					*} /* cierro rondas */		
 				*} /* cierro encuestas */
