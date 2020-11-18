@@ -268,7 +268,6 @@ if "${source}"=="" {
 */
 global input	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Input"
 global output 	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Onput"
-
 /*
 * Location for temporary files. This folder is on MS TEAMS.
 * 
@@ -405,7 +404,7 @@ qui {
 						  global tema "demografia"
 						************************************************
 						// Division: SCL
-						// Authors: ...
+						// Authors: Daniela Zuluaga
 						************************************************
 					
 						local clases Total quintil_1 /*quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano*/
@@ -425,372 +424,77 @@ qui {
 										
 								/* Porcentaje de hogares con jefatura femenina */
 								scl_pct ///
-									jefa_ch jefa_ch "1" if jefa_ch!=. & sexo_ci!=.
-								
-								
-													/*if "`indicador'" == "jefa_ch" {
-															
-													capture estpost tabulate jefa_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1 & jefa_ch!=. & sexo_ci!=.
-													local valor= e(pct)[1,2]
-													if _rc == 0 {
-													
-													estpost tabulate jefa_ch if `clase'==1 & `clase2'==1 & jefa_ch!=. & sexo_ci!=.
-													local muestra=e(b)[1,2]	
-																			
-																			post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																			}
-																			
-																			else {
-																			
-																			post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																			}
-															}  cierro indicador*/
+								jefa_ch jefa_ch "1" if jefa_ch!=. & sexo_ci!=.												
 										
 								/* Porcentaje de hogares con jefatura económica femenina */
 								scl_pct ///
-									jefaecon_ch hhfem_ch "1" if jefe_ci==1 & hhfem_ch!=. & sexo_ci!=.
-								
-													/*
-													if "`indicador'" == "jefaecon_ch" {
-									
-													capture estpost tabulate hhfem_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1 & hhfem_ch!=. & sexo_ci!=.
-													local valor= e(pct)[1,2]
-													if _rc == 0 {
-													
-													estpost tabulate hhfem_ch if `clase'==1 & `clase2'==1 & hhfem_ch!=. & sexo_ci!=.
-													local muestra=e(b)[1,2]	
-																			
-																			post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																			}
-																			
-																			else {
-																			
-																			post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																			}														
-																			
-															}  cierro indicador*/
+								jefaecon_ch hhfem_ch "1" if jefe_ci==1 & hhfem_ch!=. & sexo_ci!=.											
 										
 								/* Porcentaje de población femenina*/
 								scl_pct ///
-									pobfem_ci pobfem_ci "1" if pobfem_ci!=. 
-									
-													/*if "`indicador'" == "pobfem_ci" {
-														
-													capture estpost tabulate pobfem_ci [w=round(factor_ci)] if  `clase'==1 & `clase2'==1 & pobfem_ci!=. 
-													local valor= e(pct)[1,2]
-													if _rc == 0 {
-													
-													estpost tabulate pobfem_ci if `clase'==1 & `clase2'==1 & pobfem_ci!=.
-													local muestra=e(b)[1,2]	
-																			
-																			post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																			}
-																			
-																			else {
-																			
-																			post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																			}	
-									
-																		
-															}  cierro indicador*/
-										
+								pobfem_ci pobfem_ci "1" if pobfem_ci!=. 
+																						
 								/* Porcentaje de hogares con al menos un miembro de 0-5 años*/
 								scl_pct ///
-									miembro6_ch miembro6_ch "1" if jefe_ci==1 & miembro6_ch!=.
-								
-														/* if "`indicador'" == "miembro6_ch" {
-														
-														capture estpost tabulate miembro6_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1 & miembro6_ch!=.
-														local valor= e(pct)[1,2]
-														if _rc == 0 {
-														
-														estpost tabulate miembro6_ch if `clase'==1 & `clase2'==1 & miembro6_ch!=.
-														local muestra=e(b)[1,2]	
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-										
-																				
-																}  *cierro indicador*/
-										
+								miembro6_ch miembro6_ch "1" if jefe_ci==1 & miembro6_ch!=.
+												
 								* Porcentaje de hogares con al menos un miembro entre 6-16 años*
 								scl_pct ///
-									miembro6y16_ch miembro6y16_ch "1" if jefe_ci==1 & miembro6y16_ch!=.
-									
-														/* if "`indicador'" == "miembro6y16_ch" {
-														
-														capture estpost tabulate miembro6y16_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1 & miembro6y16_ch!=.
-														local valor= e(pct)[1,2]
-														if _rc == 0 {
-														
-														estpost tabulate miembro6y16_ch if `clase'==1 & `clase2'==1 & miembro6y16_ch!=.
-														local muestra=e(b)[1,2]	
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-										
-																			
-																}  *cierro indicador*
-																
+								miembro6y16_ch miembro6y16_ch "1" if jefe_ci==1 & miembro6y16_ch!=.
+																													
 								* Porcentaje de hogares con al menos un miembro de 65 años o más*
-														*if "`indicador'" == "miembro65_ch" {
-										
-													   capture estpost tabulate miembro65_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1 & miembro65_ch!=.
-														local valor= e(pct)[1,2]
-														if _rc == 0 {
-														
-														estpost tabulate miembro65_ch if `clase'==1 & `clase2'==1 & miembro65_ch!=.
-														local muestra=e(b)[1,2]	
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																} * cierro indicador*
-																
+								scl_pct ///
+								miembro65_ch miembro65_ch "1" if jefe_ci==1 & miembro65_ch!=.
+												
 								* Porcentaje de hogares unipersonales*
-														if "`indicador'" == "unip_ch" {
-														
-														capture estpost tabulate unip_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1 & unip_ch!=.
-														local valor= e(pct)[1,2]
-														if _rc == 0 {
-														
-														estpost tabulate unip_ch if `clase'==1 & `clase2'==1 & unip_ch!=.
-														local muestra=e(b)[1,2]	
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																} * cierro indicador*
-																
+								scl_pct ///
+								unip_ch unip_ch "1" if jefe_ci==1 & unip_ch!=.
+																									
 								* Porcentaje de hogares nucleares*
-														if "`indicador'" == "nucl_ch" {
-														
-														capture estpost tabulate nucl_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1 & nucl_ch!=.
-														local valor= e(pct)[1,2]
-														if _rc == 0 {
-														
-														estpost tabulate nucl_ch if `clase'==1 & `clase2'==1 & nucl_ch!=.
-														local muestra=e(b)[1,2]	
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																} * cierro indicador*
+								scl_pct ///
+								nucl_ch nucl_ch "1" if jefe_ci==1 & nucl_ch!=.
 																
 								* Porcentaje de hogares ampliados*
-														if "`indicador'" == "ampl_ch" {
-														
-														capture estpost tabulate ampl_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1 & ampl_ch!=.
-														local valor= e(pct)[1,2]
-														if _rc == 0 {
-														
-														estpost tabulate ampl_ch if `clase'==1 & `clase2'==1 & ampl_ch!=.
-														local muestra=e(b)[1,2]	
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-										
-																				
-																} * cierro indicador*
-																
+						        scl_pct ///
+								ampl_ch ampl_ch "1" if jefe_ci==1 & ampl_ch!=.
+																																
 								* Porcentaje de hogares compuestos*
-														if "`indicador'" == "comp_ch" {
-													
-													   capture estpost tabulate comp_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1 & comp_ch!=.
-														local valor= e(pct)[1,2]
-														if _rc == 0 {
-														
-														estpost tabulate comp_ch if `clase'==1 & `clase2'==1 & comp_ch!=.
-														local muestra=e(b)[1,2]	
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																			
-																} * cierro indicador*
-																
+								scl_pct ///
+								comp_ch comp_ch "1" if jefe_ci==1 & comp_ch!=.
+																	
 								* Porcentaje de hogares corresidentes*
-														if "`indicador'" == "corres_ch" {
-										
-														capture estpost tabulate corres_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1 & corres_ch!=.
-														local valor= e(pct)[1,2]
-														if _rc == 0 {
-														
-														estpost tabulate corres_ch if `clase'==1 & `clase2'==1 & corres_ch!=.
-														local muestra=e(b)[1,2]	
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																} * cierro indicador*/
-								
-								
-								
-								
-								/*Razón de dependencia*/
+							    scl_pct ///
+								corres_ch corres_ch "1" if jefe_ci==1 & corres_ch!=.					
+
+								*Razón de dependencia*
 								scl_mean ///
-									depen_ch depen_ch if jefe_ci==1 & depen_ch!=.
-									
-														/*	
-														if "`indicador'" == "depen_ch" {
-																
-														capture sum depen_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1 & depen_ch!=. 
-														capture local valor= `r(mean)'
-														if _rc == 0 {
-														
-														capture sum depen_ch if jefe_ci==1 & `clase'==1 & `clase2'==1 & depen_ch!=. 
-														capture local muestra= `r(N)'
-																											
-															
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}		
-																} cierro indicador*/
+								depen_ch depen_ch if jefe_ci==1 & depen_ch!=.				
 										
-								/* Número promedio de miembros del hogar*/
+								* Número promedio de miembros del hogar*
 								scl_mean ///
-									tamh_ch nmiembros_ch if jefe_ci==1 & nmiembros_ch!=. 
-									
-														/*if "`indicador'" == "tamh_ch" {
-										
-														capture sum nmiembros_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1 & nmiembros_ch!=. 
-														capture local valor= `r(mean)'
-														if _rc == 0 {
-														
-														capture sum nmiembros_ch if jefe_ci==1 & `clase'==1 & `clase2'==1 & nmiembros_ch!=. 
-														capture local muestra= `r(N)'
-																											
-															
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																		
-																} * cierro indicador*
+								tamh_ch nmiembros_ch if jefe_ci==1 & nmiembros_ch!=. 
 																
 								* Porcentaje de población menor de 18 años*
-														if "`indicador'" == "pob18_ci" {
-														
-														capture estpost tabulate pob18_ci [w=round(factor_ci)] if `clase'==1 & `clase2'==1 & pob18_ci!=.
-														local valor= e(pct)[1,2]
-														if _rc == 0 {
-														
-														estpost tabulate pob18_ci if `clase'==1 & `clase2'==1 & pob18_ci!=.
-														local muestra=e(b)[1,2]	
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																} * cierro indicador*
-																
+								scl_pct ///
+							    pob18_ci pob18_ci "1" if pob18_ci!=.
+																									
 								* Porcentaje de población de 65+ años*
-														if "`indicador'" == "pob65_ci" {
-										
-														capture estpost tabulate pob65_ci [w=round(factor_ci)] if `clase'==1 & `clase2'==1 & pob65_ci!=.
-														local valor= e(pct)[1,2]
-														if _rc == 0 {
-														
-														estpost tabulate pob65_ci if `clase'==1 & `clase2'==1 & pob65_ci!=.
-														local muestra=e(b)[1,2]	
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																} * cierro indicador*
-																										
+								scl_pct ///
+								pob65_ci pob65_ci "1" if pob65_ci!=.
+																			
 								* Porcentaje de individuos en union formal o informal*
-														if "`indicador'" == "union_ci" {
-										
-														capture estpost tabulate union_ci [w=round(factor_ci)] if `clase'==1 & `clase2'==1 & union_ci!=.
-														local valor= e(pct)[1,2]
-														if _rc == 0 {
-														
-														estpost tabulate union_ci if `clase'==1 & `clase2'==1 & union_ci!=.
-														local muestra=e(b)[1,2]	
-							
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																} * cierro indicador*
-																										
+								scl_pct ///
+								union_ci union_ci "1" if union_ci!=.
+																								
 								* Edad mediana de la población en años *
-														if "`indicador'" == "pobedad_ci" {
+
+														
+														/*if "`indicador'" == "pobedad_ci" {
 														
 														capture sum edad_ci [w=round(factor_ci)] if  `clase'==1 & `clase2'==1 & edad_ci!=., detail
 														capture local valor= `r(p50)'
 														if _rc == 0 {
-														
-														capture sum edad_ci if jefe_ci==1 & `clase'==1 & `clase2'==1 & edad_ci!=. 
-														capture local muestra= `r(N)'
-																											
-															
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																} * cierro indicador*/	
+													*/
 										
 										
 										
@@ -812,28 +516,7 @@ qui {
 								
 								/* Porcentaje de población que reside en zonas urbanas*/
 								scl_pct ///
-									urbano_ci urbano_ci "1" if urbano_ci!=. 
-									
-													/*
-													if "`indicador'" == "urbano_ci"  {
-										
-														capture estpost tabulate urbano_ci [w=round(factor_ci)] if `clase'==1 & urbano_ci!=. 
-														local valor= e(pct)[1,2]
-														if _rc == 0 {
-														
-														estpost tabulate urbano_ci if `clase'==1 & urbano_ci!=. 
-														local muestra=e(b)[1,2]	
-																			
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																} * cierro indicador*/
+								urbano_ci urbano_ci "1" if urbano_ci!=. 
 										
 							} /*cierro clase*/			    
 											
@@ -2351,8 +2034,8 @@ qui {
 							************************************************
 							  global tema "pobreza"
 							************************************************
-							// Division: SPH
-							// Authors: ...
+							// Division: SCL
+							// Authors: Daniela Zuluaga
 							************************************************
 								
 								local clases 	Total Hombre Mujer Rural Urbano
@@ -2367,113 +2050,27 @@ qui {
 											noisily display "$tema: $current_slice"	
 								
 								
-								/*
-														/* Porcentaje poblacion que vive con menos de 3.1 USD diarios per capita*/
-																if "`indicador'" == "pobreza31" {																						 
-																 capture estpost tabulate poor31 [w=round(factor_ci)] if `clase'==1 & `clase2'==1 & `nivel'==1 & poor31!=. 
-																 local valor= e(pct)[1,2]
-																 if _rc == 0 {
-																	
-																 estpost tabulate poor31 if `clase'==1 & `clase2'==1 & `nivel'==1 & poor31!=.
-																 local muestra=e(b)[1,2]	
-															
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'")  ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'")  ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																							
-																} /*cierro indicador*/		
-																
-																/* Porcentaje poblacion que vive con menos de 5 USD diarios per capita*/
-																if "`indicador'" == "pobreza" {																						 
-																 capture estpost tabulate poor [w=round(factor_ci)] if  `clase'==1 & `clase2'==1 & `nivel'==1 & poor!=.
-																 local valor= e(pct)[1,2]
-																 if _rc == 0 {
-																	
-																 estpost tabulate poor if `clase'==1 & `clase2'==1 & `nivel'==1 & poor!=.
-																 local muestra=e(b)[1,2]	
-															
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'")  ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'")  ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																	
-																} /*cierro indicador*/
-																
-																/* Porcentaje de la población con ingresos entre 5 y 12.4 USD diarios per capita*/
-																if "`indicador'" == "vulnerable" {                               
-																
-																capture estpost tabulate vulnerable [w=round(factor_ci)] if  `clase'==1 & `clase2'==1 & `nivel'==1 & vulnerable!=.
-																 local valor= e(pct)[1,2]
-																 if _rc == 0 {
-																	
-																 estpost tabulate vulnerable if `clase'==1 & `clase2'==1 & `nivel'==1 & vulnerable!=.
-																 local muestra=e(b)[1,2]	
-															
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'")  ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'")  ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																								
-																} /*cierro indicador*/	
-																
-																/* Porcentaje de la población con ingresos entre 12.4 y 64 USD diarios per capita*/
-																if "`indicador'" == "middle" {								
-															
-																 capture estpost tabulate middle [w=round(factor_ci)] if  `clase'==1 & `clase2'==1 & `nivel'==1 & middle!=.
-																 local valor= e(pct)[1,2]
-																 if _rc == 0 {
-																	
-																 estpost tabulate middle if `clase'==1 & `clase2'==1 & `nivel'==1 & middle!=.
-																 local muestra=e(b)[1,2]	
-															
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'")  ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'")  ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																									
-																} /*cierro indicador*/	
-																
-																/* Porcentaje de la población con ingresos mayores 64 USD diarios per capita*/
-																if "`indicador'" == "rich" {							
-																
-																 capture estpost tabulate rich [w=round(factor_ci)] if  `clase'==1 & `clase2'==1 & `nivel'==1 & rich!=.
-																 local valor= e(pct)[1,2]
-																 if _rc == 0 {
-																	
-																 estpost tabulate rich if `clase'==1 & `clase2'==1 & `nivel'==1 & rich!=.
-																 local muestra=e(b)[1,2]	
-															
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'")  ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'")  ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																					
-																} /*cierro indicador*/	
-							*/
 								
-								
-							
+												* Porcentaje poblacion que vive con menos de 3.1 USD diarios per capita*
+												scl_pct ///
+									            pobreza31 poor31 "1" if poor31!=. 
+															
+												*Porcentaje poblacion que vive con menos de 5 USD diarios per capita
+												scl_pct ///
+									            pobreza poor "1" if poor!=. 
+																
+												* Porcentaje de la población con ingresos entre 5 y 12.4 USD diarios per capita*
+												 scl_pct ///
+									             vulnerable vulnerable "1" if vulnerable!=. 
+		
+                                                 * Porcentaje de la población con ingresos entre 12.4 y 64 USD diarios per capita*
+												  scl_pct ///
+									              middle middle "1" if middle!=. 
+															
+                                                 * Porcentaje de la población con ingresos mayores 64 USD diarios per capita*
+												 scl_pct ///
+									             rich rich "1" if rich!=. 
+
 				
 										} /* cierro clase3 */	
 									}/*cierro clase2*/
@@ -2491,10 +2088,10 @@ qui {
 													noisily display "$tema: $current_slice"	
 													
 													
-				/*
+				
 													
 														/* Coeficiente de Gini para el ingreso per cápita del hogar*/			
-														if "`indicador'" == "ginihh" {
+														/*if "`indicador'" == "ginihh" {
 														
 														capture sum ginihh if `clase'==1 & ginihh!=.
 														capture local valor= `r(mean)'
@@ -2512,10 +2109,10 @@ qui {
 																	   post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 																	   }
 															
-														} /*cierro indicador*/
+														} cierro indicador*/
 														
 														/* Coeficiente de Gini para salarios por hora*/
-														if "`indicador'" == "gini" {
+														/*if "`indicador'" == "gini" {
 														
 														capture sum gini if `clase'==1 & gini!=.
 														capture local valor= `r(mean)'
@@ -2533,10 +2130,10 @@ qui {
 																	  post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 																	  }
 															
-														} /*cierro indicador*/
+														} cierro indicador*/
 														
 														  /* Coeficiente de theil para el ingreso per cápita del hogar*/
-														  if "`indicador'" == "theilhh" {
+														  /*if "`indicador'" == "theilhh" {
 														
 														capture sum theilhh if `clase'==1 & theilhh!=.
 														capture local valor= `r(mean)'
@@ -2553,10 +2150,10 @@ qui {
 															
 																	  post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 																	  }
-														} /*cierro indicador*/
+														} cierro indicador*/
 														
-														/* Coeficiente de theil para salarios por hora*/
-														 if "`indicador'" == "theil" {
+														* Coeficiente de theil para salarios por hora*
+														 /*if "`indicador'" == "theil" {
 														
 														capture sum theil if `clase'==1 & theil!=.
 														capture local valor= `r(mean)'
@@ -2573,32 +2170,15 @@ qui {
 															
 																	  post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
 																	  }
-														} /*cierro indicador*/
+														} cierro indicador*/
 														
-														/* Porcentaje del ingreso laboral del hogar contribuido por las mujeres */
-														if "`indicador'" == "ylmfem_ch" {
-								
-														capture sum shareylmfem_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & shareylmfem_ch!=. 
-														capture local valor= `r(mean)'
-														if _rc == 0 {
-															
-														capture sum shareylmfem_ch if jefe_ci==1 & `clase'==1 & shareylmfem_ch!=. 
-														capture local muestra= `r(N)'	
-
+													* Porcentaje del ingreso laboral del hogar contribuido por las mujeres */
+													scl_pct ///
+									                 ylmfem_ch shareylmfem_ch "1" if jefe_ci==1 & shareylmfem_ch!=. 
+														 
 														
-																		
-																		post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																		}
-																		
-																		else {
-																		
-																		post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																		}
-																		
-														} /* cierro indicador*/
 														} /*cierro clase*/	
-														*/
-														
+													
 														} /* cierro clase3 */	
 									}/*cierro clase2*/
 								} /* cierro clase*/ 
@@ -2619,31 +2199,8 @@ qui {
 													
 													/* Porcentaje de hogares que reciben remesas del exterior */
 													scl_pct ///
-														indexrem indexrem "1" if jefe_ci==1 & indexrem!=.
-													
-								/*
-																  
-																	if "`indicador'" == "indexrem" {
-											
-																		capture estpost tabulate indexrem [w=round(factor_ci)] if jefe_ci==1 & `clase'==1  & indexrem!=.
-																		local valor= e(pct)[1,2]
-																		if _rc == 0 {
-																		
-																		estpost tabulate indexrem if jefe_ci==1 & `clase'==1  & indexrem!=.
-																		local muestra=e(b)[1,2]	
+													indexrem indexrem "1" if jefe_ci==1 & indexrem!=.
 
-																	
-																					
-																					post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																					}
-																					
-																					else {
-																					
-																					post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																					}
-																	} /* cierro indicador*/
-							*/
-							
 							
 												} /* cierro clase3 */	
 										}/*cierro clase2*/
@@ -2654,7 +2211,7 @@ qui {
 								  global tema "vivienda"
 								************************************************
 								// Division: SCL
-								// Authors: ...
+								// Authors: Daniela Zuluaga
 								************************************************
 								
 								local clases 	Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano
@@ -2669,253 +2226,56 @@ qui {
 											noisily display "$tema: $current_slice"	
 								
 					
-							/*
-																/* % de hogares con servicio de agua de acueducto*/
-																if "`indicador'" == "aguared_ch" {
-										
-																				
-																	capture estpost tabulate aguared_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1  & `clase2'==1 & aguared_ch!=.
-																	local valor= e(pct)[1,2]
-																	if _rc == 0 {
-																	
-																	estpost tabulate aguared_ch if jefe_ci==1 & `clase'==1  & `clase2'==1 & aguared_ch!=.
-																	local muestra=e(b)[1,2]	
-
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																																
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																							
-																				
-																} /* cierro indicador*/	
+						
+											   * % de hogares con servicio de agua de acueducto*
+											   scl_pct ///
+									           aguared_ch aguared_ch "1" if jefe_ci==1 & aguared_ch!=. 
 																
-																/* % de hogares con acceso a servicios de saneamiento mejorados*/
-																if "`indicador'" == "des2_ch" {
-										
-																	capture estpost tabulate des2_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1  & des2_ch!=.
-																	local valor= e(pct)[1,2]
-																	if _rc == 0 {
-																	
-																	estpost tabulate des2_ch if jefe_ci==1 & `clase'==1 & `clase2'==1  & des2_ch!=.
-																	local muestra=e(b)[1,2]	
-
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																																
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																					
-																				
-																} /* cierro indicador*/	
-																
-																/* % de hogares con electricidad */
-																if "`indicador'" == "luz_ch" {
-										
-																					
-																	capture estpost tabulate luz_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1 & luz_ch!=. 
-																	local valor= e(pct)[1,2]
-																	if _rc == 0 {
-																	
-																	estpost tabulate luz_ch if jefe_ci==1 & `clase'==1 & `clase2'==1 & luz_ch!=.
-																	local muestra=e(b)[1,2]	
-
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																																
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																} /* cierro indicador*/	
-																
-																/* % hogares con pisos de tierra */
-																if "`indicador'" == "dirtf_ch" {
-										
-																	capture estpost tabulate dirtf_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1 & dirtf_ch!=.
-																	local valor= e(pct)[1,2]
-																	if _rc == 0 {
-																	
-																	estpost tabulate dirtf_ch if jefe_ci==1 & `clase'==1 & `clase2'==1 & dirtf_ch!=.
-																	local muestra=e(b)[1,2]	
-
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																																
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																} /* cierro indicador*/
-																
-																/* % de hogares con refrigerador */
-																if "`indicador'" == "refrig_ch" {
-										
-
-																	capture estpost tabulate freezer_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1 & freezer_ch!=.
-																	local valor= e(pct)[1,2]
-																	if _rc == 0 {
-																	
-																	estpost tabulate freezer_ch if jefe_ci==1 & `clase'==1 & `clase2'==1 & freezer_ch!=.
-																	local muestra=e(b)[1,2]	
-
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																																
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																} /* cierro indicador*/
-																
-																/* % de hogares con carro particular */
-																if "`indicador'" == "auto_ch" {
-										
-																	capture estpost tabulate auto_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1  & `clase2'==1 & auto_ch!=.
-																	local valor= e(pct)[1,2]
-																	if _rc == 0 {
-																	
-																	estpost tabulate auto_ch  if jefe_ci==1 & `clase'==1  & `clase2'==1 & auto_ch!=.
-																	local muestra=e(b)[1,2]	
-
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																																
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																} /* cierro indicador*/
-																
-																/* % de hogares con acceso a internet */
-																if "`indicador'" == "internet_ch" {
-										
-																	capture estpost tabulate internet_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1  & `clase2'==1 & internet_ch!=.
-																	local valor= e(pct)[1,2]
-																	if _rc == 0 {
-																	
-																	estpost tabulate internet_ch if jefe_ci==1 & `clase'==1  & `clase2'==1 & internet_ch!=.
-																	local muestra=e(b)[1,2]	
-
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																																
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																} /* cierro indicador*/
-																
-																/* % de hogares con teléfono celular*/
-																if "`indicador'" == "cel_ch" {
-										
-																	capture estpost tabulate cel_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1 & cel_ch!=.
-																	local valor= e(pct)[1,2]
-																	if _rc == 0 {
-																	
-																	estpost tabulate cel_ch if jefe_ci==1 & `clase'==1 & `clase2'==1 & cel_ch!=.
-																	local muestra=e(b)[1,2]	
-
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																																
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																} /* cierro indicador*/
-																/* % de hogares con techos de materiales no permanentes*/
-																if "`indicador'" == "techonp_ch" {
-										
-																	capture estpost tabulate techonp_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1  & `clase2'==1 & techonp_ch!=.
-																	local valor= e(pct)[1,2]
-																	if _rc == 0 {
-																	
-																	estpost tabulate techonp_ch if jefe_ci==1 & `clase'==1  & `clase2'==1 & techonp_ch!=.
-																	local muestra=e(b)[1,2]	
-
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																																
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																} /* cierro indicador*/
-																
-																/* % de hogares con paredes de materiales no permanentes*/
-																if "`indicador'" == "parednp_ch" {
-										
-																	capture estpost tabulate parednp_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1  & `clase2'==1 & parednp_ch!=.
-																	local valor= e(pct)[1,2]
-																	if _rc == 0 {
-																	
-																	estpost tabulate parednp_ch if jefe_ci==1 & `clase'==1  & `clase2'==1 & parednp_ch!=.
-																	local muestra=e(b)[1,2]	
-
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																																
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																} /* cierro indicador*/
-																
-																/* Número de miembros por cuarto*/
-																if "`indicador'" == "hacinamiento_ch" {
-										
-																capture sum hacinamiento_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1 & hacinamiento_ch!=. 
-																capture local valor= `r(mean)'
-																if _rc == 0 {
-																	
-																capture  sum hacinamiento_ch if jefe_ci==1 & `clase'==1 & `clase2'==1 & hacinamiento_ch!=. 
-																capture local muestra= `r(N)'
+											   * % de hogares con acceso a servicios de saneamiento mejorados*
+											   scl_pct ///
+									           des2_ch des2_ch "1" if jefe_ci==1 & des2_ch!=. 							
 																														
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																} /* cierro indicador*/
-																
-																/*% de hogares con estatus residencial estable */
-																if "`indicador'" == "estable_ch" {
-										
-																	capture estpost tabulate estable_ch [w=round(factor_ci)] if jefe_ci==1 & `clase'==1 & `clase2'==1 & estable_ch!=. 
-																	local valor= e(pct)[1,2]
-																	if _rc == 0 {
-																	
-																	estpost tabulate estable_ch if jefe_ci==1 & `clase'==1 & `clase2'==1 & estable_ch!=. 
-																	local muestra=e(b)[1,2]	
+											   * % de hogares con electricidad *
+											   scl_pct ///
+									           luz_ch luz_ch "1" if jefe_ci==1 &  luz_ch!=. 
+																												
+										       * % hogares con pisos de tierra *
+										        scl_pct ///
+									            dirtf_ch dirtf_ch "1" if jefe_ci==1 &  dirtf_ch!=. 
+														
+											   * % de hogares con refrigerador *
+											    scl_pct ///
+									            refrig_ch freezer_ch "1" if jefe_ci==1 &  freezer_ch!=. 
 
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																																
-																				else {
-																				
-																				post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																				}
-																				
-																} /* cierro indicador*/
-														*/
+												* % de hogares con carro particular*
+												scl_pct ///
+									            auto_ch auto_ch "1" if jefe_ci==1 &  auto_ch!=. 													
 																
+												* % de hogares con acceso a internet *
+												scl_pct ///
+									            internet_ch internet_ch "1" if jefe_ci==1 &  internet_ch!=. 
+																			
+												* % de hogares con teléfono celular*
+												scl_pct ///
+									            cel_ch cel_ch "1" if jefe_ci==1 &  cel_ch!=.
 																
+											    * % de hogares con techos de materiales no permanentes*
+												scl_pct ///
+									            techonp_ch techonp_ch "1" if jefe_ci==1 &  techonp_ch!=.
+
+												* % de hogares con paredes de materiales no permanentes*
+											    scl_pct ///
+									            parednp_ch parednp_ch "1" if jefe_ci==1 &  parednp_ch!=.
+
+												* Número de miembros por cuarto*
+												scl_mean ///
+								                hacinamiento_ch hacinamiento_ch if jefe_ci==1 & hacinamiento_ch!=. 
+												
+												*% de hogares con estatus residencial estable *
+												scl_pct ///
+									            estable_ch estable_ch "1" if jefe_ci==1 &  estable_ch!=.
+												
+			
 											}/*cierro clases3*/		
 										} /*cierro clases2*/
 								} /*cierro clases*/
