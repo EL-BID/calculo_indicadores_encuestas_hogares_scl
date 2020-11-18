@@ -97,6 +97,7 @@ program scl_pct
 end
 
 
+
 /***** scl_nivel ***************************************************
  Calculates frequency indicators using
  the given variable and given category.
@@ -185,6 +186,66 @@ program scl_mean
 end
 
 
+/***** scl_ratio ***************************************************
+ Calculates ratio indicators using
+ two variables (1st the numerator, 2nd the denominator).
+ Accepts 'if'.
+ Notice that each variable is calculated in a sum command,
+ capturing the r(sum) result.
+ E.g., scl_ratio tasa_asis_edad  asis_`sfix' age_`sfix' if ...
+******************************************************************/
+capture program drop scl_ratio                                                        
+program scl_ratio
+  syntax anything [if]
+  
+    /* parameters of the indicator */
+  local indname : word 1 of `anything'
+  local indvarnum : word 2 of `anything'
+  local indvarden : word 3 of `anything'
+  /* paramaters of the current disaggregation (comes from $current_slice global macro) */
+  local pais : word 1 of $current_slice
+  local ano : word 2 of $current_slice
+  
+  local clase1 : word 4 of $current_slice
+  local clase2 : word 5 of $current_slice
+  local clase3 : word 6 of $current_slice
+  
+  /* create the "if" part of the command
+    combining with the "if" set when calling
+	the program (if any) */
+  scl_if_compose `if'
+  local xif `"`s(xif)'"'
+  sreturn clear
+   
+  
+   display `"$tema - `indname'"'
+  capture quietly sum `indvarnum' [w=round(factor_ch)] `xif'
+  capture quietly sum `indvarnum' [w=round(factor_ch)] `numcond' & `clase1'==1 & `clase2'==1 & `clase3'==1
+  
+  if _rc == 0 {
+    local numerator = `r(sum)'
+	
+	capture quietly sum `indvarden' [w=round(factor_ch)] `xif'
+	if _rc==0 {
+		capture local denominator = `r(sum)'
+		local valor = (`numerator' / `denominator') * 100 
+		
+		post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (`valor')
+	}
+		
+	else {
+		/* generate a line with missing value */
+		post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.)
+	}
+  }
+  
+  else {
+   /* generate a line with missing value */
+	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.)
+  }
+  
+end
+	
 /***** scl_ratio_2conds ********************************************
 Calculates ratio indicators using
 two variables (1st the numerator, 2nd the denominator).
@@ -242,8 +303,6 @@ program scl_ratio_2conds
   }
   
 end
-
-
 
 /*********************************************************************/
 
@@ -305,7 +364,7 @@ postfile `ptablas' str4 tiempo_id str3 pais_id str25(geografia_id clase1 clase2 
 ** Creo locales principales:
 						
 local paises ARG BHS /*BOL BRB BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN */
-local anos /*2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017*/ 2018 2019 
+local anos /*2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2019*/  2018 
 
 
 local geografia_id total_nacional
@@ -336,7 +395,7 @@ qui {
 			  *local foundfile : word 1 of `files'
 			  *cap use "${source}\\`foundfile'", clear
 			
-			  */		
+			 */		
 
 				if _rc == 0 { 
 					//* Si esta base de datos existe, entonces haga: */
@@ -952,39 +1011,34 @@ qui {
 											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3' 
 											noisily display "$tema: $current_slice"
 											
-							* Años_Escolaridad y Años_Escuela */
-											scl_pct ///
-													Años_Escolaridad_25_mas "`clase3'" "1"  & (aedu_ci !=. | edad_ci !=.) & age_25_mas==1
-											
-									} /*cierro clases3 */
+
 										
-										/* Años_Escolaridad y Años_Escuela
-										if "`indicador'" == "Años_Escolaridad_25_mas" {	
+							* Años_Escolaridad y Años_Escuela	
 												
-											local niveles anos_0 anos_1_5 anos_6 anos_7_11 anos_12 anos_13_o_mas
 											
-												foreach nivel of local niveles {
+											
+											
 																								
-													cap estpost tab `nivel' [w=round(factor_ci)] if  age_25_mas==1 & `clase'==1 & `clase2'==1 & (aedu_ci !=. | edad_ci !=.), m
+													cap estpost tab `clase3' [w=round(factor_ci)] if  age_25_mas==1 & `clase1'==1 & `clase2'==1 & (aedu_ci !=. | edad_ci !=.), m
 													if _rc == 0 {
 													mat proporcion = e(pct)
-													local valor = proporcion[1,1]
-
-													estpost tab `nivel' 				if age_25_mas==1 & `clase'==1 & `clase2'==1 & (aedu_ci !=. | edad_ci !=.), m
+													local valor = proporcion[1,2]
+													
+													estpost tab `clase3' 	if age_25_mas==1 & `clase1'==1 & `clase2'==1 & (aedu_ci !=. | edad_ci !=.), m
 													mat nivel = e(b)
-													local muestra = nivel[1,1]
+													local muestra = nivel[1,2]
 																								
-													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+													post $output ("`ano'") ("`pais'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("Años_Escolaridad_25_mas") ("%clase3/pop_25+") (`valor')
 													} /* cierro if */
 													
 													else {
 															
-															post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") (".") (".")
+													post $output ("`ano'") ("`pais'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("Años_Escolaridad_25_mas") ("%clase3/pop_25+") (.)
 														
 													} /* cierro else */
 													
-												} /* cierro nivel */		
-										} /* cierro if indicador*/	*/	
+									}			
+										
 										
 							* Ninis_2	
 								

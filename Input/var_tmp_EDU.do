@@ -35,6 +35,7 @@ Output:             Excel-DTA file
 	*1.3. Útiles para otos indicadores:			
 				
 				gen age_25_mas = edad_ci >=25          // Población mayor a 25
+
 				gen age_15_24 = inrange(edad_ci,15,24) // Ninis1
 				gen age_15_29 = inrange(edad_ci,15,29) // Ninis 2 
 				gen age_18_24 = inrange(edad_ci,18,24) 
@@ -69,13 +70,13 @@ Output:             Excel-DTA file
 				
 * 4. Nivel educativo de la poblacion  
  
-				gen anos_0 			= inrange(aedu_ci,0,0) & (aedu_ci !=. | edad_ci !=.)
-				gen anos_1_5 		= inrange(aedu_ci,1,5) & (aedu_ci !=. | edad_ci !=.)
-				gen anos_6			= inrange(aedu_ci,6,6) & (aedu_ci !=. | edad_ci !=.)
-				gen anos_7_11 		= inrange(aedu_ci,7,11) & (aedu_ci !=. | edad_ci !=.)
-				gen anos_12			= inrange(aedu_ci,12,12) & (aedu_ci !=. | edad_ci !=.)
-				gen anos_13_o_mas	= 1 if  aedu_ci>=13 & (aedu_ci !=. | edad_ci !=.)
-			replace anos_13_o_mas	= 0 if aedu_ci < 13 & (aedu_ci !=. | edad_ci !=.)
+				gen anos_0 			= inrange(aedu_ci,0,0) if (aedu_ci !=. | edad_ci !=.)
+				gen anos_1_5 		= inrange(aedu_ci,1,5) if (aedu_ci !=. | edad_ci !=.)
+				gen anos_6			= inrange(aedu_ci,6,6) if (aedu_ci !=. | edad_ci !=.)
+				gen anos_7_11 		= inrange(aedu_ci,7,11) if (aedu_ci !=. | edad_ci !=.)
+				gen anos_12			= inrange(aedu_ci,12,12) if (aedu_ci !=. | edad_ci !=.)
+				gen anos_13_o_mas	= aedu_ci>=13 if  (aedu_ci !=. | edad_ci !=.)
+
 * ==========================================================================================================================================
 *                                                                 Edades y niveles costumizados 
 * ==========================================================================================================================================				
