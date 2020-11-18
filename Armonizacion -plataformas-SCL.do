@@ -253,8 +253,6 @@ end
 */
 local mydir = c(pwd) /* GitHub folder */
 
-
-glo source = "C:\Users\FENRIQUEM\Documents\OneDrive - Inter-American Development Bank Group\Fernando\Migration\Documents\"
 *
 * If you want to set a local folder instead, set this global macro before running the code.
 * If $source is empty, then by default the shared folder will be used (must be at the IDB or
@@ -316,12 +314,12 @@ qui {
 			 /* 
 			   Alternatively, if you want to test a certain collection of .dta files,
 			   uncomment the code below which will search for all .dta files in the $source
-			   folder, that start with the name PAIS_ANO. */
+			   folder, that start with the name PAIS_ANO. 
 			   
 			  local files : dir "${source}" files "`pais'_`ano'*.dta"
 			  local foundfile : word 1 of `files'
 			  cap use "${source}\\`foundfile'", clear
-			
+			*/
 			  	
 				if _rc == 0 { 
 					//* Si esta base de datos existe, entonces haga: */
