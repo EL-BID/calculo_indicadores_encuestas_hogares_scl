@@ -16,7 +16,6 @@ Output:             Excel-DTA file
 version 16.0
 drop _all 
 set more off 
-cd "C:\Users\FENRIQUEM\Documents\GitHub\calculo_indicadores_encuestas_hogares_scl"
 *ssc install quantiles inequal7
 * cap ssc install estout
 * cap ssc install inequal7
