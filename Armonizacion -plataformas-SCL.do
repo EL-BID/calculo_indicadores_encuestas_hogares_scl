@@ -184,6 +184,50 @@ program scl_mean
   
 end
 
+/***** scl_median **************************************************
+ Calculates mean indicators using
+ the given variable.
+ Accepts 'if'.
+
+ E.g., scl_median pobedad_ci
+******************************************************************/
+capture program drop scl_median                                                       
+program scl_median
+  syntax anything [if]
+  /* parameters of the indicator */
+  local indname : word 1 of `anything'
+  local indvar : word 2 of `anything'
+  /* paramaters of the current disaggregation (comes from $current_slice global macro) */
+  local pais : word 1 of $current_slice
+  local ano : word 2 of $current_slice
+  local geografia_id : word 3 of $current_slice
+  local clase1 : word 4 of $current_slice
+  local clase2 : word 5 of $current_slice
+  local clase3 : word 6 of $current_slice
+  
+  scl_if_compose `if'
+  local xif `"`s(xif)'"'
+  sreturn clear
+ 
+  
+  display `"$tema - `indname'"'
+  capture quietly sum `indvar' [w=round(factor_ch)] `xif', detail
+  
+  if _rc == 0 {
+    capture local valor = `r(p50)'
+	
+	if ""=="`valor'" local valor = .
+	
+	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"median of `indvar'"') (`valor')
+	
+  }
+  else {
+   /* generate a line with missing value */
+	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"median of `indvar'"') (.)
+  }
+  
+end
+
 
 /***** scl_ratio ***************************************************
  Calculates ratio indicators using
@@ -393,7 +437,7 @@ qui {
 				}
 				
 				
-/*					
+				
 *****************************************************************************************************************************************
 					* 1.2: Indicators for each topic		
 *****************************************************************************************************************************************
@@ -485,17 +529,9 @@ qui {
 								union_ci union_ci "1" if union_ci!=.
 																								
 								* Edad mediana de la población en años *
-
-														
-														/*if "`indicador'" == "pobedad_ci" {
-														
-														capture sum edad_ci [w=round(factor_ci)] if  `clase'==1 & `clase2'==1 & edad_ci!=., detail
-														capture local valor= `r(p50)'
-														if _rc == 0 {
-													*/
-										
-										
-										
+								scl_median ///
+								pobedad_ci edad_ci if edad_ci!=. 
+									
 								}/*cierro clase2*/		
 							} /*cierro clase*/
 							
@@ -2085,90 +2121,112 @@ qui {
 													global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
 													noisily display "$tema: $current_slice"	
 													
-													
+		/*											
 				
 													
-														/* Coeficiente de Gini para el ingreso per cápita del hogar*/			
-														/*if "`indicador'" == "ginihh" {
-														
-														capture sum ginihh if `clase'==1 & ginihh!=.
-														capture local valor= `r(mean)'
-														if _rc == 0 {
-															
-														capture sum ginihh if `clase'==1 & ginihh!=. 
-														capture local muestra= `r(N)'
+														 /* Coeficiente de Gini para el ingreso per cápita del hogar*/			
+							if "`indicador'" == "ginihh" {
+							
+							capture sum pc_ytot_ch
+							if r(mean)>0 & r(mean)!=. {
+							cap inequal7 pc_ytot_ch [w=round(factor_ci)] if pc_ytot_ch!=. & pc_ytot_ch>0 & `clase'==1
+							local valor =`r(gini)'*100							
+							}
+							if _rc == 0 {
+								
+							capture sum pc_ytot_ch if `clase'==1
+							if r(mean)>0 & r(mean)!=.{
+							local muestra =`r(N)' 
+							} 
+							
+						
+								            post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								            }
+								
+								           else {
+								
+								           post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								           }
+								
+							} /*cierro indicador*/
+							
+							/* Coeficiente de Gini para salarios por hora*/
+							if "`indicador'" == "gini" {
+							
+							capture sum ylmhopri_ci
+							if r(mean)>0 & r(mean)!=. {
+							cap inequal7 ylmhopri_ci [w=round(factor_ci)] if ylmhopri_ci!=. & ylmhopri_ci>0 & `clase'==1 & edad_ci>=15 & edad_ci<=64
+							local valor =`r(gini)'*100							
+							}
+							if _rc == 0 {
+								
+							capture sum ylmhopri_ci if  `clase'==1  & edad_ci>=15 & edad_ci<=64
+							if r(mean)>0 & r(mean)!=. {
+							local muestra =`r(N)' 
+							} 
 
-															
-																		post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																		}
-															
-																	   else {
-															
-																	   post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																	   }
-															
-														} cierro indicador*/
-														
-														/* Coeficiente de Gini para salarios por hora*/
-														/*if "`indicador'" == "gini" {
-														
-														capture sum gini if `clase'==1 & gini!=.
-														capture local valor= `r(mean)'
-														if _rc == 0 {
-															
-														capture sum gini if `clase'==1 & gini!=. 
-														capture local muestra= `r(N)'
+								
+								          post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								          }
+								
+								          else {
+								
+								          post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								          }
+								
+							} /*cierro indicador*/
+							
+							  /* Coeficiente de theil para el ingreso per cápita del hogar*/
+							  if "`indicador'" == "theilhh" {
+							
+							capture sum pc_ytot_ch
+							if r(mean)>0 & r(mean)!=. {
+							cap inequal7 pc_ytot_ch [w=round(factor_ci)] if pc_ytot_ch!=. & pc_ytot_ch>0 & `clase'==1
+							local valor =`r(theil)'*100							
+							}
+							if _rc == 0 {
+								
+							capture sum pc_ytot_ch if `clase'==1
+							if r(mean)>0 & r(mean)!=. {
+							local muestra =`r(N)' 
+							} 
 
-															
-																	  post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																	  }
-															
-																	  else {
-															
-																	  post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																	  }
-															
-														} cierro indicador*/
-														
-														  /* Coeficiente de theil para el ingreso per cápita del hogar*/
-														  /*if "`indicador'" == "theilhh" {
-														
-														capture sum theilhh if `clase'==1 & theilhh!=.
-														capture local valor= `r(mean)'
-														if _rc == 0 {
-															
-														capture sum theilhh if `clase'==1 & theilhh!=. 
-														capture local muestra= `r(N)'
+								
+								          post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								          }
+								
+								          else {
+								
+								          post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								          }
+							} /*cierro indicador*/
+							
+							/* Coeficiente de theil para salarios por hora*/
+							 if "`indicador'" == "theil" {
+							
+							capture sum ylmhopri_ci
+							if r(mean)>0 & r(mean)!=. {
+							cap inequal7 ylmhopri_ci [w=round(factor_ci)] if ylmhopri_ci!=. & ylmhopri_ci>0 & `clase'==1 & edad_ci>=15 & edad_ci<=64
+							local valor =`r(theil)'*100							
+							}
+							if _rc == 0 {
+								
+							capture sum ylmhopri_ci if  `clase'==1  & edad_ci>=15 & edad_ci<=64
+							if r(mean)>0 & r(mean)!=.  {
+							local muestra =`r(N)' 
+							} 
 
-															
-																	  post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																	  }
-															
-																	  else {
-															
-																	  post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																	  }
-														} cierro indicador*/
-														
-														* Coeficiente de theil para salarios por hora*
-														 /*if "`indicador'" == "theil" {
-														
-														capture sum theil if `clase'==1 & theil!=.
-														capture local valor= `r(mean)'
-														if _rc == 0 {
-															
-														capture sum theil if `clase'==1 & theil!=. 
-														capture local muestra= `r(N)'
 
-															
-																	  post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																	  }
-															
-																	  else {
-															
-																	  post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																	  }
-														} cierro indicador*/
+								
+								          post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								          }
+								
+								          else {
+								
+								          post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								          }
+							} /*cierro indicador*/
+	*/						
 														
 													* Porcentaje del ingreso laboral del hogar contribuido por las mujeres */
 													scl_pct ///
