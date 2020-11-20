@@ -205,7 +205,7 @@ program scl_ratio
   /* paramaters of the current disaggregation (comes from $current_slice global macro) */
   local pais : word 1 of $current_slice
   local ano : word 2 of $current_slice
-  
+  local geografia_id : word 3 of $current_slice
   local clase1 : word 4 of $current_slice
   local clase2 : word 5 of $current_slice
   local clase3 : word 6 of $current_slice
@@ -220,7 +220,7 @@ program scl_ratio
   
    display `"$tema - `indname'"'
   capture quietly sum `indvarnum' [w=round(factor_ch)] `xif'
-  capture quietly sum `indvarnum' [w=round(factor_ch)] `numcond' & `clase1'==1 & `clase2'==1 & `clase3'==1
+
   
   if _rc == 0 {
     local numerator = `r(sum)'
@@ -325,24 +325,18 @@ if "${source}"=="" {
 }
 
 /*
-* Location of the .do files to include
+ Location of the .do files to include
 */
-*global input	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Input"
-*global output 	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Onput"
+global input	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Input"
+global output 	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Onput"
 
 /*
 * Location for temporary files. This folder is on MS TEAMS.
 * 
 * NOTE: template.dta must be in this folder.
 */
-*global covidtmp  "C:\Users\\`= c(username)'\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
+global covidtmp  "C:\Users\\`= c(username)'\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
 
-
-
-global input	 "C:\Users\alop\OneDrive - Inter-American Development Bank Group\Desktop\GitRepositories\calculo_indicadores_encuestas_hogares_scl\Input"
-global output 	 "C:\Users\alop\OneDrive - Inter-American Development Bank Group\Desktop\GitRepositories\calculo_indicadores_encuestas_hogares_scl\Output"
-global covidtmp  "C:\Users\ALOP\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
-global covidtmp "C:\Users\alop\OneDrive - Inter-American Development Bank Group\Desktop\GitRepositories\calculo_indicadores_encuestas_hogares_scl\Bases tmp" //Temporary files will be saved in your GitHub folder inside "Bases tmp".
 
 
 
@@ -363,8 +357,8 @@ postfile `ptablas' str4 tiempo_id str3 pais_id str25(geografia_id clase1 clase2 
 
 ** Creo locales principales:
 						
-local paises ARG BHS /*BOL BRB BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN */
-local anos /*2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2019*/  2018 
+local paises  ARG BHS BOL BRA BRB BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
+local anos  2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 
 
 
 local geografia_id total_nacional
@@ -377,8 +371,8 @@ qui {
 			* En este dofile de encuentra el diccionario de encuestas y rondas de la región
 			include "${input}\Directorio HS LAC.do" 
 
-			foreach encuesta of local encuestas {					
-				foreach ronda of local rondas {	
+			*foreach encuesta of local encuestas {					
+			*	foreach ronda of local rondas {	
 				
 				local files : dir "${source}" files "`pais'_`ano'*.dta"
 				local foundfile : word 1 of `files'
@@ -2879,8 +2873,8 @@ qui {
 				
 				
 						
-					} /* cierro rondas */		
-				} /* cierro encuestas */
+				*	} /* cierro rondas */		
+				*} /* cierro encuestas */
 			} /* cierro anos */
 		} /* cierro paises */
 } /* cierro quietly */
