@@ -239,10 +239,6 @@ program scl_ratio
 	}
   }
   
-  else {
-   /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.)
-  }
   
 end
 	
@@ -297,11 +293,7 @@ program scl_ratio_2conds
      }
      
   }
-  else {
-   /* generate a line with missing value */
-     post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.)
-  }
-  
+
 end
 
 /*********************************************************************/
