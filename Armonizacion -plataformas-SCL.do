@@ -243,6 +243,65 @@ program scl_ratio
   
 end
 
+/***** scl_ratio_2conds ********************************************
+ Calculates ratio indicators using
+ two variables (1st the numerator, 2nd the denominator).
+ Accepts two conditions as text (last two arguments, see example).
+Both conditions must be provided, if either of the
+conditions is unnecessary set “if 1” as the condition.
+
+ E.g., 
+local numerator_condition `"if edad_ci>=6 & asiste_ci!=."'
+local denominator_condition `"if asiste_ci!=."'
+
+scl_ratio_2conds ///
+   tasa_bruta_asis asis_prim age_prim `"`numerator_condition'"' `"`denominator_condition'"'
+
+******************************************************************/
+capture program drop scl_ratio_2conds                                                        
+program scl_ratio_2conds
+  syntax anything
+  /* parameters of the indicator */
+  local indname : word 1 of `anything'
+  local indvarnum : word 2 of `anything'
+  local indvarden : word 3 of `anything'
+  local numcond : word 4 of `anything'
+  local dencond : word 5 of `anything'
+  /* paramaters of the current disaggregation (comes from $current_slice global macro) */
+  local pais : word 1 of $current_slice
+  local ano : word 2 of $current_slice
+  local geografia_id : word 3 of $current_slice
+  local clase1 : word 4 of $current_slice
+  local clase2 : word 5 of $current_slice
+  local clase3 : word 6 of $current_slice
+    
+  display `"$tema - `indname'"'
+  capture quietly sum `indvarnum' [w=round(factor_ch)] `numcond' & `clase1'==1 & `clase2'==1 & `clase3'==1
+  
+  if _rc == 0 {
+    local numerator = `r(sum)'
+	
+	capture quietly sum `indvarden' [w=round(factor_ch)] `dencond' & `clase1'==1 & `clase2'==1 & `clase3'==1
+	if _rc==0 {
+		capture local denominator = `r(sum)'
+		local valor = (`numerator' / `denominator') * 100 
+		
+		post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (`valor')
+	}
+	else {
+		/* generate a line with missing value */
+		post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.)
+	}
+	
+  }
+  else {
+   /* generate a line with missing value */
+	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.)
+  }
+  
+end
+
+
 
 /*********************************************************************/
 
@@ -871,9 +930,27 @@ qui {
 										else if `"`clase3'"'=="Superior" local sfix tert
 										
 										/* Tasa asistencia Bruta  */
-										scl_ratio ///
-											tasa_bruta_asis asis_`sfix' age_`sfix' if asiste_ci!=.
-								    
+										if (`"clase3"'=="Primaria") {
+										  //the code for Primaria uses a different program,
+										  // because the "if" condition for the numerator is different
+										  // of that of the denominator
+										
+											local numerator_condition `"if edad_ci>=6 & asiste_ci!=."'
+											local denominator_condition `"if asiste_ci!=."'
+
+											scl_ratio_2conds ///
+											   tasa_bruta_asis asis_prim age_prim `"`numerator_condition'"' `"`denominator_condition'"'
+
+											   
+										}
+										else {
+										  //all the others have the same "if" condition for both
+										  // numerator and denominator
+										
+											scl_ratio ///
+												tasa_bruta_asis asis_`sfix' age_`sfix' if asiste_ci!=.
+										
+										}
 										
 																									 
 															/* Prescolar   
