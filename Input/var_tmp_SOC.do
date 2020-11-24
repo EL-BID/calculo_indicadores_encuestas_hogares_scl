@@ -168,9 +168,9 @@ Output:             Excel-DTA file
 				gen techonp_ch=(techo_ch==0)
                 replace techonp_ch=. if techo_ch==.
 		* 3.5 Hogares con paredes no permanentes					
-                gen parednp=(pared_ch==0)
-                replace parednp=. if pared_ch==.
-				su des1_ch
+                gen parednp_ch=(pared_ch==0)
+                replace parednp_ch=. if pared_ch==.
+			
 		* 3.6 Hogares con servicio de saneamiento mejorado
 				su des1_ch
                 if r(N)!=0{
