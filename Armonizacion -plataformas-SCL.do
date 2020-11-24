@@ -20,6 +20,8 @@ set more off
 * cap ssc install estout
 * cap ssc install inequal7
 
+qui {
+
 
 /**** if composition utility function ****************************
  scl_if_compose clase1 clase2 clase3 if ...
@@ -53,6 +55,9 @@ end
  Accepts 'if'.
 
  E.g., scl_pct pmujer sexo_ci "Mujer" if ...
+ 
+ Remark: if category is not provided, it is
+  assumed to be "1"
 ******************************************************************/
 capture program drop scl_pct                                                        
 program scl_pct
@@ -315,10 +320,21 @@ global output 	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Onput"
 * 
 * NOTE: template.dta must be in this folder.
 */
-global covidtmp  "C:\Users\\`= c(username)'\Documents\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
+global covidtmp  "C:\Users\\`= c(username)'\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
 
-
-
+//alternatively, this folder might be under the following path
+mata:st_numscalar("Found", direxists("$covidtmp"))
+if scalar(Found)==0  {
+	global covidtmp  "C:\Users\\`= c(username)'\Documents\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
+	//check if it was found now
+	mata:st_numscalar("Found", direxists("$covidtmp"))
+}
+//if the folder wasn't found in either paths
+if scalar(Found)==0 {
+	noi display "DID NOT FIND THE TEAMS FOLDER - $covidtmp"
+	noi display "template.dta should be in this folder. Missing this folder may result in execution errors."
+	
+}
 
 /*====================================================================
                         1: Open dataset and Generate indicators
@@ -342,8 +358,8 @@ local anos 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019
 
 local geografia_id total_nacional
 
+	noisily display "Empezando calculos..."
 
-qui {
 	foreach pais of local paises {
 		foreach ano of local anos {
 			
