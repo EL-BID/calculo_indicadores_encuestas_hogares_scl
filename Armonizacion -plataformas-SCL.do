@@ -361,27 +361,20 @@ qui {
 		foreach ano of local anos {
 			
 			* En este dofile de encuentra el diccionario de encuestas y rondas de la región
-			include "${input}\Directorio HS LAC.do" 
+			 include "${input}\Directorio HS LAC.do" 
+			 * Encuentra el archivo para este país/año
+			 cap use "${source}\\`pais'\\`encuestas'\data_arm\\`pais'_`ano'`rondas'_BID.dta" , clear
 
-			*foreach encuesta of local encuestas {					
-			*	foreach ronda of local rondas {	
-				
-				local files : dir "${source}" files "`pais'_`ano'*.dta"
-				local foundfile : word 1 of `files'
-				
-				cap use "${source}\\`pais'\\`encuesta'\data_arm\\`pais'_`ano'`ronda'_BID.dta" , clear
-				*cap use "${source}\\`foundfile'", clear
-			
-			/* 
+			 
+			 /* 
 			   Alternatively, if you want to test a certain collection of .dta files,
 			   uncomment the code below which will search for all .dta files in the $source
-			   folder, that start with the name PAIS_ANO.
+			   folder, that start with the name PAIS_ANO. 
 			   
-			  *local files : dir "${source}" files "`pais'_`ano'*.dta"
-			  *local foundfile : word 1 of `files'
-			  *cap use "${source}\\`foundfile'", clear
-			
-			 */		
+			  local files : dir "${source}" files "`pais'_`ano'*.dta"
+			  local foundfile : word 1 of `files'
+			  cap use "${source}\\`foundfile'", clear
+			*/	
 
 				if _rc == 0 { 
 					//* Si esta base de datos existe, entonces haga: */
@@ -927,7 +920,7 @@ qui {
 
 										//======== CALCULATE INDICATORS ================================================
 										local sfix ""
-										     if `"`clase3'"'=="Prescolar"  local sfix pres
+										if `"`clase3'"'=="Prescolar"  local sfix pres
 										else if `"`clase3'"'=="Primaria"   local sfix prim
 										else if `"`clase3'"'=="Secundaria" local sfix seco
 										else if `"`clase3'"'=="Superior"   local sfix tert
