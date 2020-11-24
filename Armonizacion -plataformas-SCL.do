@@ -446,7 +446,7 @@ qui {
 					  
 					  /* use an empty file which contains all variables */
 
-					  use "${input}\template.dta", clear
+					  use "${covidtmp}\template.dta", clear
 
 					
 				}
