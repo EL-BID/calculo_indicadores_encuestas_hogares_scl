@@ -102,6 +102,7 @@ program scl_pct
 end
 
 
+
 /***** scl_nivel ***************************************************
  Calculates frequency indicators using
  the given variable and given category.
@@ -240,13 +241,13 @@ end
  Accepts 'if'.
  Notice that each variable is calculated in a sum command,
  capturing the r(sum) result.
-
  E.g., scl_ratio tasa_asis_edad  asis_`sfix' age_`sfix' if ...
 ******************************************************************/
 capture program drop scl_ratio                                                        
 program scl_ratio
   syntax anything [if]
-  /* parameters of the indicator */
+  
+    /* parameters of the indicator */
   local indname : word 1 of `anything'
   local indvarnum : word 2 of `anything'
   local indvarden : word 3 of `anything'
@@ -266,8 +267,9 @@ program scl_ratio
   sreturn clear
    
   
-  display `"$tema - `indname'"'
+   display `"$tema - `indname'"'
   capture quietly sum `indvarnum' [w=round(factor_ch)] `xif'
+
   
   if _rc == 0 {
     local numerator = `r(sum)'
@@ -279,19 +281,69 @@ program scl_ratio
 		
 		post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (`valor')
 	}
+		
 	else {
 		/* generate a line with missing value */
 		post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.)
 	}
-	
-  }
-  else {
-   /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.)
   }
   
+  
 end
+	
+/***** scl_ratio_2conds ********************************************
+Calculates ratio indicators using
+two variables (1st the numerator, 2nd the denominator).
+Accepts two conditions as text (last two arguments, see example).
+Both conditions must be provided, if either of the
+conditions is unnecessary set “if 1” as the condition.
 
+E.g., 
+local numerator_condition `"if edad_ci>=6 & asiste_ci!=."'
+local denominator_condition `"if asiste_ci!=."'
+
+scl_ratio_2conds ///
+   tasa_bruta_asis asis_prim age_prim `"`numerator_condition'"' `"`denominator_condition'"'
+
+******************************************************************/
+capture program drop scl_ratio_2conds                                                        
+program scl_ratio_2conds
+  syntax anything
+  /* parameters of the indicator */
+  local indname : word 1 of `anything'
+  local indvarnum : word 2 of `anything'
+  local indvarden : word 3 of `anything'
+  local numcond : word 4 of `anything'
+  local dencond : word 5 of `anything'
+  /* paramaters of the current disaggregation (comes from $current_slice global macro) */
+  local pais : word 1 of $current_slice
+  local ano : word 2 of $current_slice
+  local geografia_id : word 3 of $current_slice
+  local clase1 : word 4 of $current_slice
+  local clase2 : word 5 of $current_slice
+  local clase3 : word 6 of $current_slice
+    
+  display `"$tema - `indname'"'
+  capture quietly sum `indvarnum' [w=round(factor_ch)] `numcond' & `clase1'==1 & `clase2'==1 & `clase3'==1
+  
+  if _rc == 0 {
+    local numerator = `r(sum)'
+     
+     capture quietly sum `indvarden' [w=round(factor_ch)] `dencond' & `clase1'==1 & `clase2'==1 & `clase3'==1
+     if _rc==0 {
+           capture local denominator = `r(sum)'
+           local valor = (`numerator' / `denominator') * 100 
+           
+           post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (`valor')
+     }
+     else {
+           /* generate a line with missing value */
+           post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.)
+     }
+     
+  }
+
+end
 
 /*********************************************************************/
 
@@ -299,6 +351,7 @@ end
 * Do files will be loaded relative to current directory. Set current directory to the GitHub folder
 *  using command "cd" before running the code 
 */
+
 local mydir = c(pwd) /* GitHub folder */
 
 *
@@ -311,7 +364,7 @@ if "${source}"=="" {
 }
 
 /*
-* Location of the .do files to include
+ Location of the .do files to include
 */
 global input	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Input"
 global output 	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Onput"
@@ -353,8 +406,9 @@ postfile `ptablas' str4 tiempo_id str3 pais_id str25(geografia_id clase1 clase2 
 
 ** Creo locales principales:
 						
-local paises ARG BHS BOL BRB BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
-local anos 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 
+local paises  ARG BHS BOL BRA BRB BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
+local anos  2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 
+
 
 local geografia_id total_nacional
 
@@ -379,6 +433,7 @@ local geografia_id total_nacional
 			  cap use "${source}\\`foundfile'", clear
 			*/
 			  	
+
 				if _rc == 0 { 
 					//* Si esta base de datos existe, entonces haga: */
 					noisily display "Calculando \\`pais'\\`encuestas'\data_arm\\`pais'_`ano'`rondas'_BID.dta..."		
@@ -448,15 +503,17 @@ local geografia_id total_nacional
 					  noisily display "`pais'_`ano'`rondas'_BID.dta - no se encontró el archivo. Generando missing values..."
 					  
 					  /* use an empty file which contains all variables */
-					  use "${covidtmp}\\template.dta", clear
+
+					  use "${covidtmp}\template.dta", clear
+
 					
 				}
-				
 				
 				
 *****************************************************************************************************************************************
 					* 1.2: Indicators for each topic		
 *****************************************************************************************************************************************
+
 
 						************************************************
 						  global tema "demografia"
@@ -576,7 +633,7 @@ local geografia_id total_nacional
 							  global tema "educacion"
 							************************************************
 							// Division: EDU
-							// Authors: ...
+							// Authors: Angela Lopez 
 							************************************************				
 									
 							local clases  Total Hombre Mujer quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano
@@ -598,382 +655,193 @@ local geografia_id total_nacional
 
 										//======== CALCULATE INDICATORS ================================================
 										local sfix ""
-										if `"`clase3'"'=="Prescolar" local sfix pres
-										else if `"`clase3'"'=="Primaria" local sfix prim
+										if `"`clase3'"'=="Prescolar"  local sfix pres
+										else if `"`clase3'"'=="Primaria"   local sfix prim
 										else if `"`clase3'"'=="Secundaria" local sfix seco
-										else if `"`clase3'"'=="Superior" local sfix tert
+										else if `"`clase3'"'=="Superior"   local sfix tert
 										
-										/* Tasa asistencia Bruta  */
-										scl_ratio ///
-											tasa_bruta_asis asis_`sfix' age_`sfix' if asiste_ci!=.
-								    
+									
 										
-																									 
-															/* Prescolar   
-																capture sum age_pres [w=round(factor_ci)]	 if `clase'==1 & asiste_ci!=. & `clase2' ==1
-																if _rc == 0 {
-																local pop_pres = `r(sum)'
-																
-																sum asis_pres [w=round(factor_ci)]	 if `clase'==1 & asiste_ci!=. & `clase2' ==1
-																local numerador = `r(sum)'
-																local valor = (`numerador' / `pop_pres') * 100 
-																
-																sum asis_pres 	 if `clase'==1 & asiste_ci!=. & `clase2' ==1
-																local muestra = `r(sum)'
-																
-																post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Prescolar") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																}
+							 * Tasa asistencia Bruta  
+											
+										if ("`clase3'"=="Prescolar") {
+										//the code for Prescolar uses a different program,
+										// because the "if" condition for the numerator is different
+										// of that of the denominator
 												
-												
+											scl_ratio ///
+												tasa_bruta_asis asis_`sfix' age_`sfix' if asiste_ci!=.
+											
+										}
+										
+										else {
+										//all the others have the same "if" condition for both
+										// numerator and denominator
+											local numerator_condition `"if edad_ci>=6 & asiste_ci!=."'
+											local denominator_condition `"if asiste_ci!=."'
 
-															* Primaria   
-																capture sum age_prim [w=round(factor_ci)] if asiste_ci!=. &  `clase'==1  & `clase2' ==1  
-																if _rc == 0 {
-																local pop_prim = `r(sum)'
-																
-																sum asis_prim [w=round(factor_ci)]	 if  edad_ci>=6 & asiste_ci!=. & `clase'==1 & `clase2' ==1
-																local numerador = `r(sum)'
-																local valor = (`numerador' / `pop_prim') * 100 
-																
-																sum asis_prim  if `clase'==1 & edad_ci>=6 & asiste_ci!=. & `clase2' ==1
-																local muestra = `r(sum)'
-																
-																post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																}
-												
-															* Secundaria 
-																capture sum age_seco [w=round(factor_ci)]	if `clase'==1 & asiste_ci!=. & `clase2' ==1
-																if _rc == 0 {
-																local pop_seco = `r(sum)'	
-												
-																sum asis_seco [w=round(factor_ci)]	 if `clase'==1 & edad_ci>=6 & asiste_ci!=. & `clase2' ==1
-																local numerador = `r(sum)'
-																local valor = (`numerador'/ `pop_seco') * 100 
-																
-																sum asis_seco  if `clase'==1 & edad_ci>=6 & asiste_ci!=. & `clase2' ==1
-																local muestra = `r(sum)'
-																
-																post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Secundaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																}								
-																
-																*Terciaria
-																capture sum age_tert [w=round(factor_ci)]	if `clase'==1 & asiste_ci!=. & `clase2' ==1
-																if _rc == 0 {
-																local pop_tert = `r(sum)'	
-																
-																sum asis_tert [w=round(factor_ci)]	 if `clase'==1 & edad_ci>=6 & asiste_ci!=. & `clase2' ==1
-																local numerador = `r(sum)'
-																local valor = (`numerador'/ `pop_tert') * 100 
-																
-																sum asis_tert  if `clase'==1 & edad_ci>=6 & asiste_ci!=. & `clase2' ==1
-																local muestra = `r(sum)'
-																
-																post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Superior") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																
-																*/
-														
-											/* Tasa asistencia Neta */
+											scl_ratio_2conds ///
+												tasa_bruta_asis asis_`sfix' age_`sfix' `"`numerator_condition'"' `"`denominator_condition'"'
+											
+										}
+
+															
+							 * Tasa asistencia Neta 
 											scl_pct ///
 												tasa_neta_asis asis_`sfix' "1" if age_`sfix' == 1 & asiste_ci!=.									
-								    			
-										
-
-																/* Prescolar   						
-																cap estpost tab asis_pres [w=round(factor_ci)] 	if age_pres == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
-																if _rc == 0 {
-																	mat proporcion = e(pct)
-																	local valor = proporcion[1,2]
-																
-																	estpost tab asis_pres				if age_pres == 1 & asiste_ci !=. & `clase'==1  & `clase2' ==1, m
-																	mat nivel = e(b)
-																	local muestra = nivel[1,2]
-																											
-																post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Prescolar") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																}
-																
-																else {
-																
-																post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") (".") (".")
-																
-																}
-																* Primaria   
-																cap estpost tab asis_prim [w=round(factor_ci)] 	if age_prim == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
-																if _rc == 0 {
-																	mat proporcion = e(pct)
-																	local valor = proporcion[1,1]
-																
-																	estpost tab asis_prim				if age_prim == 1 & asiste_ci !=. & `clase'==1  & `clase2' ==1, m
-																	mat nivel = e(b)
-																	local muestra = nivel[1,1]
-																	
-																	post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																}
-																
-																else {
-																	
-																	post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") (".") (".")
-																
-																}
-																* Secundaria 
-																cap estpost tab asis_seco [w=round(factor_ci)] 	if age_seco == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
-																if _rc == 0 {
-																	mat proporcion = e(pct)
-																	local valor = proporcion[1,1]
-																	
-																	estpost tab asis_seco				if age_seco == 1 & asiste_ci !=. & `clase'==1  & `clase2' ==1, m
-																	mat nivel = e(b)
-																	local muestra = nivel[1,1]							
-																	
-																	post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Secundaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																}
-																
-																else {
-																	
-																	post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") (".") (".")
-																
-																}
-																
-																*Superior						
-																cap estpost tab asis_tert [w=round(factor_ci)] 	if age_tert == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
-																if _rc == 0 {
-																	mat proporcion = e(pct)
-																	local valor = proporcion[1,1]
-											  
-																	estpost tab asis_tert				if age_tert == 1 & asiste_ci !=. & `clase'==1  & `clase2' ==1, m
-																	mat nivel = e(b)
-																	local muestra = nivel[1,1]																	
-																
-																	post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Superior") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																}
-																
-																else {
-																	
-																	post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") (".") (".")
-																
-																}
-																
-															*/
+								    													
 															
 															
-										} /* cierre clases3 */
+									} /* cierre clases3 */
 											
 										
-										local clases3 age_4_5 age_6_11 age_12_14 age_15_17 age_18_23
+									local clases3 age_4_5 age_6_11 age_12_14 age_15_17 age_18_23
 									
-										foreach clase3 of local clases3 {								
+									foreach clase3 of local clases3 {								
 								
 											
 												/* Parameters of current disaggregation levels, used by all commands */
 												global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
 												noisily display "$tema: $current_slice"
 
-												//======== CALCULATE INDICATORS ================================================	
 												
-												/* Tasa asistencia grupo etario */
+												
+							* Tasa asistencia grupo etario */
 												scl_pct ///
 													tasa_asis_edad asiste_ci "1"
-												
-																	/*
-																	cap estpost tab asiste_ci [w=round(factor_ci)] if `nivel' ==1 & `clase'==1
-																	if _rc == 0 {
-																		mat proporcion = e(pct)
-																		local valor = proporcion[1,2]
-																		
-																		estpost tab asiste_ci 				if `nivel' ==1 & `clase'==1
-																		mat nivel = e(b)
-																		local muestra = nivel[1,2]
-																												
-																		post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																	}
-																	
-																	else {
-																			
-																			post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") (".") (".")
-														
-																	}*/
-														
-												
-												/* Tasa No Asistencia grupo etario */
+																																				
+							* Tasa No Asistencia grupo etario */
 												scl_pct ///
 													tasa_no_asis_edad asiste_ci "0"
 									 
-																	/*cap estpost tab asiste_ci [w=round(factor_ci)] if `nivel' ==1 & `clase'==1
-																	if _rc == 0 {
-																	mat proporcion = e(pct)
-																	local valor = proporcion[1,1]
-																	
-																	estpost tab asiste_ci 				if `nivel' ==1 & `clase'==1
-																	mat nivel = e(b)
-																	local muestra = nivel[1,1]
-																		
-																	post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-																	}
-																	
-																	else {
-																			
-																			post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") (".") (".")
-																		
-																	}*/
 													
+									} /*cierro clases3 */
+										
+										
+									local clases3 anos_0 anos_1_5 anos_6 anos_7_11 anos_12 anos_13_o_mas
+									
+									foreach clase3 of local clases3 {
+											
+											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3' 
+											noisily display "$tema: $current_slice"
+											
+
+										
+							* Años_Escolaridad y Años_Escuela	
+												
+											
+											
+											
+																								
+													cap estpost tab `clase3' [w=round(factor_ci)] if  age_25_mas==1 & `clase1'==1 & `clase2'==1 & (aedu_ci !=. | edad_ci !=.), m
+													if _rc == 0 {
+													mat proporcion = e(pct)
+													local valor = proporcion[1,2]
+													
+													estpost tab `clase3' 	if age_25_mas==1 & `clase1'==1 & `clase2'==1 & (aedu_ci !=. | edad_ci !=.), m
+													mat nivel = e(b)
+													local muestra = nivel[1,2]
+																								
+													post $output ("`ano'") ("`pais'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("Años_Escolaridad_25_mas") ("%clase3/pop_25+") (`valor')
+													} /* cierro if */
+													
+													else {
+															
+													post $output ("`ano'") ("`pais'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("Años_Escolaridad_25_mas") ("%clase3/pop_25+") (.)
+														
+													} /* cierro else */
+													
+									}			
+										
+										
+							* Ninis_2	
+								
+										local clases3 age_15_24 age_15_29
+									
+										foreach clase3 of local clases3 {
+										
+										global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+										noisily display "$tema: $current_slice"
+											
+										scl_pct ///
+												Ninis_2 nini "1" & edad_ci !=.
+										
 										} /*cierro clases3 */
 										
-												
-										/* Años_Escolaridad y Años_Escuela
-										if "`indicador'" == "Años_Escolaridad_25_mas" {	
-												
-											local niveles anos_0 anos_1_5 anos_6 anos_7_11 anos_12 anos_13_o_mas
-											
-												foreach nivel of local niveles {
-																								
-													cap estpost tab `nivel' [w=round(factor_ci)] if  age_25_mas==1 & `clase'==1 & `clase2'==1 & (aedu_ci !=. | edad_ci !=.), m
-													if _rc == 0 {
-													mat proporcion = e(pct)
-													local valor = proporcion[1,1]
-
-													estpost tab `nivel' 				if age_25_mas==1 & `clase'==1 & `clase2'==1 & (aedu_ci !=. | edad_ci !=.), m
-													mat nivel = e(b)
-													local muestra = nivel[1,1]
-																								
-													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-													} /* cierro if */
-													
-													else {
-															
-															post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") (".") (".")
-														
-													} /* cierro else */
-													
-												} /* cierro nivel */		
-										} /* cierro if indicador*/		
-													
-										* Ninis Inactivos no asisten
-										if "`indicador'" == "Ninis_2" {									
-											
-											local niveles age_15_24 age_15_29
-												
-												foreach nivel of local niveles {
-																								
-													cap estpost tab nini [w=round(factor_ci)] 	if `nivel' == 1 & `clase'==1  & edad_ci !=. & `clase2' ==1, m
-													if _rc == 0 {
-														mat proporcion = e(pct)
-														local valor = proporcion[1,1]
-														
-														estpost tab nini 				if `nivel' == 1 & `clase'==1 & edad_ci !=. & `clase2' ==1, m
-														mat nivel = e(b)
-														local muestra = nivel[1,1]
-														
-													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-													} /* cierro if */
-													
-													else {
-															
-													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("`nivel'") ("`tema'") ("`indicador'") (".") (".")
-														
-													} /* cierro else */
-													
-													
-												} /* cierro nivel*/			
-										} /* cierro if indicador*/		
-
-										* Tasa de terminación
-										if "`indicador'" == "tasa_terminacion_c" {	
-													
-											*Primaria
+								
+						*tasa_terminacion_c				
+										local clases3 Primaria Secundaria 
+								
+										foreach clase3 of local clases3 {								
+						
+									
+										/* Parameters of current disaggregation levels, used by all commands */
+										global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+										noisily display "$tema: $current_slice"
 										
-													cap estpost tab tprimaria [w=round(factor_ci)] if age_term_p_c == 1 & tprimaria !=. & `clase'==1  & edad_ci !=. & `clase2' ==1, m
-													if _rc == 0 {
-													mat proporcion = e(pct)
-													local valor = proporcion[1,2]
-													
-													estpost tab tprimaria  if age_term_p_c == 1 & tprimaria !=. & `clase'==1  & edad_ci !=. & `clase2' ==1, m
-													mat nivel = e(b)
-													local muestra = nivel[1,2]
-											
-													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-													
-													}/* cierro if */
-													
-													else {
-															
-													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") (".") (".")
-														
-													} /* cierro else */
-											
-													
-											*Secundaria		
 										
-													cap estpost tab tsecundaria [w=round(factor_ci)] 	if age_term_s_c == 1 & tprimaria !=. & `clase'==1  & edad_ci !=. & `clase2' ==1, m
-													if _rc == 0 {
-													mat proporcion = e(pct)
-													local valor = proporcion[1,2]
-													
-													estpost tab tsecundaria  if age_term_s_c == 1 & tprimaria !=. & `clase'==1  & edad_ci !=. & `clase2' ==1, m
-													mat nivel = e(b)
-													local muestra = nivel[1,2]
-														
-													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Secundaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-													
-													}/* cierro if */
-													
-													else {
-															
-													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Secundaria") ("`tema'") ("`indicador'") (".") (".")
-														
-													} /* cierro else */
-													
-										} /*cierro indicador 
-																			
-										* Tasa de abandono escolar temprano "Leavers"  */
-										if "`indicador'" == "leavers" {
-																									
-													cap estpost tab leavers [w=round(factor_ci)] 	if age_18_24 == 1 & edad_ci !=. & `clase'==1 & `clase2' ==1, m
-													if _rc == 0 {
-													mat proporcion = e(pct)
-													local valor = proporcion[1,1]
-													
-													estpost tab leavers 				if age_18_24 == 1 & edad_ci !=. & `clase'==1  & `clase2' ==1, m
-													mat nivel = e(b)
-													local muestra = nivel[1,1]
-																							
-													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Total") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-													} /* cierro if */
-													
-													else {
-															
-													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Total") ("`tema'") ("`indicador'") (".") (".")
-														
-													} /* cierro else */
-													
-										} /*cierro indicador 
+										
+										local sfix ""
+										    
+											 if `"`clase3'"'=="Primaria"   local sfix primaria
+										else if `"`clase3'"'=="Secundaria" local sfix secundaria
+										
+										local agetermfix ""
+										    
+										     if `"`clase3'"'=="Primaria"   local agetermfix p_c
+										else if `"`clase3'"'=="Secundaria" local agetermfix s_c
+
+										
+										/* Tasa asistencia Bruta  */
+										scl_pct ///
+											tasa_terminacion_c t`sfix'  if asiste_ci!=. & age_term_`agetermfix' ==1
+										
+										} /*cierro clases3 */
+										
+								
+											
+						 ** Tasa de abandono escolar temprano "Leavers"
+											
+										local clases3 age_18_24 
+								
+										foreach clase3 of local clases3 {								
+						
+									
+										/* Parameters of current disaggregation levels, used by all commands */
+										global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+										noisily display "$tema: $current_slice"
+
+										
+										/* Tasa asistencia Bruta  */
+										scl_pct ///
+											leavers leavers  if edad_ci !=.
+										
+										} /*cierro clases3 */	
+										
+											
+											
+											
 												
-										* Tasa de abandono sobreedad"  */
-										if "`indicador'" == "tasa_sobre_edad" {								
-											
-
-											*Primaria
-													
-													cap estpost tab age_prim_sobre [w=round(factor_ci)] 	if asis_prim_c == 1 & asiste_ci !=. & `clase'==1 & `clase2' ==1, m
-													if _rc == 0 {
-													mat proporcion = e(pct)
-													local valor = proporcion[1,1]
-													
-													estpost tab age_prim_sobre				if asis_prim_c == 1 & asiste_ci !=. & `clase'==1  & `clase2' ==1, m
-													mat nivel = e(b)
-													local muestra = nivel[1,1]
-
-													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
-													} /* cierro if */
-													
-													else {
-															
-													post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("`clase2'") ("Primaria") ("`tema'") ("`indicador'") (".") (".")
-														
-													} /* cierro else */
-													
-													
-										} /* cierro if indicador*/ 
+						* Tasa de sobreedad  
 										
-										*/
+										
+										local clases3 Primaria 
+								
+										foreach clase3 of local clases3 {								
+						
+									
+										/* Parameters of current disaggregation levels, used by all commands */
+										global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+										noisily display "$tema: $current_slice"
+
+										
+										/* Tasa sobreedad */
+										scl_pct ///
+											tasa_sobre_edad age_prim_sobre  if asis_prim_c == 1 & asiste_ci !=. 
+										
+										} /*cierro clases3 */	
+										
+	
 										
 										
 									} /* cierro clase2 */
@@ -1545,7 +1413,7 @@ local geografia_id total_nacional
 										} /*cierro clases2*/
 								} /*cierro clases*/
 								
-*/								
+								
 								************************************************
 								  global tema "migracion"
 								************************************************
@@ -1581,7 +1449,7 @@ local geografia_id total_nacional
 								} /*cierro clases*/
 							
 						
-					*} /* cierro rondas */		
+				*	} /* cierro rondas */		
 				*} /* cierro encuestas */
 			} /* cierro anos */
 		} /* cierro paises */
