@@ -1448,6 +1448,72 @@ local geografia_id total_nacional
 										} /*cierro clases2*/
 								} /*cierro clases*/
 							
+							
+								************************************************
+								  global tema "programas sociales"
+								************************************************
+								// Division: SPH
+								// Authors: 
+								************************************************
+								local clases 	Total Hombre Mujer 
+								local clases2 	Total Rural Urbano 
+								local clases3	Total gpo_ingneto1 gpo_ingneto2 gpo_ingneto3 gpo_ingneto4 
+								
+								foreach clase1 of local clases {
+									foreach clase2 of local clases2 {
+										foreach clase3 of local clases3 {
+											/* Parameters of current disaggregation levels, used by all commands */
+											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+											noisily display "$tema: $current_slice"	
+									
+											* Porcentaje de la población que beneficiario de PTMC *
+												 scl_pct ///
+													pmtc ptmc_ch "1" if ptmc!=. 
+								
+											* Porcentaje de la población en hogares con adultos mayores beneficiarios de PNC *
+												 scl_pct ///
+													pnc_ch	pension_ch "1" if pension_ch!=. & mayor64_ch==1
+
+											* Porcentaje de adultos mayores beneficiarios de PNC *
+												 scl_pct ///
+													pnc	pension_ci "1" if pension_ch!=. & mayor64_ci==1
+													
+													
+												}/*cierro clases3*/		
+										} /*cierro clases2*/
+								} /*cierro clases*/
+								
+								local clases 	Total Hombre Mujer 
+								local clases2 	Total Rural Urbano 
+								local clases3 	Total 
+
+								foreach clase1 of local clases {
+									foreach clase2 of local clases2 {
+										foreach clase3 of local clases3 {
+											/* Parameters of current disaggregation levels, used by all commands */
+											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+											noisily display "$tema: $current_slice"	
+													
+											* Porcentaje de beneficiaios PTMC en pobreza extrema (# PTMC en PE / Total PTMC)*
+												scl_ratio ///
+													ptmc1 ptmc_ingneto1 ptmc_ch
+													
+											* Porcentaje de beneficiaios PTMC en pobreza moderada (# PTMC en PM / Total PTMC)*
+												scl_ratio ///
+													ptmc1 ptmc_ingneto2 ptmc_ch
+													
+											* Porcentaje de beneficiaios PTMC en vulerabilidad (# PTMC en vulerabilidad / Total PTMC)*
+												scl_ratio ///
+													ptmc1 ptmc_ingneto3 ptmc_ch
+													
+											* Porcentaje de beneficiaios PTMC no pobres (# PTMC no pobres / Total PTMC)*
+												scl_ratio ///
+													ptmc1 ptmc_ingneto4 ptmc_ch													
+											
+												}/*cierro clases3*/		
+										} /*cierro clases2*/
+								} /*cierro clases*/													
+
 						
 				*	} /* cierro rondas */		
 				*} /* cierro encuestas */
