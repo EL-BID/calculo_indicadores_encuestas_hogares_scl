@@ -345,6 +345,7 @@ program scl_ratio_2conds
 
 end
 
+
 /*********************************************************************/
 
 /*
@@ -659,8 +660,6 @@ local geografia_id total_nacional
 										else if `"`clase3'"'=="Primaria"   local sfix prim
 										else if `"`clase3'"'=="Secundaria" local sfix seco
 										else if `"`clase3'"'=="Superior"   local sfix tert
-										
-									
 										
 							 * Tasa asistencia Bruta  
 											
@@ -1402,12 +1401,36 @@ local geografia_id total_nacional
 											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
 											noisily display "$tema: $current_slice"	
 								
-												/* Porcentaje población afrodescendiente */
+												/* Porcentaje población afrodescendiente 
 												scl_pct ///
-													pafro_ci raza_ci "Afro-descendiente"
-												
-												
-												
+													pafro_ci afroind_ci "Afro-descendiente"
+												/* Porcentaje población indígena */
+												scl_pct ///
+												    pindi_ci afroind_ci "Indígena" 
+												/* Porcentaje población ni Afrodescendiente ni indígena*/
+												scl_pct ///
+												    pnoafronoindi_ci afroind_ci "Otros"
+                                              	/* Porcentaje población Afro-indígena (Garífuna)*/
+											    scl_pct ///
+												   pafroindi_ci afroind_ci "Afro-indígena"
+                                                /* Porcentaje de hogares con jefatura afrodescendiente */ 
+										        scl_pct ///
+												   pjefe_afro_ch afroind_ch "Afro-descendiente" 
+												   /* Porcentaje de hogares con jefatura indígena */ 
+										        scl_pct ///												   
+												   pjefe_indi_ch afroind_ch "Indígena" 
+											    /* Porcentaje de hogares con jefatura ni afrodescendiente ni indígena*/ 
+									            scl_pct ///												   
+                                                   pjefe_noafronoindi_ch afroind_ch "Otros"
+											    /* Porcentaje de hogares con jefatura Afro-indígena (Garífuna)*/ 
+											    scl_pct ///												   
+												   pjefe_afroindi_ch afroind_ch "Afro-indígena"
+                                                /* Porcentaje de personas que reportan tener alguna dificultad en actividades de la vida diaria */
+											    scl_pct ///												   
+                                                   pdis_ci dis_ci "Con Discapacidad"
+												/* Porcentaje de hogares con miembros que reportan tener alguna dificultad en realizar actividades de la vida diaria. */
+                                                scl_pct ///
+												   pdis_ch dis_ch "Con Discapacidad" */						
 												
 											}/*cierro clases3*/		
 										} /*cierro clases2*/
