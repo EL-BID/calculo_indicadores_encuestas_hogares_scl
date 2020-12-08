@@ -66,7 +66,7 @@ Creation Date:    19 Jul 2018 - 11:14:13
 	if "`pais'" == "BOL" & ("`ano'" > "2011")  local rondas m11
 * Brasil 
 	if "`pais'" == "BRA" & ("`ano'" < "2016")   local rondas m9
-	if "`pais'" == "BRA" & ("`ano'" >= "2016")  local rondas t1
+	if "`pais'" == "BRA" & ("`ano'" >= "2016")  local rondas a
 * Chile
 	if "`pais'" == "CHL" & ("`ano'" == "2006" | "`ano'" == "2009" ) local rondas m11_m12
 	if "`pais'" == "CHL" & ("`ano'" == "2008" | "`ano'" >= "2010" )  local rondas m11_m12_m1
