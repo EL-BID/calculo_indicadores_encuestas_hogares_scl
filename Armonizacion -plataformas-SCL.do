@@ -484,7 +484,7 @@ local geografia_id total_nacional
 						* Pobreza, vivienda, demograficas
 							include "${input}\var_tmp_SOC.do"
 						* Inclusion
-						**	include "${input}\var_tmp_GDI.do"	
+							include "${input}\var_tmp_GDI.do"	
 							
 					* base de datos de microdatos con variables intermedias
 					********** include "${input}\append_calculo_microdatos_scl.do"	
@@ -540,71 +540,71 @@ local geografia_id total_nacional
 										
 								/* Porcentaje de hogares con jefatura femenina */
 								scl_pct ///
-								jefa_ch jefa_ch "1" if jefa_ch!=. & sexo_ci!=.												
+									jefa_ch jefa_ch "1" if jefa_ch!=. & sexo_ci!=.												
 										
 								/* Porcentaje de hogares con jefatura económica femenina */
 								scl_pct ///
-								jefaecon_ch hhfem_ch "1" if jefe_ci==1 & hhfem_ch!=. & sexo_ci!=.											
+									jefaecon_ch hhfem_ch "1" if jefe_ci==1 & hhfem_ch!=. & sexo_ci!=.											
 										
 								/* Porcentaje de población femenina*/
 								scl_pct ///
-								pobfem_ci pobfem_ci "1" if pobfem_ci!=. 
+									pobfem_ci pobfem_ci "1" if pobfem_ci!=. 
 																						
 								/* Porcentaje de hogares con al menos un miembro de 0-5 años*/
 								scl_pct ///
-								miembro6_ch miembro6_ch "1" if jefe_ci==1 & miembro6_ch!=.
+									miembro6_ch miembro6_ch "1" if jefe_ci==1 & miembro6_ch!=.
 												
 								* Porcentaje de hogares con al menos un miembro entre 6-16 años*
 								scl_pct ///
-								miembro6y16_ch miembro6y16_ch "1" if jefe_ci==1 & miembro6y16_ch!=.
+									miembro6y16_ch miembro6y16_ch "1" if jefe_ci==1 & miembro6y16_ch!=.
 																													
 								* Porcentaje de hogares con al menos un miembro de 65 años o más*
 								scl_pct ///
-								miembro65_ch miembro65_ch "1" if jefe_ci==1 & miembro65_ch!=.
+									miembro65_ch miembro65_ch "1" if jefe_ci==1 & miembro65_ch!=.
 												
 								* Porcentaje de hogares unipersonales*
 								scl_pct ///
-								unip_ch unip_ch "1" if jefe_ci==1 & unip_ch!=.
+									unip_ch unip_ch "1" if jefe_ci==1 & unip_ch!=.
 																									
 								* Porcentaje de hogares nucleares*
 								scl_pct ///
-								nucl_ch nucl_ch "1" if jefe_ci==1 & nucl_ch!=.
+									nucl_ch nucl_ch "1" if jefe_ci==1 & nucl_ch!=.
 																
 								* Porcentaje de hogares ampliados*
 						        scl_pct ///
-								ampl_ch ampl_ch "1" if jefe_ci==1 & ampl_ch!=.
+									ampl_ch ampl_ch "1" if jefe_ci==1 & ampl_ch!=.
 																																
 								* Porcentaje de hogares compuestos*
 								scl_pct ///
-								comp_ch comp_ch "1" if jefe_ci==1 & comp_ch!=.
+									comp_ch comp_ch "1" if jefe_ci==1 & comp_ch!=.
 																	
 								* Porcentaje de hogares corresidentes*
 							    scl_pct ///
-								corres_ch corres_ch "1" if jefe_ci==1 & corres_ch!=.					
+									corres_ch corres_ch "1" if jefe_ci==1 & corres_ch!=.					
 
 								*Razón de dependencia*
 								scl_mean ///
-								depen_ch depen_ch if jefe_ci==1 & depen_ch!=.				
+									depen_ch depen_ch if jefe_ci==1 & depen_ch!=.				
 										
 								* Número promedio de miembros del hogar*
 								scl_mean ///
-								tamh_ch nmiembros_ch if jefe_ci==1 & nmiembros_ch!=. 
+									tamh_ch nmiembros_ch if jefe_ci==1 & nmiembros_ch!=. 
 																
 								* Porcentaje de población menor de 18 años*
 								scl_pct ///
-							    pob18_ci pob18_ci "1" if pob18_ci!=.
+									pob18_ci pob18_ci "1" if pob18_ci!=.
 																									
 								* Porcentaje de población de 65+ años*
 								scl_pct ///
-								pob65_ci pob65_ci "1" if pob65_ci!=.
+									pob65_ci pob65_ci "1" if pob65_ci!=.
 																			
 								* Porcentaje de individuos en union formal o informal*
 								scl_pct ///
-								union_ci union_ci "1" if union_ci!=.
+									union_ci union_ci "1" if union_ci!=.
 																								
 								* Edad mediana de la población en años *
 								scl_median ///
-								pobedad_ci edad_ci if edad_ci!=. 
+									pobedad_ci edad_ci if edad_ci!=. 
 									
 								}/*cierro clase2*/		
 							} /*cierro clase*/
@@ -624,7 +624,7 @@ local geografia_id total_nacional
 								
 								/* Porcentaje de población que reside en zonas urbanas*/
 								scl_pct ///
-								urbano_ci urbano_ci "1" if urbano_ci!=. 
+									urbano_ci urbano_ci "1" if urbano_ci!=. 
 										
 							} /*cierro clase*/			    
 											
@@ -672,7 +672,6 @@ local geografia_id total_nacional
 												tasa_bruta_asis asis_`sfix' age_`sfix' if asiste_ci!=.
 											
 										}
-										
 										else {
 										//all the others have the same "if" condition for both
 										// numerator and denominator
@@ -727,26 +726,22 @@ local geografia_id total_nacional
 
 										
 							* Años_Escolaridad y Años_Escuela	
-												
-											
-											
-											
-																								
+							************* This is a custom code, the situation is not covered by the scl_pct command *******************
 													cap estpost tab `clase3' [w=round(factor_ci)] if  age_25_mas==1 & `clase1'==1 & `clase2'==1 & (aedu_ci !=. | edad_ci !=.), m
 													if _rc == 0 {
 													mat proporcion = e(pct)
 													local valor = proporcion[1,2]
 													
-													estpost tab `clase3' 	if age_25_mas==1 & `clase1'==1 & `clase2'==1 & (aedu_ci !=. | edad_ci !=.), m
-													mat nivel = e(b)
-													local muestra = nivel[1,2]
+													//estpost tab `clase3' 	if age_25_mas==1 & `clase1'==1 & `clase2'==1 & (aedu_ci !=. | edad_ci !=.), m
+													//mat nivel = e(b)
+													//local muestra = nivel[1,2]
 																								
-													post $output ("`ano'") ("`pais'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("Años_Escolaridad_25_mas") ("%clase3/pop_25+") (`valor')
+													post $output ("`ano'") ("`pais'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("Años_Escolaridad_25_mas") ("%`clase3'/pop_25+") (`valor')
 													} /* cierro if */
 													
 													else {
 															
-													post $output ("`ano'") ("`pais'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("Años_Escolaridad_25_mas") ("%clase3/pop_25+") (.)
+													post $output ("`ano'") ("`pais'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("Años_Escolaridad_25_mas") ("%`clase3'/pop_25+") (.)
 														
 													} /* cierro else */
 													
@@ -1130,23 +1125,23 @@ local geografia_id total_nacional
 								
 												* Porcentaje poblacion que vive con menos de 3.1 USD diarios per capita*
 												scl_pct ///
-									            pobreza31 poor31 "1" if poor31!=. 
+													pobreza31 poor31 "1" if poor31!=. 
 															
 												*Porcentaje poblacion que vive con menos de 5 USD diarios per capita
 												scl_pct ///
-									            pobreza poor "1" if poor!=. 
+													pobreza poor "1" if poor!=. 
 																
 												* Porcentaje de la población con ingresos entre 5 y 12.4 USD diarios per capita*
-												 scl_pct ///
-									             vulnerable vulnerable "1" if vulnerable!=. 
+												scl_pct ///
+													vulnerable vulnerable "1" if vulnerable!=. 
 		
                                                  * Porcentaje de la población con ingresos entre 12.4 y 64 USD diarios per capita*
-												  scl_pct ///
-									              middle middle "1" if middle!=. 
+												scl_pct ///
+													middle middle "1" if middle!=. 
 															
                                                  * Porcentaje de la población con ingresos mayores 64 USD diarios per capita*
-												 scl_pct ///
-									             rich rich "1" if rich!=. 
+												scl_pct ///
+													rich rich "1" if rich!=. 
 
 				
 										} /* cierro clase3 */	
@@ -1273,7 +1268,7 @@ local geografia_id total_nacional
 														
 													* Porcentaje del ingreso laboral del hogar contribuido por las mujeres */
 													scl_pct ///
-									                 ylmfem_ch shareylmfem_ch "1" if jefe_ci==1 & shareylmfem_ch!=. 
+														ylmfem_ch shareylmfem_ch "1" if jefe_ci==1 & shareylmfem_ch!=. 
 														 
 														
 														} /*cierro clase*/	
@@ -1298,7 +1293,7 @@ local geografia_id total_nacional
 													
 													/* Porcentaje de hogares que reciben remesas del exterior */
 													scl_pct ///
-													indexrem indexrem "1" if jefe_ci==1 & indexrem!=.
+														indexrem indexrem "1" if jefe_ci==1 & indexrem!=.
 
 							
 												} /* cierro clase3 */	
@@ -1328,51 +1323,51 @@ local geografia_id total_nacional
 						
 											   * % de hogares con servicio de agua de acueducto*
 											   scl_pct ///
-									           aguared_ch aguared_ch "1" if jefe_ci==1 & aguared_ch!=. 
+													aguared_ch aguared_ch "1" if jefe_ci==1 & aguared_ch!=. 
 																
 											   * % de hogares con acceso a servicios de saneamiento mejorados*
 											   scl_pct ///
-									           des2_ch des2_ch "1" if jefe_ci==1 & des2_ch!=. 							
+													des2_ch des2_ch "1" if jefe_ci==1 & des2_ch!=. 							
 																														
 											   * % de hogares con electricidad *
 											   scl_pct ///
-									           luz_ch luz_ch "1" if jefe_ci==1 &  luz_ch!=. 
+													luz_ch luz_ch "1" if jefe_ci==1 &  luz_ch!=. 
 																												
 										       * % hogares con pisos de tierra *
 										        scl_pct ///
-									            dirtf_ch dirtf_ch "1" if jefe_ci==1 &  dirtf_ch!=. 
+													dirtf_ch dirtf_ch "1" if jefe_ci==1 &  dirtf_ch!=. 
 														
 											   * % de hogares con refrigerador *
 											    scl_pct ///
-									            refrig_ch freezer_ch "1" if jefe_ci==1 &  freezer_ch!=. 
+													refrig_ch freezer_ch "1" if jefe_ci==1 &  freezer_ch!=. 
 
 												* % de hogares con carro particular*
 												scl_pct ///
-									            auto_ch auto_ch "1" if jefe_ci==1 &  auto_ch!=. 													
+													auto_ch auto_ch "1" if jefe_ci==1 &  auto_ch!=. 													
 																
 												* % de hogares con acceso a internet *
 												scl_pct ///
-									            internet_ch internet_ch "1" if jefe_ci==1 &  internet_ch!=. 
+													internet_ch internet_ch "1" if jefe_ci==1 &  internet_ch!=. 
 																			
 												* % de hogares con teléfono celular*
 												scl_pct ///
-									            cel_ch cel_ch "1" if jefe_ci==1 &  cel_ch!=.
+													cel_ch cel_ch "1" if jefe_ci==1 &  cel_ch!=.
 																
 											    * % de hogares con techos de materiales no permanentes*
 												scl_pct ///
-									            techonp_ch techonp_ch "1" if jefe_ci==1 &  techonp_ch!=.
+													techonp_ch techonp_ch "1" if jefe_ci==1 &  techonp_ch!=.
 
 												* % de hogares con paredes de materiales no permanentes*
 											    scl_pct ///
-									            parednp_ch parednp_ch "1" if jefe_ci==1 &  parednp_ch!=.
+													parednp_ch parednp_ch "1" if jefe_ci==1 &  parednp_ch!=.
 
 												* Número de miembros por cuarto*
 												scl_mean ///
-								                hacinamiento_ch hacinamiento_ch if jefe_ci==1 & hacinamiento_ch!=. 
+													hacinamiento_ch hacinamiento_ch if jefe_ci==1 & hacinamiento_ch!=. 
 												
 												*% de hogares con estatus residencial estable *
 												scl_pct ///
-									            estable_ch estable_ch "1" if jefe_ci==1 &  estable_ch!=.
+													estable_ch estable_ch "1" if jefe_ci==1 &  estable_ch!=.
 												
 			
 											}/*cierro clases3*/		
@@ -1401,7 +1396,7 @@ local geografia_id total_nacional
 											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
 											noisily display "$tema: $current_slice"	
 								
-												/* Porcentaje población afrodescendiente 
+												* Porcentaje población afrodescendiente 
 												scl_pct ///
 													pafro_ci afroind_ci "Afro-descendiente"
 												/* Porcentaje población indígena */
@@ -1425,12 +1420,13 @@ local geografia_id total_nacional
 											    /* Porcentaje de hogares con jefatura Afro-indígena (Garífuna)*/ 
 											    scl_pct ///												   
 												   pjefe_afroindi_ch afroind_ch "Afro-indígena"
-                                                /* Porcentaje de personas que reportan tener alguna dificultad en actividades de la vida diaria */
+                                             /*   /* Porcentaje de personas que reportan tener alguna dificultad en actividades de la vida diaria */
 											    scl_pct ///												   
                                                    pdis_ci dis_ci "Con Discapacidad"
 												/* Porcentaje de hogares con miembros que reportan tener alguna dificultad en realizar actividades de la vida diaria. */
                                                 scl_pct ///
-												   pdis_ch dis_ch "Con Discapacidad" */						
+												   pdis_ch dis_ch "Con Discapacidad" 
+											*/						
 												
 											}/*cierro clases3*/		
 										} /*cierro clases2*/
@@ -1454,7 +1450,7 @@ local geografia_id total_nacional
 											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
 											noisily display "$tema: $current_slice"	
 											
-								
+								/*
 											/* Porcentaje de migrantes en el pais */
 											scl_pct ///
 												migrante_ci migrante_ci "1" 
@@ -1466,7 +1462,7 @@ local geografia_id total_nacional
 											/* Porcentaje de migrantes LAC en el pais */
 											scl_pct ///
 												migrantelac_ci migrantelac_ci "1" 
-
+								*/
 											}/*cierro clases3*/		
 										} /*cierro clases2*/
 								} /*cierro clases*/
@@ -1476,9 +1472,9 @@ local geografia_id total_nacional
 								  global tema "programas sociales"
 								************************************************
 								// Division: SPH
-								// Authors: 
+								// Authors: Carolina Rivashe
 								************************************************
-								local clases 	Total Hombre Mujer 
+						/*		local clases 	Total Hombre Mujer 
 								local clases2 	Total Rural Urbano 
 								local clases3	Total gpo_ingneto1 gpo_ingneto2 gpo_ingneto3 gpo_ingneto4 
 								
@@ -1519,23 +1515,24 @@ local geografia_id total_nacional
 													
 											* Porcentaje de beneficiaios PTMC en pobreza extrema (# PTMC en PE / Total PTMC)*
 												scl_ratio ///
-													ptmc1 ptmc_ingneto1 ptmc_ch
+													ptmc_pe ptmc_ingneto1 ptmc_ch
 													
 											* Porcentaje de beneficiaios PTMC en pobreza moderada (# PTMC en PM / Total PTMC)*
 												scl_ratio ///
-													ptmc1 ptmc_ingneto2 ptmc_ch
+													ptmc_pm ptmc_ingneto2 ptmc_ch
 													
 											* Porcentaje de beneficiaios PTMC en vulerabilidad (# PTMC en vulerabilidad / Total PTMC)*
 												scl_ratio ///
-													ptmc1 ptmc_ingneto3 ptmc_ch
+													ptmc_v ptmc_ingneto3 ptmc_ch
 													
 											* Porcentaje de beneficiaios PTMC no pobres (# PTMC no pobres / Total PTMC)*
 												scl_ratio ///
-													ptmc1 ptmc_ingneto4 ptmc_ch													
+													ptmc_np ptmc_ingneto4 ptmc_ch													
 											
 												}/*cierro clases3*/		
 										} /*cierro clases2*/
-								} /*cierro clases*/													
+								} /*cierro clases*/		
+						*/
 
 						
 				*	} /* cierro rondas */		
