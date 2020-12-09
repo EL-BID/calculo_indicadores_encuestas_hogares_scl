@@ -361,7 +361,7 @@ program scl_inequal
   /* parameters of the indicator */
   local indname : word 1 of `anything'
   local indvar : word 2 of `anything'
-  local type : word 3 of `anything'
+  local typeind : word 3 of `anything'
   /* paramaters of the current disaggregation (comes from $current_slice global macro) */
   local pais : word 1 of $current_slice
   local ano : word 2 of $current_slice
@@ -381,16 +381,16 @@ program scl_inequal
   if _rc == 0 & r(mean)>0 & r(mean)!=. {
   						
 	capture quietly inequal7 `indvar' [w=round(factor_ci)] `xif'
-    local valor =`r(`type')'*100							
+    local valor =`r(`typeind')'*100							
 	
 	if ""=="`valor'" local valor = .
 	
-	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`type' of `indvar'"') (`valor')
+	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`typeind' of `indvar'"') (`valor')
 	
   }
   else {
    /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`type' of `indvar'"') (.)
+	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`typeind' of `indvar'"') (.)
   }
   
 end
@@ -479,11 +479,11 @@ local geografia_id total_nacional
 			   Alternatively, if you want to test a certain collection of .dta files,
 			   uncomment the code below which will search for all .dta files in the $source
 			   folder, that start with the name PAIS_ANO. 
-			   
-			  local files : dir "${source}" files "`pais'_`ano'*.dta"
-			  local foundfile : word 1 of `files'
-			  cap use "${source}\\`foundfile'", clear
-			*/
+			  */ 
+			  //local files : dir "${source}" files "`pais'_`ano'*.dta"
+			  //local foundfile : word 1 of `files'
+			  //cap use "${source}\\`foundfile'", clear
+			
 			  	
 
 				if _rc == 0 { 
@@ -808,7 +808,7 @@ local geografia_id total_nacional
 										global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
 										noisily display "$tema: $current_slice"
 											
-										scl_pct ///
+											scl_pct ///
 												Ninis_2 nini "1" & edad_ci !=.
 										
 										} /*cierro clases3 */
@@ -1219,28 +1219,28 @@ local geografia_id total_nacional
 															
 						
 							
-													/* Coeficiente de Gini para salarios por hora*/
-													scl_inequal ///
-															gini ylmhopri_ci gini if ylmhopri_ci!=. & ylmhopri_ci>0 & edad_ci>=15 & edad_ci<=64
-							
-							
-							
-													  /* Coeficiente de theil para el ingreso per cápita del hogar*/
-													  scl_inequal ///
-															theilhh pc_ytot_ch theil if pc_ytot_ch!=. & pc_ytot_ch>0
+														/* Coeficiente de Gini para salarios por hora*/
+														scl_inequal ///
+																gini ylmhopri_ci gini if ylmhopri_ci!=. & ylmhopri_ci>0 & edad_ci>=15 & edad_ci<=64
+								
+								
+								
+														  /* Coeficiente de theil para el ingreso per cápita del hogar*/
+														  scl_inequal ///
+																theilhh pc_ytot_ch theil if pc_ytot_ch!=. & pc_ytot_ch>0
+																
+								
+								
+														/* Coeficiente de theil para salarios por hora*/
+														scl_inequal ///
+																theil ylmhopri_ci theil if ylmhopri_ci!=. & ylmhopri_ci>0 & edad_ci>=15 & edad_ci<=64
+								
+								
 															
-							
-							
-													/* Coeficiente de theil para salarios por hora*/
-													scl_inequal ///
-															theil ylmhopri_ci theil if ylmhopri_ci!=. & ylmhopri_ci>0 & edad_ci>=15 & edad_ci<=64
-							
-	*/						
-														
-													* Porcentaje del ingreso laboral del hogar contribuido por las mujeres */
-													scl_pct ///
-														ylmfem_ch shareylmfem_ch "1" if jefe_ci==1 & shareylmfem_ch!=. 
-														 
+														* Porcentaje del ingreso laboral del hogar contribuido por las mujeres */
+														scl_pct ///
+															ylmfem_ch shareylmfem_ch "1" if jefe_ci==1 & shareylmfem_ch!=. 
+															 
 														
 													
 														} /* cierro clase3 */	
