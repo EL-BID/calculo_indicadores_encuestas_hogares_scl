@@ -1223,7 +1223,7 @@ local geografia_id total_nacional
 							
 													/* Coeficiente de Gini para salarios por hora*/
 													scl_inequal ///
-															gini ylmhopri_ci gini ylmhopri_ci!=. & ylmhopri_ci>0 & edad_ci>=15 & edad_ci<=64
+															gini ylmhopri_ci gini if ylmhopri_ci!=. & ylmhopri_ci>0 & edad_ci>=15 & edad_ci<=64
 							
 							
 							
@@ -1235,7 +1235,7 @@ local geografia_id total_nacional
 							
 													/* Coeficiente de theil para salarios por hora*/
 													scl_inequal ///
-															theil ylmhopri_ci theil ylmhopri_ci!=. & ylmhopri_ci>0 & edad_ci>=15 & edad_ci<=64
+															theil ylmhopri_ci theil if ylmhopri_ci!=. & ylmhopri_ci>0 & edad_ci>=15 & edad_ci<=64
 							
 	*/						
 														
