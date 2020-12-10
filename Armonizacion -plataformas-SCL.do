@@ -13,15 +13,13 @@ Output:             Excel-DTA file
 /*====================================================================
                         0: Program set up
 ====================================================================*/
-
-
 version 16.0
 drop _all 
 set more off 
 *ssc install quantiles inequal7
 * cap ssc install estout
 * cap ssc install inequal7
-
+ 
 qui {
 
 
@@ -86,12 +84,12 @@ program scl_pct
   
   display `"$tema - `indname'"' 
   capture quietly estpost tab `indvar' [w=round(factor_ch)] `xif', m
-  
+    
   if _rc == 0 {
     if `"`indcat'"'=="" local indcat "1"
 	
-    mat temp=e(pct)
-    local valor = temp[1,colnumb(temp,`"`indcat'"')]
+    mat a_=e(pct)
+    local valor = a_[1,colnumb(a_,`"`indcat'"')]
     
 	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"% `indvar'==`indcat'"') (`valor')
 	
@@ -347,56 +345,6 @@ program scl_ratio_2conds
 
 end
 
-
-/***** scl_inequal **************************************************
- Calculates gini and theil indicators using
- the given variable.
- Accepts 'if'.
-
- E.g., scl_inequal ginihh pc_ytot_ch gini if pc_ytot_ch!=. & pc_ytot_ch>0
-******************************************************************/
-capture program drop scl_inequal                                                        
-program scl_inequal
-  syntax anything [if]
-  /* parameters of the indicator */
-  local indname : word 1 of `anything'
-  local indvar : word 2 of `anything'
-  local typeind : word 3 of `anything'
-  /* paramaters of the current disaggregation (comes from $current_slice global macro) */
-  local pais : word 1 of $current_slice
-  local ano : word 2 of $current_slice
-  local geografia_id : word 3 of $current_slice
-  local clase1 : word 4 of $current_slice
-  local clase2 : word 5 of $current_slice
-  local clase3 : word 6 of $current_slice
-  
-  scl_if_compose `if'
-  local xif `"`s(xif)'"'
-  sreturn clear
- 
-  
-  display `"$tema - `indname'"'
-  capture quietly sum `indvar' 
-  
-  if _rc == 0 & r(mean)>0 & r(mean)!=. {
-  						
-	capture quietly inequal7 `indvar' [w=round(factor_ci)] `xif'
-    local valor =`r(`typeind')'*100							
-	
-	if ""=="`valor'" local valor = .
-	
-	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`typeind' of `indvar'"') (`valor')
-	
-  }
-  else {
-   /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`typeind' of `indvar'"') (.)
-  }
-  
-end
-
-
-
 /*********************************************************************/
 
 /*
@@ -412,25 +360,25 @@ local mydir = c(pwd) /* GitHub folder */
 * connected to the VPN)
 
 if "${source}"=="" {
-	global source  	 "\\Sdssrv03\surveys\harmonized" /*if you have a local copy of the .dta files, change here to use your local copy */
+	global source   "/home/alop/shared/Data_Governance/harmonized" /*if you have a local copy of the .dta files, change here to use your local copy */
 }
 
 /*
  Location of the .do files to include
 */
-global input	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Input"
-global output 	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Onput"
+global input	 "`mydir'/calculo_indicadores_encuestas_hogares_scl/Input"
+global output 	 "`mydir'/calculo_indicadores_encuestas_hogares_scl/Output"
 /*
 * Location for temporary files. This folder is on MS TEAMS.
 * 
 * NOTE: template.dta must be in this folder.
 */
-global covidtmp  "C:\Users\\`= c(username)'\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
-
+global covidtmp  "/home/alop/private/otras_branches/calculo_indicadores_encuestas_hogares_scl/Output"
+log using "$covidtmp/log.log", replace
 //alternatively, this folder might be under the following path
 mata:st_numscalar("Found", direxists("$covidtmp"))
 if scalar(Found)==0  {
-	global covidtmp  "C:\Users\\`= c(username)'\Documents\Inter-American Development Bank Group\Data Governance - SCL - General\Proyecto - Data management\Bases tmp"
+	global covidtmp  "/home/alop/private/otras_branches/calculo_indicadores_encuestas_hogares_scl/Output"
 	//check if it was found now
 	mata:st_numscalar("Found", direxists("$covidtmp"))
 }
@@ -445,7 +393,7 @@ if scalar(Found)==0 {
                         1: Open dataset and Generate indicators
 ====================================================================*/
 
-**** include "${input}\calculo_microdatos_scl.do"
+**** include "${input}/calculo_microdatos_scl.do"
 						
 tempfile tablas
 tempname ptablas
@@ -458,9 +406,10 @@ postfile `ptablas' str4 tiempo_id str3 pais_id str25(geografia_id clase1 clase2 
 
 ** Creo locales principales:
 						
-local paises  ARG BHS BOL BRA BRB BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
+local paises  ARG  BHS BOL BRA BRB BLZ CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
 local anos  2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 
-
+local anos 2008 2009
+local paises BLZ CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
 
 local geografia_id total_nacional
 
@@ -470,30 +419,30 @@ local geografia_id total_nacional
 		foreach ano of local anos {
 			
 			* En este dofile de encuentra el diccionario de encuestas y rondas de la región
-			 include "${input}\Directorio HS LAC.do" 
+			 include "${input}/Directorio HS LAC.do" 
 			 * Encuentra el archivo para este país/año
-			 cap use "${source}\\`pais'\\`encuestas'\data_arm\\`pais'_`ano'`rondas'_BID.dta" , clear
+			 cap use "${source}//`pais'//`encuestas'/data_arm//`pais'_`ano'`rondas'_BID.dta" , clear
 
 			 
 			 /* 
 			   Alternatively, if you want to test a certain collection of .dta files,
 			   uncomment the code below which will search for all .dta files in the $source
 			   folder, that start with the name PAIS_ANO. 
-			  */ 
-			  //local files : dir "${source}" files "`pais'_`ano'*.dta"
-			  //local foundfile : word 1 of `files'
-			  //cap use "${source}\\`foundfile'", clear
-			
+			   
+			  local files : dir "${source}" files "`pais'_`ano'*.dta"
+			  local foundfile : word 1 of `files'
+			  cap use "${source}//`foundfile'", clear
+			*/
 			  	
 
 				if _rc == 0 { 
 					//* Si esta base de datos existe, entonces haga: */
-					noisily display "Calculando \\`pais'\\`encuestas'\data_arm\\`pais'_`ano'`rondas'_BID.dta..."		
+					noisily display "Calculando //`pais'//`encuestas'/data_arm//`pais'_`ano'`rondas'_BID.dta..."		
 														
 						* variables de clase
 							
 					cap {
-						gen Total  =  1
+						gen byte Total  =  1
 						gen Primaria  =  1
 						gen Secundaria  =  1
 						gen Superior  =  1
@@ -529,16 +478,16 @@ local geografia_id total_nacional
 					* Variables intermedias 
 			
 						* Educación: niveles y edades teóricas cutomizadas  
-							include "${input}\var_tmp_EDU.do"
+							include "${input}/var_tmp_EDU.do"
 						* Mercado laboral 
-							include "${input}\var_tmp_LMK.do"
+							include "${input}/var_tmp_LMK.do"
 						* Pobreza, vivienda, demograficas
-							include "${input}\var_tmp_SOC.do"
+							include "${input}/var_tmp_SOC.do"
 						* Inclusion
-							include "${input}\var_tmp_GDI.do"	
+						**	include "${input}/var_tmp_GDI.do"	
 							
 					* base de datos de microdatos con variables intermedias
-					********** include "${input}\append_calculo_microdatos_scl.do"	
+					********** include "${input}/append_calculo_microdatos_scl.do"	
 					
 					} //end capture
 				}
@@ -551,12 +500,12 @@ local geografia_id total_nacional
 					  already capturing it and will generate the missing values accordingly
 					  whenever the indicator cannot be calculated.
 					  */
-					  *display "`pais'\\`encuesta'\data_arm\\`pais'_`ano'`ronda'_BID.dta - non existe. Generando missing values..."
+					  *display "`pais'//`encuesta'/data_arm//`pais'_`ano'`ronda'_BID.dta - non existe. Generando missing values..."
 					  noisily display "`pais'_`ano'`rondas'_BID.dta - no se encontró el archivo. Generando missing values..."
 					  
 					  /* use an empty file which contains all variables */
 
-					  use "${covidtmp}\template.dta", clear
+					  use "${covidtmp}/template.dta", clear
 
 					
 				}
@@ -591,71 +540,71 @@ local geografia_id total_nacional
 										
 								/* Porcentaje de hogares con jefatura femenina */
 								scl_pct ///
-									jefa_ch jefa_ch "1" if jefa_ch!=. & sexo_ci!=.												
+								jefe_ch jefa_ch "1" if jefa_ch!=. & sexo_ci!=.												
 										
 								/* Porcentaje de hogares con jefatura económica femenina */
-								scl_pct ///
-									jefaecon_ch hhfem_ch "1" if jefe_ci==1 & hhfem_ch!=. & sexo_ci!=.											
+								*scl_pct ///
+								*jefaecon_ch hhfem_ch "1" if jefe_ci==1 & hhfem_ch!=. & sexo_ci!=.											
 										
 								/* Porcentaje de población femenina*/
 								scl_pct ///
-									pobfem_ci pobfem_ci "1" if pobfem_ci!=. 
+								pobfem_ci pobfem_ci "1" if pobfem_ci!=. 
 																						
 								/* Porcentaje de hogares con al menos un miembro de 0-5 años*/
 								scl_pct ///
-									miembro6_ch miembro6_ch "1" if jefe_ci==1 & miembro6_ch!=.
+								miembro6_ch miembro6_ch "1" if jefe_ci==1 & miembro6_ch!=.
 												
 								* Porcentaje de hogares con al menos un miembro entre 6-16 años*
 								scl_pct ///
-									miembro6y16_ch miembro6y16_ch "1" if jefe_ci==1 & miembro6y16_ch!=.
+								miembro6y16_ch miembro6y16_ch "1" if jefe_ci==1 & miembro6y16_ch!=.
 																													
 								* Porcentaje de hogares con al menos un miembro de 65 años o más*
 								scl_pct ///
-									miembro65_ch miembro65_ch "1" if jefe_ci==1 & miembro65_ch!=.
+								miembro65_ch miembro65_ch "1" if jefe_ci==1 & miembro65_ch!=.
 												
 								* Porcentaje de hogares unipersonales*
 								scl_pct ///
-									unip_ch unip_ch "1" if jefe_ci==1 & unip_ch!=.
+								unip_ch unip_ch "1" if jefe_ci==1 & unip_ch!=.
 																									
 								* Porcentaje de hogares nucleares*
 								scl_pct ///
-									nucl_ch nucl_ch "1" if jefe_ci==1 & nucl_ch!=.
+								nucl_ch nucl_ch "1" if jefe_ci==1 & nucl_ch!=.
 																
 								* Porcentaje de hogares ampliados*
 						        scl_pct ///
-									ampl_ch ampl_ch "1" if jefe_ci==1 & ampl_ch!=.
+								ampl_ch ampl_ch "1" if jefe_ci==1 & ampl_ch!=.
 																																
 								* Porcentaje de hogares compuestos*
 								scl_pct ///
-									comp_ch comp_ch "1" if jefe_ci==1 & comp_ch!=.
+								comp_ch comp_ch "1" if jefe_ci==1 & comp_ch!=.
 																	
 								* Porcentaje de hogares corresidentes*
 							    scl_pct ///
-									corres_ch corres_ch "1" if jefe_ci==1 & corres_ch!=.					
+								corres_ch corres_ch "1" if jefe_ci==1 & corres_ch!=.					
 
 								*Razón de dependencia*
 								scl_mean ///
-									depen_ch depen_ch if jefe_ci==1 & depen_ch!=.				
+								depen_ch depen_ch if jefe_ci==1 & depen_ch!=.				
 										
 								* Número promedio de miembros del hogar*
 								scl_mean ///
-									tamh_ch nmiembros_ch if jefe_ci==1 & nmiembros_ch!=. 
+								tamh_ch nmiembros_ch if jefe_ci==1 & nmiembros_ch!=. 
 																
 								* Porcentaje de población menor de 18 años*
 								scl_pct ///
-									pob18_ci pob18_ci "1" if pob18_ci!=.
+							    pob18_ci pob18_ci "1" if pob18_ci!=.
 																									
 								* Porcentaje de población de 65+ años*
 								scl_pct ///
-									pob65_ci pob65_ci "1" if pob65_ci!=.
+								pob65_ci pob65_ci "1" if pob65_ci!=.
 																			
 								* Porcentaje de individuos en union formal o informal*
 								scl_pct ///
-									union_ci union_ci "1" if union_ci!=.
+								union_ci union_ci "1" if union_ci!=.
 																								
 								* Edad mediana de la población en años *
 								scl_median ///
-									pobedad_ci edad_ci if edad_ci!=. 
+								pobedad_ci edad_ci if edad_ci!=. 
 									
 								}/*cierro clase2*/		
 							} /*cierro clase*/
@@ -675,7 +624,7 @@ local geografia_id total_nacional
 								
 								/* Porcentaje de población que reside en zonas urbanas*/
 								scl_pct ///
-									urbano_ci urbano_ci "1" if urbano_ci!=. 
+								urbano_ci urbano_ci "1" if urbano_ci!=. 
 										
 							} /*cierro clase*/			    
 											
@@ -712,6 +661,8 @@ local geografia_id total_nacional
 										else if `"`clase3'"'=="Secundaria" local sfix seco
 										else if `"`clase3'"'=="Superior"   local sfix tert
 										
+									
+										
 							 * Tasa asistencia Bruta  
 											
 										if ("`clase3'"=="Prescolar") {
@@ -723,6 +674,7 @@ local geografia_id total_nacional
 												tasa_bruta_asis asis_`sfix' age_`sfix' if asiste_ci!=.
 											
 										}
+										
 										else {
 										//all the others have the same "if" condition for both
 										// numerator and denominator
@@ -755,11 +707,11 @@ local geografia_id total_nacional
 
 												
 												
-							* Tasa asistencia grupo etario */
+							* Tasa asistencia grupo etario *
 												scl_pct ///
 													tasa_asis_edad asiste_ci "1"
 																																				
-							* Tasa No Asistencia grupo etario */
+							* Tasa No Asistencia grupo etario *
 												scl_pct ///
 													tasa_no_asis_edad asiste_ci "0"
 									 
@@ -777,22 +729,26 @@ local geografia_id total_nacional
 
 										
 							* Años_Escolaridad y Años_Escuela	
-							************* This is a custom code, the situation is not covered by the scl_pct command *******************
+												
+											
+											
+											
+																								
 													cap estpost tab `clase3' [w=round(factor_ci)] if  age_25_mas==1 & `clase1'==1 & `clase2'==1 & (aedu_ci !=. | edad_ci !=.), m
 													if _rc == 0 {
 													mat proporcion = e(pct)
 													local valor = proporcion[1,2]
 													
-													//estpost tab `clase3' 	if age_25_mas==1 & `clase1'==1 & `clase2'==1 & (aedu_ci !=. | edad_ci !=.), m
-													//mat nivel = e(b)
-													//local muestra = nivel[1,2]
+													estpost tab `clase3' 	if age_25_mas==1 & `clase1'==1 & `clase2'==1 & (aedu_ci !=. | edad_ci !=.), m
+													mat nivel = e(b)
+													local muestra = nivel[1,2]
 																								
-													post $output ("`ano'") ("`pais'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("Años_Escolaridad_25_mas") ("%`clase3'/pop_25+") (`valor')
+													post $output ("`ano'") ("`pais'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("Años_Escolaridad_25_mas") ("%clase3/pop_25+") (`valor')
 													} /* cierro if */
 													
 													else {
 															
-													post $output ("`ano'") ("`pais'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("Años_Escolaridad_25_mas") ("%`clase3'/pop_25+") (.)
+													post $output ("`ano'") ("`pais'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("Años_Escolaridad_25_mas") ("%clase3/pop_25+") (.)
 														
 													} /* cierro else */
 													
@@ -808,7 +764,7 @@ local geografia_id total_nacional
 										global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
 										noisily display "$tema: $current_slice"
 											
-											scl_pct ///
+										scl_pct ///
 												Ninis_2 nini "1" & edad_ci !=.
 										
 										} /*cierro clases3 */
@@ -1176,23 +1132,23 @@ local geografia_id total_nacional
 								
 												* Porcentaje poblacion que vive con menos de 3.1 USD diarios per capita*
 												scl_pct ///
-													pobreza31 poor31 "1" if poor31!=. 
+									            pobreza31 poor31 "1" if poor31!=. 
 															
 												*Porcentaje poblacion que vive con menos de 5 USD diarios per capita
 												scl_pct ///
-													pobreza poor "1" if poor!=. 
+									            pobreza poor "1" if poor!=. 
 																
 												* Porcentaje de la población con ingresos entre 5 y 12.4 USD diarios per capita*
-												scl_pct ///
-													vulnerable vulnerable "1" if vulnerable!=. 
+												 scl_pct ///
+									             vulnerable vulnerable "1" if vulnerable!=. 
 		
                                                  * Porcentaje de la población con ingresos entre 12.4 y 64 USD diarios per capita*
-												scl_pct ///
-													middle middle "1" if middle!=. 
+												  scl_pct ///
+									              middle middle "1" if middle!=. 
 															
                                                  * Porcentaje de la población con ingresos mayores 64 USD diarios per capita*
-												scl_pct ///
-													rich rich "1" if rich!=. 
+												 scl_pct ///
+									             rich rich "1" if rich!=. 
 
 				
 										} /* cierro clase3 */	
@@ -1210,38 +1166,119 @@ local geografia_id total_nacional
 													global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
 													noisily display "$tema: $current_slice"	
 													
-												
+													
 				
 													
-														 /* Coeficiente de Gini para el ingreso per cápita del hogar*/
-														 scl_inequal ///
-															ginihh pc_ytot_ch gini if pc_ytot_ch!=. & pc_ytot_ch>0
-															
-						
+														 /* Coeficiente de Gini para el ingreso per cápita del hogar*/			
+							if "`indicador'" == "ginihh" {
 							
-														/* Coeficiente de Gini para salarios por hora*/
-														scl_inequal ///
-																gini ylmhopri_ci gini if ylmhopri_ci!=. & ylmhopri_ci>0 & edad_ci>=15 & edad_ci<=64
+							capture sum pc_ytot_ch
+							if r(mean)>0 & r(mean)!=. {
+							cap inequal7 pc_ytot_ch [w=round(factor_ci)] if pc_ytot_ch!=. & pc_ytot_ch>0 & `clase'==1
+							local valor =`r(gini)'*100							
+							}
+							if _rc == 0 {
 								
+							capture sum pc_ytot_ch if `clase'==1
+							if r(mean)>0 & r(mean)!=.{
+							local muestra =`r(N)' 
+							} 
+							
+						
+								            post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								            }
 								
+								           else {
 								
-														  /* Coeficiente de theil para el ingreso per cápita del hogar*/
-														  scl_inequal ///
-																theilhh pc_ytot_ch theil if pc_ytot_ch!=. & pc_ytot_ch>0
-																
+								           post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								           }
 								
+							} /*cierro indicador*/
+							
+							/* Coeficiente de Gini para salarios por hora*/
+							if "`indicador'" == "gini" {
+							
+							capture sum ylmhopri_ci
+							if r(mean)>0 & r(mean)!=. {
+							cap inequal7 ylmhopri_ci [w=round(factor_ci)] if ylmhopri_ci!=. & ylmhopri_ci>0 & `clase'==1 & edad_ci>=15 & edad_ci<=64
+							local valor =`r(gini)'*100							
+							}
+							if _rc == 0 {
 								
-														/* Coeficiente de theil para salarios por hora*/
-														scl_inequal ///
-																theil ylmhopri_ci theil if ylmhopri_ci!=. & ylmhopri_ci>0 & edad_ci>=15 & edad_ci<=64
+							capture sum ylmhopri_ci if  `clase'==1  & edad_ci>=15 & edad_ci<=64
+							if r(mean)>0 & r(mean)!=. {
+							local muestra =`r(N)' 
+							} 
+
 								
+								          post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								          }
 								
-															
-														* Porcentaje del ingreso laboral del hogar contribuido por las mujeres */
-														scl_pct ///
-															ylmfem_ch shareylmfem_ch "1" if jefe_ci==1 & shareylmfem_ch!=. 
-															 
+								          else {
+								
+								          post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								          }
+								
+							} /*cierro indicador*/
+							
+							  /* Coeficiente de theil para el ingreso per cápita del hogar*/
+							  if "`indicador'" == "theilhh" {
+							
+							capture sum pc_ytot_ch
+							if r(mean)>0 & r(mean)!=. {
+							cap inequal7 pc_ytot_ch [w=round(factor_ci)] if pc_ytot_ch!=. & pc_ytot_ch>0 & `clase'==1
+							local valor =`r(theil)'*100							
+							}
+							if _rc == 0 {
+								
+							capture sum pc_ytot_ch if `clase'==1
+							if r(mean)>0 & r(mean)!=. {
+							local muestra =`r(N)' 
+							} 
+
+								
+								          post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								          }
+								
+								          else {
+								
+								          post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								          }
+							} /*cierro indicador*/
+							
+							/* Coeficiente de theil para salarios por hora*/
+							 if "`indicador'" == "theil" {
+							
+							capture sum ylmhopri_ci
+							if r(mean)>0 & r(mean)!=. {
+							cap inequal7 ylmhopri_ci [w=round(factor_ci)] if ylmhopri_ci!=. & ylmhopri_ci>0 & `clase'==1 & edad_ci>=15 & edad_ci<=64
+							local valor =`r(theil)'*100							
+							}
+							if _rc == 0 {
+								
+							capture sum ylmhopri_ci if  `clase'==1  & edad_ci>=15 & edad_ci<=64
+							if r(mean)>0 & r(mean)!=.  {
+							local muestra =`r(N)' 
+							} 
+
+
+								
+								          post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								          }
+								
+								          else {
+								
+								          post `ptablas' ("`ano'") ("`pais'") ("`geografia_id'") ("`clase'") ("no_aplica") ("no_aplica") ("`tema'") ("`indicador'") ("`valor'") ("`muestra'")
+								          }
+							} /*cierro indicador*/
+							
 														
+													* Porcentaje del ingreso laboral del hogar contribuido por las mujeres 
+													scl_pct ///
+									                 ylmfem_ch shareylmfem_ch "1" if jefe_ci==1 & shareylmfem_ch!=. 
+														 
+														
+													/*	} cierro clase*/	
 													
 														} /* cierro clase3 */	
 									}/*cierro clase2*/
@@ -1263,7 +1300,7 @@ local geografia_id total_nacional
 													
 													/* Porcentaje de hogares que reciben remesas del exterior */
 													scl_pct ///
-														indexrem indexrem "1" if jefe_ci==1 & indexrem!=.
+													indexrem indexrem "1" if jefe_ci==1 & indexrem!=.
 
 							
 												} /* cierro clase3 */	
@@ -1293,51 +1330,51 @@ local geografia_id total_nacional
 						
 											   * % de hogares con servicio de agua de acueducto*
 											   scl_pct ///
-													aguared_ch aguared_ch "1" if jefe_ci==1 & aguared_ch!=. 
+									           aguared_ch aguared_ch "1" if jefe_ci==1 & aguared_ch!=. 
 																
 											   * % de hogares con acceso a servicios de saneamiento mejorados*
 											   scl_pct ///
-													des2_ch des2_ch "1" if jefe_ci==1 & des2_ch!=. 							
+									           des2_ch des2_ch "1" if jefe_ci==1 & des2_ch!=. 							
 																														
 											   * % de hogares con electricidad *
 											   scl_pct ///
-													luz_ch luz_ch "1" if jefe_ci==1 &  luz_ch!=. 
+									           luz_ch luz_ch "1" if jefe_ci==1 &  luz_ch!=. 
 																												
 										       * % hogares con pisos de tierra *
 										        scl_pct ///
-													dirtf_ch dirtf_ch "1" if jefe_ci==1 &  dirtf_ch!=. 
+									            dirtf_ch dirtf_ch "1" if jefe_ci==1 &  dirtf_ch!=. 
 														
 											   * % de hogares con refrigerador *
 											    scl_pct ///
-													refrig_ch freezer_ch "1" if jefe_ci==1 &  freezer_ch!=. 
+									            refrig_ch freezer_ch "1" if jefe_ci==1 &  freezer_ch!=. 
 
 												* % de hogares con carro particular*
 												scl_pct ///
-													auto_ch auto_ch "1" if jefe_ci==1 &  auto_ch!=. 													
+									            auto_ch auto_ch "1" if jefe_ci==1 &  auto_ch!=. 													
 																
 												* % de hogares con acceso a internet *
 												scl_pct ///
-													internet_ch internet_ch "1" if jefe_ci==1 &  internet_ch!=. 
+									            internet_ch internet_ch "1" if jefe_ci==1 &  internet_ch!=. 
 																			
 												* % de hogares con teléfono celular*
 												scl_pct ///
-													cel_ch cel_ch "1" if jefe_ci==1 &  cel_ch!=.
+									            cel_ch cel_ch "1" if jefe_ci==1 &  cel_ch!=.
 																
 											    * % de hogares con techos de materiales no permanentes*
 												scl_pct ///
-													techonp_ch techonp_ch "1" if jefe_ci==1 &  techonp_ch!=.
+									            techonp_ch techonp_ch "1" if jefe_ci==1 &  techonp_ch!=.
 
 												* % de hogares con paredes de materiales no permanentes*
-											    scl_pct ///
-													parednp_ch parednp_ch "1" if jefe_ci==1 &  parednp_ch!=.
+											cap    scl_pct ///
+									           cap parednp_ch parednp_ch "1" if jefe_ci==1 &  parednp_ch!=.
 
 												* Número de miembros por cuarto*
 												scl_mean ///
-													hacinamiento_ch hacinamiento_ch if jefe_ci==1 & hacinamiento_ch!=. 
+								                hacinamiento_ch hacinamiento_ch if jefe_ci==1 & hacinamiento_ch!=. 
 												
 												*% de hogares con estatus residencial estable *
 												scl_pct ///
-													estable_ch estable_ch "1" if jefe_ci==1 &  estable_ch!=.
+									            estable_ch estable_ch "1" if jefe_ci==1 &  estable_ch!=.
 												
 			
 											}/*cierro clases3*/		
@@ -1366,37 +1403,12 @@ local geografia_id total_nacional
 											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
 											noisily display "$tema: $current_slice"	
 								
-												* Porcentaje población afrodescendiente 
+												/* Porcentaje población afrodescendiente */
 												scl_pct ///
-													pafro_ci afroind_ci "Afro-descendiente"
-												/* Porcentaje población indígena */
-												scl_pct ///
-												    pindi_ci afroind_ci "Indígena" 
-												/* Porcentaje población ni Afrodescendiente ni indígena*/
-												scl_pct ///
-												    pnoafronoindi_ci afroind_ci "Otros"
-                                              	/* Porcentaje población Afro-indígena (Garífuna)*/
-											    scl_pct ///
-												   pafroindi_ci afroind_ci "Afro-indígena"
-                                                /* Porcentaje de hogares con jefatura afrodescendiente */ 
-										        scl_pct ///
-												   pjefe_afro_ch afroind_ch "Afro-descendiente" 
-												   /* Porcentaje de hogares con jefatura indígena */ 
-										        scl_pct ///												   
-												   pjefe_indi_ch afroind_ch "Indígena" 
-											    /* Porcentaje de hogares con jefatura ni afrodescendiente ni indígena*/ 
-									            scl_pct ///												   
-                                                   pjefe_noafronoindi_ch afroind_ch "Otros"
-											    /* Porcentaje de hogares con jefatura Afro-indígena (Garífuna)*/ 
-											    scl_pct ///												   
-												   pjefe_afroindi_ch afroind_ch "Afro-indígena"
-                                             /*   /* Porcentaje de personas que reportan tener alguna dificultad en actividades de la vida diaria */
-											    scl_pct ///												   
-                                                   pdis_ci dis_ci "Con Discapacidad"
-												/* Porcentaje de hogares con miembros que reportan tener alguna dificultad en realizar actividades de la vida diaria. */
-                                                scl_pct ///
-												   pdis_ch dis_ch "Con Discapacidad" 
-											*/						
+													pafro_ci raza_ci "Afro-descendiente"
+												
+												
+												
 												
 											}/*cierro clases3*/		
 										} /*cierro clases2*/
@@ -1420,7 +1432,7 @@ local geografia_id total_nacional
 											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
 											noisily display "$tema: $current_slice"	
 											
-								/*
+								
 											/* Porcentaje de migrantes en el pais */
 											scl_pct ///
 												migrante_ci migrante_ci "1" 
@@ -1432,78 +1444,11 @@ local geografia_id total_nacional
 											/* Porcentaje de migrantes LAC en el pais */
 											scl_pct ///
 												migrantelac_ci migrantelac_ci "1" 
-								*/
+
 											}/*cierro clases3*/		
 										} /*cierro clases2*/
 								} /*cierro clases*/
 							
-							
-								************************************************
-								  global tema "programas sociales"
-								************************************************
-								// Division: SPH
-								// Authors: Carolina Rivashe
-								************************************************
-						/*		local clases 	Total Hombre Mujer 
-								local clases2 	Total Rural Urbano 
-								local clases3	Total gpo_ingneto1 gpo_ingneto2 gpo_ingneto3 gpo_ingneto4 
-								
-								foreach clase1 of local clases {
-									foreach clase2 of local clases2 {
-										foreach clase3 of local clases3 {
-											/* Parameters of current disaggregation levels, used by all commands */
-											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
-											noisily display "$tema: $current_slice"	
-									
-											* Porcentaje de la población que beneficiario de PTMC *
-												 scl_pct ///
-													pmtc ptmc_ch "1" if ptmc!=. 
-								
-											* Porcentaje de la población en hogares con adultos mayores beneficiarios de PNC *
-												 scl_pct ///
-													pnc_ch	pension_ch "1" if pension_ch!=. & mayor64_ch==1
-
-											* Porcentaje de adultos mayores beneficiarios de PNC *
-												 scl_pct ///
-													pnc	pension_ci "1" if pension_ch!=. & mayor64_ci==1
-													
-													
-												}/*cierro clases3*/		
-										} /*cierro clases2*/
-								} /*cierro clases*/
-								
-								local clases 	Total Hombre Mujer 
-								local clases2 	Total Rural Urbano 
-								local clases3 	Total 
-
-								foreach clase1 of local clases {
-									foreach clase2 of local clases2 {
-										foreach clase3 of local clases3 {
-											/* Parameters of current disaggregation levels, used by all commands */
-											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
-											noisily display "$tema: $current_slice"	
-													
-											* Porcentaje de beneficiaios PTMC en pobreza extrema (# PTMC en PE / Total PTMC)*
-												scl_ratio ///
-													ptmc_pe ptmc_ingneto1 ptmc_ch
-													
-											* Porcentaje de beneficiaios PTMC en pobreza moderada (# PTMC en PM / Total PTMC)*
-												scl_ratio ///
-													ptmc_pm ptmc_ingneto2 ptmc_ch
-													
-											* Porcentaje de beneficiaios PTMC en vulerabilidad (# PTMC en vulerabilidad / Total PTMC)*
-												scl_ratio ///
-													ptmc_v ptmc_ingneto3 ptmc_ch
-													
-											* Porcentaje de beneficiaios PTMC no pobres (# PTMC no pobres / Total PTMC)*
-												scl_ratio ///
-													ptmc_np ptmc_ingneto4 ptmc_ch													
-											
-												}/*cierro clases3*/		
-										} /*cierro clases2*/
-								} /*cierro clases*/		
-						*/
-
 						
 				*	} /* cierro rondas */		
 				*} /* cierro encuestas */
@@ -1531,25 +1476,25 @@ save `tablas', replace
 
 * guardo el archivo temporal
 * (this file will be ignored by GitHub)
-save "${output}\Indicadores_SCL.dta", replace
-
+save "${covidtmp}/Indicadores_SCL.dta", replace
+log close
 * Variables de formato 
 
-***** include "${input}\var_formato.do"
+***** include "${input}/var_formato.do"
 ***** order tiempo tiempo_id pais_id geografia_id clase clase_id clase2 clase2_id nivel nivel_id tema indicador tipo valor muestra
 
 
 /*
-export excel using "${output}\Indicadores_SCL.xlsx", first(var) sheet(Total_results) sheetreplace
-export delimited using  "${output}\indicadores_encuestas_hogares_scl.csv", replace
+export excel using "${output}/Indicadores_SCL.xlsx", first(var) sheet(Total_results) sheetreplace
+export delimited using  "${output}/indicadores_encuestas_hogares_scl.csv", replace
 
-unicode convertfile "${output}\indicadores_encuestas_hogares_scl.csv" "${output}\indicadores_encuestas_hogares_scl_converted.csv", dstencoding(latin1) replace */
+unicode convertfile "${output}/indicadores_encuestas_hogares_scl.csv" "${output}/indicadores_encuestas_hogares_scl_converted.csv", dstencoding(latin1) replace */
 
 *carpeta tmp
 
-***** export delimited using  "${covidtmp}\indicadores_encuestas_hogares_scl.csv", replace
-***** unicode convertfile "${covidtmp}\indicadores_encuestas_hogares_scl.csv" "${output}\indicadores_encuestas_hogares_scl_converted.csv", dstencoding(latin1) replace 
-***** save "${covidtmp}\indicadores_encuestas_hogares_scl.dta", replace
+***** export delimited using  "${covidtmp}/indicadores_encuestas_hogares_scl.csv", replace
+***** unicode convertfile "${covidtmp}/indicadores_encuestas_hogares_scl.csv" "${output}/indicadores_encuestas_hogares_scl_converted.csv", dstencoding(latin1) replace 
+***** save "${covidtmp}/indicadores_encuestas_hogares_scl.dta", replace
 
 
 /*
@@ -1570,7 +1515,7 @@ foreach div of local divisiones {
 			keep if (division == "`div'")
 			drop division
 		
-			export delimited using "${output}\\indicadores_encuestas_hogares_`div'.csv", replace
+			export delimited using "${output}//indicadores_encuestas_hogares_`div'.csv", replace
 			sleep 1000
 			restore
 						
