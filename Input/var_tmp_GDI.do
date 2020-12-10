@@ -6,7 +6,7 @@
 
      * 2. Variables de raza
             * 1.1 Variable de raza individual
-			clonevar afroind = raza_ci
+			clonevar afroind_ci = raza_ci
 			
 			*1.2 Variable de raza del jefe del hogar asignado a todos los miembros del hogar
 			gen afroind_jefe_ch= afroind_ci if jefe_ci==1
