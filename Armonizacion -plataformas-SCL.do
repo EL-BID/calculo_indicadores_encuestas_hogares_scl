@@ -94,10 +94,12 @@ program scl_pct
 	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"% `indvar'==`indcat'"') (`valor')
 	
   }
-  else {
+  if _rc ~= 0 {
    /* generate a line with missing value */
 	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"% `indvar'==`indcat'"') (.)
   }
+  
+  cap mat drop a_ 
   
 end
 
@@ -491,7 +493,7 @@ local geografia_id total_nacional
 					
 					} //end capture
 				}
-				else {
+				if _rc ~= 0  {
 				
 					/* IN the case the dta file DOES NOT EXIST for this country/year, we are going
 					  to execute the rest of the code ANYWAY. The reason is: regardless if the 
