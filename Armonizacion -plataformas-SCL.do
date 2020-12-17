@@ -20,8 +20,9 @@ set more off
 * cap ssc install estout
 * cap ssc install inequal7
  
+ cd "C:\Users\alop\OneDrive - Inter-American Development Bank Group\Desktop\Git_repositories"
+ 
 qui {
-
 
 /**** if composition utility function ****************************
  scl_if_compose clase1 clase2 clase3 if ...
@@ -62,11 +63,10 @@ end
 capture program drop scl_pct                                                        
 program scl_pct
   syntax anything [if]
-  /* parameters of the indicator */
   local indname : word 1 of `anything'
   local indvar : word 2 of `anything'
   local indcat : word 3 of `anything'
-  /* paramaters of the current disaggregation (comes from $current_slice global macro) */
+    /* paramaters of the current disaggregation (comes from $current_slice global macro) */
   local pais : word 1 of $current_slice
   local ano : word 2 of $current_slice
   local geografia_id : word 3 of $current_slice
@@ -74,32 +74,24 @@ program scl_pct
   local clase2 : word 5 of $current_slice
   local clase3 : word 6 of $current_slice
   
-  /* create the "if" part of the command
-    combining with the "if" set when calling
-	the program (if any) */
-  scl_if_compose `if'
-  local xif `"`s(xif)'"'
-  sreturn clear
-   
-  
-  display `"$tema - `indname'"' 
-  capture quietly estpost tab `indvar' [w=round(factor_ch)] `xif', m
+  cap sum `indvar' [w=round(factor_ch)] if `indvar'==`indcat'
     
   if _rc == 0 {
-    if `"`indcat'"'=="" local indcat "1"
-	
-    mat a_=e(pct)
-    local valor = a_[1,colnumb(a_,`"`indcat'"')]
-    
-	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"% `indvar'==`indcat'"') (`valor')
+	    
+  local numerator = `r(sum)'
+  cap sum `indvar' [w=round(factor_ch)] 
+  local denominator = ` r(sum_w)'
+  local valor = (`numerator' / `denominator') * 100 
+  	
+	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"sum of `indvar'"') (`valor')
 	
   }
-  if _rc ~= 0 {
+  if _rc != 0 {
    /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"% `indvar'==`indcat'"') (.)
+	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"sum of `indvar'"') (.)
   }
   
-  cap mat drop a_ 
+  
   
 end
 
@@ -362,25 +354,25 @@ local mydir = c(pwd) /* GitHub folder */
 * connected to the VPN)
 
 if "${source}"=="" {
-	global source   "/home/alop/shared/Data_Governance/harmonized" /*if you have a local copy of the .dta files, change here to use your local copy */
+	global source   "\\Sdssrv03\surveys\harmonized" /*if you have a local copy of the .dta files, change here to use your local copy */
 }
 
 /*
  Location of the .do files to include
 */
-global input	 "`mydir'/calculo_indicadores_encuestas_hogares_scl/Input"
-global output 	 "`mydir'/calculo_indicadores_encuestas_hogares_scl/Output"
+global input	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Input"
+global output 	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Output"
 /*
 * Location for temporary files. This folder is on MS TEAMS.
 * 
 * NOTE: template.dta must be in this folder.
 */
-global covidtmp  "/home/alop/private/otras_branches/calculo_indicadores_encuestas_hogares_scl/Output"
-log using "$covidtmp/log.log", replace
+global covidtmp  "`mydir'\calculo_indicadores_encuestas_hogares_scl\Output"
+
 //alternatively, this folder might be under the following path
 mata:st_numscalar("Found", direxists("$covidtmp"))
 if scalar(Found)==0  {
-	global covidtmp  "/home/alop/private/otras_branches/calculo_indicadores_encuestas_hogares_scl/Output"
+	global covidtmp  "`mydir'\calculo_indicadores_encuestas_hogares_scl\Output"
 	//check if it was found now
 	mata:st_numscalar("Found", direxists("$covidtmp"))
 }
@@ -410,8 +402,8 @@ postfile `ptablas' str4 tiempo_id str3 pais_id str25(geografia_id clase1 clase2 
 						
 local paises  ARG  BHS BOL BRA BRB BLZ CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
 local anos  2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 
-local anos 2008 2009
-local paises BLZ CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
+local anos 2008 
+local paises PER
 
 local geografia_id total_nacional
 
@@ -421,9 +413,9 @@ local geografia_id total_nacional
 		foreach ano of local anos {
 			
 			* En este dofile de encuentra el diccionario de encuestas y rondas de la región
-			 include "${input}/Directorio HS LAC.do" 
+			 include "${input}\Directorio HS LAC.do" 
 			 * Encuentra el archivo para este país/año
-			 cap use "${source}//`pais'//`encuestas'/data_arm//`pais'_`ano'`rondas'_BID.dta" , clear
+			 cap use "${source}\\`pais'\\`encuestas'\data_arm\\`pais'_`ano'`rondas'_BID.dta" , clear
 
 			 
 			 /* 
@@ -439,7 +431,7 @@ local geografia_id total_nacional
 
 				if _rc == 0 { 
 					//* Si esta base de datos existe, entonces haga: */
-					noisily display "Calculando //`pais'//`encuestas'/data_arm//`pais'_`ano'`rondas'_BID.dta..."		
+					noisily display "Calculando \\`pais'\\`encuestas'\\data_arm\\`pais'_`ano'`rondas'_BID.dta..."		
 														
 						* variables de clase
 							
@@ -480,11 +472,11 @@ local geografia_id total_nacional
 					* Variables intermedias 
 			
 						* Educación: niveles y edades teóricas cutomizadas  
-							include "${input}/var_tmp_EDU.do"
+							include "${input}\var_tmp_EDU.do"
 						* Mercado laboral 
-							include "${input}/var_tmp_LMK.do"
+							include "${input}\var_tmp_LMK.do"
 						* Pobreza, vivienda, demograficas
-							include "${input}/var_tmp_SOC.do"
+							include "${input}\var_tmp_SOC.do"
 						* Inclusion
 						**	include "${input}/var_tmp_GDI.do"	
 							
@@ -507,7 +499,7 @@ local geografia_id total_nacional
 					  
 					  /* use an empty file which contains all variables */
 
-					  use "${covidtmp}/template.dta", clear
+					  use "${covidtmp}\template.dta", clear
 
 					
 				}
@@ -517,7 +509,7 @@ local geografia_id total_nacional
 					* 1.2: Indicators for each topic		
 *****************************************************************************************************************************************
 
-
+/*	
 						************************************************
 						  global tema "demografia"
 						************************************************
@@ -539,7 +531,7 @@ local geografia_id total_nacional
 								
 								//======== CALCULATE INDICATORS ================================================
 								
-										
+									
 								/* Porcentaje de hogares con jefatura femenina */
 								scl_pct ///
 								jefe_ch jefa_ch "1" if jefa_ch!=. & sexo_ci!=.												
@@ -630,7 +622,7 @@ local geografia_id total_nacional
 										
 							} /*cierro clase*/			    
 											
-											
+			*/								
 											
 							************************************************
 							  global tema "educacion"
@@ -664,7 +656,7 @@ local geografia_id total_nacional
 										else if `"`clase3'"'=="Superior"   local sfix tert
 										
 									
-										
+			/*							
 							 * Tasa asistencia Bruta  
 											
 										if ("`clase3'"=="Prescolar") {
@@ -687,11 +679,11 @@ local geografia_id total_nacional
 												tasa_bruta_asis asis_`sfix' age_`sfix' `"`numerator_condition'"' `"`denominator_condition'"'
 											
 										}
-
+				*/
 															
 							 * Tasa asistencia Neta 
 											scl_pct ///
-												tasa_neta_asis asis_`sfix' "1" if age_`sfix' == 1 & asiste_ci!=.									
+												tasa_neta_asis asis_`sfix' 1 if asiste_ci!=.									
 								    													
 															
 															
@@ -707,15 +699,15 @@ local geografia_id total_nacional
 												global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
 												noisily display "$tema: $current_slice"
 
-												
+											
 												
 							* Tasa asistencia grupo etario *
 												scl_pct ///
-													tasa_asis_edad asiste_ci "1"
+													tasa_asis_edad asiste_ci 1
 																																				
 							* Tasa No Asistencia grupo etario *
 												scl_pct ///
-													tasa_no_asis_edad asiste_ci "0"
+													tasa_no_asis_edad asiste_ci 0
 									 
 													
 									} /*cierro clases3 */
@@ -735,7 +727,7 @@ local geografia_id total_nacional
 											
 											
 											
-																								
+	/*																							
 													cap estpost tab `clase3' [w=round(factor_ci)] if  age_25_mas==1 & `clase1'==1 & `clase2'==1 & (aedu_ci !=. | edad_ci !=.), m
 													if _rc == 0 {
 													mat proporcion = e(pct)
@@ -756,7 +748,7 @@ local geografia_id total_nacional
 													
 									}			
 										
-										
+									*/	
 							* Ninis_2	
 								
 										local clases3 age_15_24 age_15_29
@@ -767,7 +759,7 @@ local geografia_id total_nacional
 										noisily display "$tema: $current_slice"
 											
 										scl_pct ///
-												Ninis_2 nini "1" & edad_ci !=.
+												Ninis_2 nini 1 & edad_ci !=.
 										
 										} /*cierro clases3 */
 										
@@ -797,7 +789,7 @@ local geografia_id total_nacional
 										
 										/* Tasa asistencia Bruta  */
 										scl_pct ///
-											tasa_terminacion_c t`sfix'  if asiste_ci!=. & age_term_`agetermfix' ==1
+											tasa_terminacion_c t`sfix' 1 if asiste_ci!=. 
 										
 										} /*cierro clases3 */
 										
@@ -817,7 +809,7 @@ local geografia_id total_nacional
 										
 										/* Tasa asistencia Bruta  */
 										scl_pct ///
-											leavers leavers  if edad_ci !=.
+											leavers leavers 1 if edad_ci !=.
 										
 										} /*cierro clases3 */	
 										
@@ -840,7 +832,7 @@ local geografia_id total_nacional
 										
 										/* Tasa sobreedad */
 										scl_pct ///
-											tasa_sobre_edad age_prim_sobre  if asis_prim_c == 1 & asiste_ci !=. 
+											tasa_sobre_edad age_prim_sobre 1 if asiste_ci !=. 
 										
 										} /*cierro clases3 */	
 										
@@ -851,7 +843,7 @@ local geografia_id total_nacional
 								}	/* cierro clase */			
 				
 								
-								
+					/*				
 								
 								***************************************************
 								  global tema "laboral"
@@ -1280,7 +1272,7 @@ local geografia_id total_nacional
 									                 ylmfem_ch shareylmfem_ch "1" if jefe_ci==1 & shareylmfem_ch!=. 
 														 
 														
-													/*	} cierro clase*/	
+														
 													
 														} /* cierro clase3 */	
 									}/*cierro clase2*/
@@ -1451,13 +1443,12 @@ local geografia_id total_nacional
 										} /*cierro clases2*/
 								} /*cierro clases*/
 							
-						
+						*/
 				*	} /* cierro rondas */		
 				*} /* cierro encuestas */
 			} /* cierro anos */
 		} /* cierro paises */
 } /* cierro quietly */
- 
 
  
 postclose `ptablas'
@@ -1478,8 +1469,8 @@ save `tablas', replace
 
 * guardo el archivo temporal
 * (this file will be ignored by GitHub)
-save "${covidtmp}/Indicadores_SCL.dta", replace
-log close
+save "${covidtmp}\Indicadores_SCL.dta", replace
+
 * Variables de formato 
 
 ***** include "${input}/var_formato.do"
