@@ -52,20 +52,20 @@ Output:             Excel-DTA file
 	* 2.1. Asistencia 
 	
 				gen asis_pres   = asispre_ci
-				gen asis_prim   = 1 if aedu_ci>=0  & aedu_ci<  6  & aedu_ci<. & asiste_ci==1 
-				gen asis_seco   = 1 if aedu_ci>=6  & aedu_ci<  12 & aedu_ci<. & asiste_ci == 1
-				gen asis_seco_b = 1 if aedu_ci>=6  & aedu_ci<= 8  & asiste_ci == 1
-				gen asis_seco_a = 1 if aedu_ci>=9  & aedu_ci<= 11 & asiste_ci == 1
-				gen asis_tert   = 1 if aedu_ci>=12 & aedu_ci<   . & asiste_ci == 1
+				gen asis_prim   = (asiste_ci==1 & (aedu_ci>=0  & aedu_ci<  6))
+				gen asis_seco   = ((aedu_ci>=6  & aedu_ci<  12) & asiste_ci == 1)
+				gen asis_seco_b = ((aedu_ci>=6  & aedu_ci<= 8)  & asiste_ci == 1)
+				gen asis_seco_a = ((aedu_ci>=9  & aedu_ci<= 11) & asiste_ci == 1)
+				gen asis_tert   = (aedu_ci>=12 & asiste_ci == 1)
 				
 	* leavers Jóvenes entre los 18-24 años que terminaron hasta que secundaria baja y no están asistiendo a ningún nivel de educación.
-				g leavers=.
-				replace leavers = 1 if age_18_24 == 1 & (aedu_ci > 0 & aedu_ci<=9) & asiste_ci == 0
+				
+				g leavers = ((aedu_ci > 0 & aedu_ci<=9) & asiste_ci == 0)
 				
 	* Ninis 
 	
-				g nini=.
-				replace nini = 1 if asiste_ci==0 & condocup_ci == 3
+				
+				g nini = (asiste_ci==0 & condocup_ci == 3)
 
 				
 * 4. Nivel educativo de la poblacion  
@@ -109,55 +109,55 @@ Output:             Excel-DTA file
 				
 		* Sobreedad 
 
-			gen     age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 0 & edad_ci>=8 & asispre_ci != 1
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 1 & edad_ci>=9
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 2 & edad_ci>=10
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 3 & edad_ci>=11
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 4 & edad_ci>=12
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 5 & edad_ci>=13
+			gen     age_prim_sobre = (asiste_ci == 1 & aedu_ci== 0 & edad_ci>=8 & asispre_ci != 1)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 1 & edad_ci>=9)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 2 & edad_ci>=10)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 3 & edad_ci>=11)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 4 & edad_ci>=12)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 5 & edad_ci>=13)
 		
 		
 		
 			if "`pais'" == "BHS" | "`pais'" == "BRB"    {
 			* Estos países comienzan la primaria a los 5 anios 
-			replace age_prim_sobre = . 
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 0 & edad_ci>=7 & asis_pres !=1
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 1 & edad_ci>=8
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 2 & edad_ci>=9
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 3 & edad_ci>=10
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 4 & edad_ci>=11
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 5 & edad_ci>=12			
+			replace age_prim_sobre = 0 
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 0 & edad_ci>=7 & asis_pres !=1)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 1 & edad_ci>=8)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 2 & edad_ci>=9)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 3 & edad_ci>=10)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 4 & edad_ci>=11)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 5 & edad_ci>=12)			
 			}
 			
 			if "`pais'" == "GUY" {
-			replace age_prim_sobre = . 
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 0 & edad_ci>=8 & asis_pres !=1
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 2 & edad_ci>=10
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 3 & edad_ci>=11
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 4 & edad_ci>=12
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 5 & edad_ci>=13
+			replace age_prim_sobre = 0 
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 0 & edad_ci>=8 & asis_pres !=1)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 2 & edad_ci>=10)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 3 & edad_ci>=11)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 4 & edad_ci>=12)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 5 & edad_ci>=13)
 			}
 		
 			if  "`pais'" == "COL"   {
 			* estos países la educación primaria va hasta quinto grado
-			replace age_prim_sobre = . if aedu_ci > 4
+			replace age_prim_sobre = 0 if aedu_ci > 4
 			}
 			
 			if "`pais'" == "SLV" | "`pais'" == "GTM"  | "`pais'" == "PRY"   {
 			* Estos países copmienzan la primaria desde los 7 anios y estudian 6 anios de primaria
-			replace age_prim_sobre = . 
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 0 & edad_ci>=9 & asispre_ci != 1
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 1 & edad_ci>=10
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 2 & edad_ci>=11
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 3 & edad_ci>=12
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 4 & edad_ci>=13
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 5 & edad_ci>=14	
+			replace age_prim_sobre = 0 
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 0 & edad_ci>=9 & asispre_ci != 1)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 1 & edad_ci>=10)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 2 & edad_ci>=11)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 3 & edad_ci>=12)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 4 & edad_ci>=13)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 5 & edad_ci>=14)	
 			* la asistencia costumizada es la misma del default
 			}
 			
 			if "`pais'" == "DOM" | "`pais'" == "CHL" | "`pais'" == "BRA" {
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 6 & edad_ci>=14
-			replace age_prim_sobre = 1 if asiste_ci == 1 & aedu_ci== 7 & edad_ci>=15
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 6 & edad_ci>=14)
+			replace age_prim_sobre = 1 if (asiste_ci == 1 & aedu_ci== 7 & edad_ci>=15)
 			}
 					
 		* Terminación 
