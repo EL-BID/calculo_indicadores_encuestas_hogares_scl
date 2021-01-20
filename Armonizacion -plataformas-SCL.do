@@ -367,7 +367,7 @@ program scl_inequal
  
   
   display `"$tema - `indname'"'
-  capture quietly sum `indvar' 
+  capture quietly sum `indvar' `xif'
   
   if _rc == 0 & r(mean)>0 & r(mean)!=. {
   						
