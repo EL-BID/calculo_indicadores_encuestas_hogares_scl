@@ -1068,6 +1068,8 @@ local geografia_id total_nacional
 											scl_mean ///
 												ingreso_hor_prom hwage if condocup_ci==1
 
+						} /* cierro clase3 para que no desagregue edades en las variables de pensión*/
+											
 											scl_pct ///
 												pensionista_65_mas pensiont_ci "1" if age_65_mas==1	
 																																					
@@ -1096,8 +1098,7 @@ local geografia_id total_nacional
 												y_pen_total ypent_ci "1" if ypent_ci!=. & age_65_mas==1
 																			
 										
-										
-									} /* cierro clase3 */	
+											
 								}/*cierro clase2*/
 							} /* cierro clase*/ 
 					
