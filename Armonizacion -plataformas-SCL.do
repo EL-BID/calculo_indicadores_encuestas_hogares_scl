@@ -883,7 +883,7 @@ local geografia_id total_nacional
 												ingreso_mens_prom ylab_ppp if condocup_ci==1 & ylab_ppp!=.
 
 											scl_mean ///
-												ingreso_hor_prom hwage_ppp if condocup_ci==1 & hwage_ppp!=.
+												ingreso_hor_prom_ppp hwage_ppp if condocup_ci==1 & hwage_ppp!=.
 					
 											scl_mean ///
 												horas_trabajadas horastot_ci if condocup_ci==1 & horastot_ci!=.
@@ -1066,7 +1066,7 @@ local geografia_id total_nacional
 												formalidad_4 formal_ci "1" if condocup_ci==1
 																		
 											scl_mean ///
-												ingreso_hor_prom hwage_ppp if condocup_ci==1 & formal_ci==0
+												ingreso_hor_prom hwage if condocup_ci==1
 
 											scl_pct ///
 												pensionista_65_mas pensiont_ci "1" if age_65_mas==1	
