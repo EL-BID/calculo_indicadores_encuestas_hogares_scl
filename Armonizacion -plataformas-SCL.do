@@ -1063,7 +1063,7 @@ local geografia_id total_nacional
 												formalidad_3 formal_ci "1" if condocup_ci==1 & categopri_ci==3	
 
 											scl_pct ///
-												formalidad_4 formal_ci "1" if condocup_ci==1
+												formalidad_4 formal_ci "1" if condocup_ci==1 & categopri_ci==2
 																		
 											scl_mean ///
 												ingreso_hor_prom hwage if condocup_ci==1
