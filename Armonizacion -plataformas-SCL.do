@@ -921,10 +921,10 @@ local geografia_id total_nacional
 											//======== CALCULATE INDICATORS ================================================
 													
 											scl_pct ///
-												tasa_ocupacion condocup_ci 1
+												tasa_ocupacion condocup_ci 1 if pet==1
 										
 											scl_pct ///
-												tasa_desocupacion condocup_ci 2
+												tasa_desocupacion condocup_ci 2 if pea==1
 										
 											scl_pct ///
 												tasa_participacion pea 1 if pet==1
