@@ -42,8 +42,8 @@ Output:             Excel-DTA file
                 replace miembro6y16_ch=. if nentre6y16_ch==.
 			* 1.8 Hogares con familiares de 65+ años
 			
-				*gen miembro65_ch=(nmayor65_ch>0 & nmayor65_ch<.)  if jefe_ci==1 & miembro65_ch!=.
-                *cap replace miembro65_ch=. if (jefe_ci==1 & nmayor65_ch==.)
+				gen miembro65_ch=(nmayor65_ch>0 & nmayor65_ch<.)  if jefe_ci==1 
+                replace miembro65_ch=. if nmayor65_ch==.
 			* 1.9 Hogares unipersonales
 			    gen unip_ch=(clasehog_ch==1) if jefe_ci==1 & clasehog_ch!=.
                 replace unip_ch=. if clasehog_ch==.
@@ -90,9 +90,11 @@ Output:             Excel-DTA file
 		* 2.3 Porcentaje poblacion que vive con menos de 5 usd diarios
 				gen      poor =0 if pc_ytot_ch!=.
 				replace  poor =1 if pc_ytot_ch<lp5_ci
+				
 		* 2.4 Porcentaje de la población con ingresos entre 5 y 12.4 usd per capita por día
 				gen vulnerable=0 if pc_ytot_ch!=.
                 replace vulnerable=1 if ((pc_ytot_ch>=lp5_ci) & (pc_ytot_ch<lp31_ci*4))
+				
 		* 2.5 Porcentaje de la población con ingresos entre $12.4 y $62 per capita por día
 				gen middle=0 if pc_ytot_ch!=.
 				replace middle=1 if ((pc_ytot_ch>=lp31_ci*4) & (pc_ytot_ch<lp31_ci*20))
@@ -100,59 +102,34 @@ Output:             Excel-DTA file
 		* 2.6 Porcentaje de la población con ingresos mayores a 62 USD per capita por día
 				gen rich=0 if pc_ytot_ch!=.
 				replace rich=1 if (pc_ytot_ch>=lp31_ci*20 & pc_ytot_ch!=.)
+				
 		* 2.7 Porcentaje de hogares que reciben remesas del exterior
 				gen indexrem=(remesas_ch>0 & remesas_ch!=.) if jefe_ci==1 & remesas_ch!=.
+				
 		* 2.8 Salarios por hora	
 				gen ylmprixh = ylmpri_ci/(horaspri_ci * 4.34)
-		* 2.9 Coeficiente de Gini para el ingreso per cápita del hogar
-		        gen ginihh=.
-				sum pc_ytot_ch
-				if r(mean)>0 & r(mean)!=. {
-				inequal7 pc_ytot_ch [w=round(factor_ci)] if (pc_ytot_ch!=. & pc_ytot_ch>0)
-				replace ginihh=${S_4}
-				replace ginihh=ginihh*100
-				}
-				
-		* 2.10 Coeficiente de Gini para Salarios por Hora
-				gen gini=.
-				sum ylmhopri_ci
-                if r(mean)>0 & r(mean)!=. {
-                inequal7 ylmhopri_ci [w=round(factor_ci)] if (edad_ci>=15 & edad_ci<=64) & (ylmhopri_ci>0 & ylmhopri_ci!=.) & pc_ytot_ch!=. & pc_ytot_ch>0
-                replace gini=${S_4} if (edad_ci>=15 & edad_ci<=64) 
-				replace gini=gini*100
-				}			
-		* 2.11 Coeficiente de Theil para el ingreso per cápita del hogar
-		        gen theilhh=.
-				sum pc_ytot_ch
-				if r(mean)>0 & r(mean)!=. {
-				inequal7 pc_ytot_ch [w=round(factor_ci)] if (pc_ytot_ch!=. & pc_ytot_ch>0)
-				replace theilhh=${S_8}
-				replace theilhh=theilhh*100
-				}				
-		* 2.12 Coeficiente de Theil para Salarios por Hora
-				gen theil=.
-				sum ylmhopri_ci
-                if r(mean)>0 & r(mean)!=. {
-                inequal7 ylmhopri_ci [w=round(factor_ci)] if (edad_ci>=15 & edad_ci<=64) & (ylmhopri_ci>0 & ylmhopri_ci!=.)
-                replace theil=${S_8} if (edad_ci>=15 & edad_ci<=64)
-				replace theil=theil*100
-				}
-		* 2.13 Ingreso del hogar generado por mujeres
+
+		* 2.9 Ingreso del hogar generado por mujeres
                 bys idh_ch: egen ywomen=sum(yallsr18) if sexo_ci==2
                 bys idh_ch: egen hhywomen=max(ywomen)
-		* 2.14 Proporción del ingreso del hogar generado por mujeres con respecto al ingreso total del hogar
+				
+		* 2.10 Proporción del ingreso del hogar generado por mujeres con respecto al ingreso total del hogar
                 gen relacion1=hhywomen/hhyallsr 
-		* 2.15 Hogares donde la mayor parte del ingreso es generado por  mujeres
+				
+		* 2.11 Hogares donde la mayor parte del ingreso es generado por  mujeres
 			    gen hhfem_ch=(relacion1>0.50 & relacion1<.) if jefe_ci ==1
                 replace hhfem_ch=0 if relacion1==0.50 & jefa_ch==0 & jefe_ci ==1
-		* 2.16 Porcentaje del ingreso laboral de adultos generado por mujeres
+				
+		* 2.12 Porcentaje del ingreso laboral de adultos generado por mujeres
 			    gen ylmpri18=ylmpri_ci if dumedad==1
                 bys idh_ch:egen hhylmpri=sum(ylmpri18)
-		* 2.17 Ingreso laboral generado por mujeres
+				
+		* 2.13 Ingreso laboral generado por mujeres
 			    by idh_ch, sort: egen yLwomen=sum(ylmpri18) if sexo_ci==2
                 bys idh_ch: egen hhyLwomen=max(yLwomen)
                 gen shareylmfem_ch=(hhyLwomen/hhylmpri)*100
-
+		* 2.14 Ingreso laboral por horas de personas entre 15 y 54
+				gen ylmhopri_15_64 = ylmhopri_ci if edad_ci>=15 & edad_ci<=64 & ylmhopri_ci!=. & ylmhopri_ci>0
 
 	* 3. Vivienda 
 	

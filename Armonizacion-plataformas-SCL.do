@@ -14,13 +14,16 @@ Output:             Excel-DTA file
                         0: Program set up
 ====================================================================*/
 version 16.0
+clear all
 drop _all 
 set more off 
+set maxvar 120000, perm
+
 *ssc install quantiles inequal7
-* cap ssc install estout
-* cap ssc install inequal7
+ cap ssc install estout
+ cap ssc install inequal7
  
- 
+ cd "C:\Users\alop\OneDrive - Inter-American Development Bank Group\Desktop\Git_repositories"
  
 qui {
 
@@ -89,12 +92,12 @@ program scl_pct
   local denominator = `r(sum_w)'
   local valor = (`numerator' / `denominator') * 100  
   	
-	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"sum of `indvar'"') (`valor')
+	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"sum of `indvar'"') (`valor')
 	
   }
   if _rc != 0 {
    /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"sum of `indvar'"') (.)
+	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"sum of `indvar'"') (.)
   }
   
   
@@ -134,12 +137,12 @@ program scl_nivel
   if _rc == 0 {
     capture local valor = `r(sum_w)'
 	
-	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"sum of `indvar'"') (`valor')
+	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"sum of `indvar'"') (`valor')
 	
   }
   else {
    /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"sum of `indvar'"') (.)
+	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"sum of `indvar'"') (.)
   }
   
 end
@@ -178,12 +181,12 @@ program scl_mean
 	
 	if ""=="`valor'" local valor = .
 	
-	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"mean of `indvar'"') (`valor')
+	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"mean of `indvar'"') (`valor')
 	
   }
   else {
    /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"mean of `indvar'"') (.)
+	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"mean of `indvar'"') (.)
   }
   
 end
@@ -221,12 +224,12 @@ program scl_median
 	
 	if ""=="`valor'" local valor = .
 	
-	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"median of `indvar'"') (`valor')
+	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"median of `indvar'"') (`valor')
 	
   }
   else {
    /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"median of `indvar'"') (.)
+	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"median of `indvar'"') (.)
   }
   
 end
@@ -276,12 +279,12 @@ program scl_ratio
 		capture local denominator = `r(sum)'
 		local valor = (`numerator' / `denominator') * 100 
 		
-		post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (`valor')
+		post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (`valor')
 	}
 		
 	else {
 		/* generate a line with missing value */
-		post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.)
+		post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.)
 	}
   }
   
@@ -328,11 +331,11 @@ program scl_ratio_2conds
            capture local denominator = `r(sum)'
            local valor = (`numerator' / `denominator') * 100 
            
-           post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (`valor')
+           post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (`valor')
      }
      else {
            /* generate a line with missing value */
-           post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.)
+           post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.)
      }
      
   }
@@ -361,28 +364,25 @@ program scl_inequal
   local clase2 : word 5 of $current_slice
   local clase3 : word 6 of $current_slice
   
-  scl_if_compose `if'
+   scl_if_compose `if'
   local xif `"`s(xif)'"'
   sreturn clear
  
   
   display `"$tema - `indname'"'
-  capture quietly sum `indvar' `xif'
-  
-  if _rc == 0 & r(mean)>0 & r(mean)!=. {
   						
 	capture quietly inequal7 `indvar' [w=round(factor_ci)] `xif'
-    local valor =`r(`typeind')'*100							
+	if _rc == 0 {
+    local valor =`r(`typeind')' * 100
+		
 	
-	if ""=="`valor'" local valor = .
+	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`typeind' of `indvar'"') (`valor')
 	
-	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`typeind' of `indvar'"') (`valor')
-	
-  }
-  if _rc != 0 {
+	}
+	if _rc != 0 {
    /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'")  ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`typeind' of `indvar'"') (.)
-  }
+	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`typeind' of `indvar'"') (.)
+	}
   
  end 
 
@@ -404,14 +404,14 @@ local mydir = c(pwd) /* GitHub folder */
 * connected to the VPN)
 
 if "${source}"=="" {
-	global source   "\\Sdssrv03\surveys\harmonized" /*if you have a local copy of the .dta files, change here to use your local copy */
+	global source   "C:\Users\alop\OneDrive - Inter-American Development Bank Group\Desktop\harmonized" //if you have a local copy of the .dta files, change here to use your local copy 
 }
 
 /*
  Location of the .do files to include
 */
 global input	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Input"
-global output 	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Output"
+global out 	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Output"
 /*
 * Location for temporary files. This folder is on MS TEAMS.
 * 
@@ -439,27 +439,41 @@ if scalar(Found)==0 {
 
 **** include "${input}/calculo_microdatos_scl.do"
 						
-tempfile tablas
-tempname ptablas
-global output `ptablas'
 
-** Este postfile da estructura a la base:
-
-* postfile `ptablas' str30(tiempo_id pais_id geografia_id clase1 clase2 nivel_id tema indicador valor muestra) using `tablas', replace
-postfile `ptablas' str4 tiempo_id str3 pais_id str25(geografia_id clase1 clase2 clase3 tema indicador) str35 description valor /* muestra */ using `tablas', replace
 
 ** Creo locales principales:
 						
-local paises  ARG  BHS BOL BRA BRB BLZ CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
-local anos  2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 
-local paises PER
-
+local paises  /*ARG BHS BOL BRA BRB BLZ CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY*/ PER/*DOM SUR TTO URY VEN */
+local anos  /*2006 2007 2008 2009*/ 2010 /*2011 2012 2013 2014 2015 2016 2017 2018 2019 */
 local geografia_id total_nacional
 
 	noisily display "Empezando calculos..."
 
 	foreach pais of local paises {
-		foreach ano of local anos {
+		
+			tempfile microdato_`pais'
+			tempname pmicrodato_`pais'
+
+			postfile `pmicrodato_`pais'' str4 tiempo_id str3 pais_id str25(fuente geografia_id clase1 clase2 clase3 tema indicador) str35 description valor using `microdato_`pais'', replace
+			postclose `pmicrodato_`pais''
+			use `microdato_`pais'', clear
+
+
+			save "${out}\indicadores_encuestas_hogares_scl_`pais'.dta", replace 
+		
+		
+		foreach ano of local anos {	
+			
+			tempfile tablas_`pais'
+			tempname ptablas_`pais'
+			global output `ptablas_`pais''
+
+			** Este postfile da estructura a la base:
+
+			* postfile `ptablas' str30(tiempo_id pais_id geografia_id clase1 clase2 nivel_id tema indicador valor muestra) using `tablas', replace
+			postfile `ptablas_`pais'' str4 tiempo_id str3 pais_id str25(fuente geografia_id clase1 clase2 clase3 tema indicador) str35 description valor /* muestra */ using `tablas_`pais'', replace
+			
+			
 			
 			* En este dofile de encuentra el diccionario de encuestas y rondas de la región
 			 include "${input}\Directorio HS LAC.do" 
@@ -480,7 +494,7 @@ local geografia_id total_nacional
 
 				if _rc == 0 { 
 					//* Si esta base de datos existe, entonces haga: */
-					noisily display "Calculando \\`pais'\\`encuestas'\\data_arm\\`pais'_`ano'`rondas'_BID.dta..."		
+					noisily display "Calculando \\`pais'\\`encuestas'\data_arm\\`pais'_`ano'`rondas'_BID.dta..."		
 														
 						* variables de clase
 							
@@ -548,7 +562,7 @@ local geografia_id total_nacional
 					  
 					  /* use an empty file which contains all variables */
 
-					  use "${covidtmp}/template.dta", clear
+					  use "${covidtmp}\template.dta", clear
 
 					
 				}
@@ -558,7 +572,7 @@ local geografia_id total_nacional
 					* 1.2: Indicators for each topic		
 *****************************************************************************************************************************************
 				
-
+/*
 						************************************************
 						  global tema "demografia"
 						************************************************
@@ -671,7 +685,7 @@ local geografia_id total_nacional
 										
 							} /*cierro clase*/			    
 											
-										
+								
 											
 							************************************************
 							  global tema "educacion"
@@ -784,12 +798,12 @@ local geografia_id total_nacional
 													mat nivel = e(b)
 													local muestra = nivel[1,2]
 																								
-													post $output ("`ano'") ("`pais'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("Años_Escolaridad_25_mas") ("%clase3/pop_25+") (`valor')
+													post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("Años_Escolaridad_25_mas") ("%clase3/pop_25+") (`valor')
 													} /* cierro if */
 													
 													else {
 															
-													post $output ("`ano'") ("`pais'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("Años_Escolaridad_25_mas") ("%clase3/pop_25+") (.)
+													post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("Años_Escolaridad_25_mas") ("%clase3/pop_25+") (.)
 														
 													} /* cierro else */
 													
@@ -1196,11 +1210,11 @@ local geografia_id total_nacional
 												scl_pct ///
 									            rich rich 1 if rich!=. 
 
-				
+			
 										} /* cierro clase3 */	
 									}/*cierro clase2*/
 								} /* cierro clase*/ 
-				
+	*/				
 								local clases Total Urbano Rural
 								local clases2 Total
 								local clases3 Total 
@@ -1231,9 +1245,9 @@ local geografia_id total_nacional
 												scl_inequal ///
 												theil ylmhopri_ci theil 
 															
-												* Porcentaje del ingreso laboral del hogar contribuido por las mujeres */
-												scl_pct ///
-												ylmfem_ch shareylmfem_ch 1 if  shareylmfem_ch!=. 
+												* Porcentaje del ingreso laboral del hogar contribuido por las mujeres 
+												scl_mean ///
+												ylmfem_ch shareylmfem_ch if jefe_ci==1 & shareylmfem_ch!=. 
 															 
 														
 													
@@ -1241,7 +1255,7 @@ local geografia_id total_nacional
 									}/*cierro clase2*/
 								} /* cierro clase*/ 
 														
-														
+	/*													
 								
 								local clases Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano
 								local clases2 Total
@@ -1337,9 +1351,9 @@ local geografia_id total_nacional
 											}/*cierro clases3*/		
 										} /*cierro clases2*/
 								} /*cierro clases*/
-
+*/
 								
-							
+				/*			
 								
 							    ************************************************
 								  global tema "diversidad"
@@ -1393,7 +1407,7 @@ local geografia_id total_nacional
 											}/*cierro clases3*/		
 										} /*cierro clases2*/
 								} /*cierro clases*/
-								
+									
 								
 								************************************************
 								  global tema "migracion"
@@ -1429,7 +1443,7 @@ local geografia_id total_nacional
 										} /*cierro clases2*/
 								} /*cierro clases*/
 							
-							
+						
 								************************************************
 								  global tema "programas sociales"
 								************************************************
@@ -1492,21 +1506,28 @@ local geografia_id total_nacional
 												}/*cierro clases3*/		
 										} /*cierro clases2*/
 								} /*cierro clases*/		
-						
+						*/ 
+			
+
+
+ 
+			postclose `ptablas_`pais''
+
+			use `tablas_`pais'', clear
+			* destring valor muestra, replace
+			recode valor 0=.
+			* recode muestra 0=.
+			save `tablas_`pais'', replace 
+			
+			use "${out}\indicadores_encuestas_hogares_scl_`pais'.dta"
+			append using  `tablas_`pais''
+		
+
+			save "${out}\indicadores_encuestas_hogares_scl_`pais'.dta", replace 
+			*clear
 			} /* cierro anos */
 		} /* cierro paises */
 } /* cierro quietly */
-
- 
-postclose `ptablas'
-
-use `tablas', clear
-* destring valor muestra, replace
-recode valor 0=.
-* recode muestra 0=.
-save `tablas', replace 
-
-
 
 
 /*====================================================================
@@ -1517,7 +1538,7 @@ save `tablas', replace
 
 * guardo el archivo temporal
 * (this file will be ignored by GitHub)
-save "${covidtmp}\Indicadores_SCL.dta", replace
+
 
 * Variables de formato 
 
@@ -1555,8 +1576,8 @@ foreach div of local divisiones {
 			restore
 						
 } 
- */
  
+ */
  		
-exit
-/* End of do-file */
+
+/* End
