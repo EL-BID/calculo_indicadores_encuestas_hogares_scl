@@ -118,6 +118,7 @@ program scl_nivel
   /* parameters of the indicator */
   local indname : word 1 of `anything'
   local indvar : word 2 of `anything'
+  local indcat : word 3 of `anything'
   /* paramaters of the current disaggregation (comes from $current_slice global macro) */
   local pais : word 1 of $current_slice
   local ano : word 2 of $current_slice
@@ -132,7 +133,7 @@ program scl_nivel
  
   
   display `"$tema - `indname'"'
-  capture quietly sum `indvar' [w=round(factor_ch)] `xif'
+  capture quietly sum `indvar' [w=round(factor_ch)] `xif' & `indvar'==`indcat'
   
   if _rc == 0 {
     capture local valor = `r(sum_w)'
@@ -935,10 +936,10 @@ local geografia_id total_nacional
 											//======== CALCULATE INDICATORS ================================================
 													
 											scl_pct ///
-												tasa_ocupacion condocup_ci 1
+												tasa_ocupacion condocup_ci 1 if pet==1
 										
 											scl_pct ///
-												tasa_desocupacion condocup_ci 2
+												tasa_desocupacion condocup_ci 2 if pea==1
 										
 											scl_pct ///
 												tasa_participacion pea 1 if pet==1
@@ -950,7 +951,7 @@ local geografia_id total_nacional
 												ingreso_mens_prom ylab_ppp if condocup_ci==1 & ylab_ppp!=.
 
 											scl_mean ///
-												ingreso_hor_prom hwage_ppp if condocup_ci==1 & hwage_ppp!=.
+												ingreso_hor_prom_ppp hwage_ppp if condocup_ci==1 & hwage_ppp!=.
 					
 											scl_mean ///
 												horas_trabajadas horastot_ci if condocup_ci==1 & horastot_ci!=.
@@ -998,127 +999,127 @@ local geografia_id total_nacional
 												inglaboral_informales ylab_ci if condocup_ci==1 & formal_ci==0
 												
 											scl_nivel ///
-												nivel_asalariados asalariado if condocup_ci==1
+												nivel_asalariados asalariado 1 if condocup_ci==1
 			
 											scl_nivel ///
-												nivel_independientes ctapropia if condocup_ci==1
+												nivel_independientes ctapropia 1 if condocup_ci==1
 												
 											scl_nivel ///
-												nivel_patrones patron if condocup_ci==1
+												nivel_patrones patron 1 if condocup_ci==1
 																				
 											scl_nivel ///
-												nivel_sinremuneracion sinremuner if condocup_ci==1
+												nivel_sinremuneracion sinremuner 1 if condocup_ci==1
 
 											scl_nivel ///
-												nivel_subempleo subemp_ci if condocup_ci==1
+												nivel_subempleo subemp_ci 1 if condocup_ci==1
 
 											scl_pct ///
 												tasa_agro agro 1 if condocup_ci==1																	
 											
 											scl_nivel ///
-												nivel_agro agro if condocup_ci==1
+												nivel_agro agro 1 if condocup_ci==1
 											
 											scl_pct ///
 												tasa_minas minas 1 if condocup_ci==1																	
 	
 											scl_nivel ///
-												nivel_minas minas if condocup_ci==1										
+												nivel_minas minas 1 if condocup_ci==1										
 																			
 											scl_pct ///
 												tasa_industria industria 1 if condocup_ci==1		
 												
 											scl_nivel ///
-												nivel_industria industria if condocup_ci==1										
+												nivel_industria industria 1 if condocup_ci==1										
 
 											scl_pct ///
 												tasa_sspublicos sspublicos 1 if condocup_ci==1		
 
 											scl_nivel ///
-												nivel_sspublicos sspublicos if condocup_ci==1										
+												nivel_sspublicos sspublicos 1 if condocup_ci==1										
 
 											scl_pct ///
 												tasa_construccion construccion 1 if condocup_ci==1		
 
 											scl_nivel ///
-												nivel_construccion construccion if condocup_ci==1												
+												nivel_construccion construccion 1 if condocup_ci==1												
 
 											scl_pct ///
 												tasa_comercio comercio 1 if condocup_ci==1		
 
 											scl_nivel ///
-												nivel_comercio comercio if condocup_ci==1	
+												nivel_comercio comercio 1 if condocup_ci==1	
 												
 											scl_pct ///
 												tasa_transporte transporte 1 if condocup_ci==1		
 
 											scl_nivel ///
-												nivel_transporte transporte if condocup_ci==1																			
+												nivel_transporte transporte 1 if condocup_ci==1																			
 																			
 											scl_pct ///
 												tasa_financiero financiero 1 if condocup_ci==1		
 
 											scl_nivel ///
-												nivel_financiero financiero if condocup_ci==1																			
+												nivel_financiero financiero 1 if condocup_ci==1																			
 							
 											scl_pct ///
 												tasa_servicios servicios 1 if condocup_ci==1		
 
 											scl_nivel ///
-												nivel_servicios servicios if condocup_ci==1																				
+												nivel_servicios servicios 1 if condocup_ci==1																				
 								
 											scl_pct ///
 												tasa_profestecnico profestecnico 1 if condocup_ci==1		
 
 											scl_nivel ///
-												nivel_profestecnico profestecnico if condocup_ci==1																					
+												nivel_profestecnico profestecnico 1 if condocup_ci==1																					
 
 											scl_pct ///
 												tasa_director director 1 if condocup_ci==1		
 
 											scl_nivel ///
-												nivel_director director if condocup_ci==1																					
+												nivel_director director 1 if condocup_ci==1																					
 																
 											scl_pct ///
 												tasa_administrativo administrativo 1 if condocup_ci==1		
 
 											scl_nivel ///
-												nivel_administrativo administrativo if condocup_ci==1																			
+												nivel_administrativo administrativo 1 if condocup_ci==1																			
 																																						
 											scl_pct ///
 												tasa_comerciantes comerciantes 1 if condocup_ci==1		
 
 											scl_nivel ///
-												nivel_comerciantes comerciantes if condocup_ci==1																			
+												nivel_comerciantes comerciantes 1 if condocup_ci==1																			
 
 											scl_pct ///
 												tasa_trabss trabss 1 if condocup_ci==1		
 
 											scl_nivel ///
-												nivel_trabss trabss if condocup_ci==1	
+												nivel_trabss trabss 1 if condocup_ci==1	
 												
 											scl_pct ///
 												tasa_trabagricola trabagricola 1 if condocup_ci==1		
 
 											scl_nivel ///
-												nivel_trabagricola trabagricola if condocup_ci==1																									
+												nivel_trabagricola trabagricola 1 if condocup_ci==1																									
 									
 											scl_pct ///
 												tasa_obreros obreros 1 if condocup_ci==1		
 
 											scl_nivel ///
-												nivel_obreros obreros if condocup_ci==1																									
+												nivel_obreros obreros 1 if condocup_ci==1																									
 
 											scl_pct ///
 												tasa_ffaa ffaa 1 if condocup_ci==1		
 
 											scl_nivel ///
-												nivel_ffaa ffaa if condocup_ci==1																									
+												nivel_ffaa ffaa 1 if condocup_ci==1																									
 
 											scl_pct ///
 												tasa_otrostrab otrostrab 1 if condocup_ci==1		
 
 											scl_nivel ///
-												nivel_otrostrab otrostrab if condocup_ci==1											
+												nivel_otrostrab otrostrab 1 if condocup_ci==1											
 
 											scl_pct ///
 												empleo_publico spublico_ci 1 if condocup_ci==1		
@@ -1130,10 +1131,12 @@ local geografia_id total_nacional
 												formalidad_3 formal_ci 1 if condocup_ci==1 & categopri_ci==3	
 
 											scl_pct ///
-												formalidad_4 formal_ci 1 if condocup_ci==1
+												formalidad_4 formal_ci "1" if condocup_ci==1 & categopri_ci==2
 																		
 											scl_mean ///
-												ingreso_hor_prom hwage_ppp if condocup_ci==1 & formal_ci==0
+												ingreso_hor_prom hwage if condocup_ci==1
+												
+							} /* cierro clase3 */	
 
 											scl_pct ///
 												pensionista_65_mas pensiont_ci 1 if age_65_mas==1	
@@ -1164,7 +1167,7 @@ local geografia_id total_nacional
 																			
 										
 										
-									} /* cierro clase3 */	
+								
 								}/*cierro clase2*/
 							} /* cierro clase*/ 
 					

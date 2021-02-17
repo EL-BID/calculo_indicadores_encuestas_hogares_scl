@@ -20,7 +20,8 @@ Output:             Excel-DTA file
 	*1.1 Poblacion en Edad de Trabajar - PET y economicamente activa PEA:
 				cap gen pet=1 if condocup_ci==1 | condocup_ci==2 | condocup_ci==3
 				cap gen pea=1 if condocup_ci==1 | condocup_ci==2 
-
+				replace pea = 0 if condocup_ci==3
+				
 	*1.2. Diferentes análisis de la PET:			
 				gen age_15_64  = inrange(edad_ci,15,64) 
 				gen age_25_64  = inrange(edad_ci,25,64) 
