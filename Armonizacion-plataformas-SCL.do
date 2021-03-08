@@ -28,9 +28,9 @@ set maxvar 120000, perm
 qui {
 
 /**** if composition utility function ****************************
- scl_if_compose clase1 clase2 clase3 if ...
+ scl_if_compose sexo area nivel_educativo if ...
  will return
-  if ... & `clase1'==1 & `clase2'==1 & `clase3'==1
+  if ... & `sexo'==1 & `area'==1 & `nivel_educativo'==1
  in s(xif) macro.
  Needs to clear s manually calling sreturn clear.
 ******************************************************************/
@@ -38,16 +38,19 @@ capture program drop scl_if_compose
 program scl_if_compose, sclass
  syntax [if]
  /* paramaters of the current disaggregation (comes from $current_slice global macro) */
- local clase1 : word 4 of $current_slice
- local clase2 : word 5 of $current_slice
- local clase3 : word 6 of $current_slice
+ local sexo : word 4 of $current_slice
+ local area : word 5 of $current_slice
+ local nivel_educativo : word 6 of $current_slice
+ local quintil_ingreso : word 7 of $current_slice
+ local grupo_etario : word 8 of $current_slice
+ local etnicidad : word 9 of $current_slice
  
  if "`if'"!="" {
      /* most common case */
-	 sreturn local xif `"`if' & `clase1'==1 & `clase2'==1 & `clase3'==1"'
+	 sreturn local xif `"`if' & `sexo'==1 & `area'==1 & `nivel_educativo'==1 & `quintil_ingreso'==1 & `grupo_etario'==1 "'
   }
   else {
-	 sreturn local xif `"if `clase1'==1 & `clase2'==1 & `clase3'==1"'
+	 sreturn local xif `"if `sexo'==1 & `area'==1 & `nivel_educativo'==1 & `quintil_ingreso'==1 & `grupo_etario'==1 "'
   }
   
 end
@@ -73,31 +76,34 @@ program scl_pct
   local pais : word 1 of $current_slice
   local ano : word 2 of $current_slice
   local geografia_id : word 3 of $current_slice
-  local clase1 : word 4 of $current_slice
-  local clase2 : word 5 of $current_slice
-  local clase3 : word 6 of $current_slice
+  local sexo : word 4 of $current_slice
+  local area : word 5 of $current_slice
+  local nivel_educativo : word 6 of $current_slice
+  local quintil_ingreso : word 7 of $current_slice
+  local grupo_etario : word 8 of $current_slice
+  local etnicidad : word 9 of $current_slice
      
 	scl_if_compose `if'
 	local xif `"`s(xif)'"'
 	sreturn clear
 	 
 	 
-  cap sum `indvar' [w=round(factor_ch)] `xif' & `indvar'==`indcat' //if `indvar'==`indcat' & `clase1'==1 & `clase2'==1 & `clase3'==1
+  cap sum `indvar' [w=round(factor_ch)] `xif' & `indvar'==`indcat' 
   
     
   if _rc == 0 {
 	    
   local numerator = `r(sum_w)'
-  cap sum `indvar' [w=round(factor_ch)] `xif' //if `clase1'==1 & `clase2'==1 & `clase3'==1
+  cap sum `indvar' [w=round(factor_ch)] `xif' 
   local denominator = `r(sum_w)'
   local valor = (`numerator' / `denominator') * 100  
   	
-	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"sum of `indvar'"') (`valor')
+	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"sum of `indvar'"') (`valor')
 	
   }
   if _rc != 0 {
    /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"sum of `indvar'"') (.)
+	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"sum of `indvar'"') (.)
   }
   
   
@@ -123,9 +129,12 @@ program scl_nivel
   local pais : word 1 of $current_slice
   local ano : word 2 of $current_slice
   local geografia_id : word 3 of $current_slice
-  local clase1 : word 4 of $current_slice
-  local clase2 : word 5 of $current_slice
-  local clase3 : word 6 of $current_slice
+  local sexo : word 4 of $current_slice
+  local area : word 5 of $current_slice
+  local nivel_educativo : word 6 of $current_slice
+  local quintil_ingreso : word 7 of $current_slice
+  local grupo_etario : word 8 of $current_slice
+  local etnicidad : word 9 of $current_slice
   
   scl_if_compose `if'
   local xif `"`s(xif)'"'
@@ -138,12 +147,12 @@ program scl_nivel
   if _rc == 0 {
     capture local valor = `r(sum_w)'
 	
-	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"sum of `indvar'"') (`valor')
+	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"sum of `indvar'"') (`valor')
 	
   }
   else {
    /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"sum of `indvar'"') (.)
+	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"sum of `indvar'"') (.)
   }
   
 end
@@ -165,9 +174,12 @@ program scl_mean
   local pais : word 1 of $current_slice
   local ano : word 2 of $current_slice
   local geografia_id : word 3 of $current_slice
-  local clase1 : word 4 of $current_slice
-  local clase2 : word 5 of $current_slice
-  local clase3 : word 6 of $current_slice
+  local sexo : word 4 of $current_slice
+  local area : word 5 of $current_slice
+  local nivel_educativo : word 6 of $current_slice
+  local quintil_ingreso : word 7 of $current_slice
+  local grupo_etario : word 8 of $current_slice
+  local etnicidad : word 9 of $current_slice
   
   scl_if_compose `if'
   local xif `"`s(xif)'"'
@@ -182,12 +194,12 @@ program scl_mean
 	
 	if ""=="`valor'" local valor = .
 	
-	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"mean of `indvar'"') (`valor')
+	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"mean of `indvar'"') (`valor')
 	
   }
   else {
    /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"mean of `indvar'"') (.)
+	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"mean of `indvar'"') (.)
   }
   
 end
@@ -208,9 +220,12 @@ program scl_median
   local pais : word 1 of $current_slice
   local ano : word 2 of $current_slice
   local geografia_id : word 3 of $current_slice
-  local clase1 : word 4 of $current_slice
-  local clase2 : word 5 of $current_slice
-  local clase3 : word 6 of $current_slice
+  local sexo : word 4 of $current_slice
+  local area : word 5 of $current_slice
+  local nivel_educativo : word 6 of $current_slice
+  local quintil_ingreso : word 7 of $current_slice
+  local grupo_etario : word 8 of $current_slice
+  local etnicidad : word 9 of $current_slice
   
   scl_if_compose `if'
   local xif `"`s(xif)'"'
@@ -225,12 +240,12 @@ program scl_median
 	
 	if ""=="`valor'" local valor = .
 	
-	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"median of `indvar'"') (`valor')
+	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"median of `indvar'"') (`valor')
 	
   }
   else {
    /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"median of `indvar'"') (.)
+	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"median of `indvar'"') (.)
   }
   
 end
@@ -256,9 +271,12 @@ program scl_ratio
   local pais : word 1 of $current_slice
   local ano : word 2 of $current_slice
   local geografia_id : word 3 of $current_slice
-  local clase1 : word 4 of $current_slice
-  local clase2 : word 5 of $current_slice
-  local clase3 : word 6 of $current_slice
+  local sexo : word 4 of $current_slice
+  local area : word 5 of $current_slice
+  local nivel_educativo : word 6 of $current_slice
+  local quintil_ingreso : word 7 of $current_slice
+  local grupo_etario : word 8 of $current_slice
+  local etnicidad : word 9 of $current_slice
   
   /* create the "if" part of the command
     combining with the "if" set when calling
@@ -280,12 +298,12 @@ program scl_ratio
 		capture local denominator = `r(sum)'
 		local valor = (`numerator' / `denominator') * 100 
 		
-		post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (`valor')
+		post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (`valor')
 	}
 		
 	else {
 		/* generate a line with missing value */
-		post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.)
+		post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.)
 	}
   }
   
@@ -317,26 +335,29 @@ program scl_ratio_2conds
   local pais : word 1 of $current_slice
   local ano : word 2 of $current_slice
   local geografia_id : word 3 of $current_slice
-  local clase1 : word 4 of $current_slice
-  local clase2 : word 5 of $current_slice
-  local clase3 : word 6 of $current_slice
+  local sexo : word 4 of $current_slice
+  local area : word 5 of $current_slice
+  local nivel_educativo : word 6 of $current_slice
+  local quintil_ingreso : word 7 of $current_slice
+  local grupo_etario : word 8 of $current_slice
+  local etnicidad : word 9 of $current_slice
     
   display `"$tema - `indname'"'
-  capture quietly sum `indvarnum' [w=round(factor_ch)] `numcond' & `clase1'==1 & `clase2'==1 & `clase3'==1
+  capture quietly sum `indvarnum' [w=round(factor_ch)] `numcond' & `sexo'==1 & `area'==1 & `nivel_educativo'==1
   
   if _rc == 0 {
     local numerator = `r(sum)'
      
-     capture quietly sum `indvarden' [w=round(factor_ch)] `dencond' & `clase1'==1 & `clase2'==1 & `clase3'==1
+     capture quietly sum `indvarden' [w=round(factor_ch)] `dencond' & `sexo'==1 & `area'==1 & `nivel_educativo'==1
      if _rc==0 {
            capture local denominator = `r(sum)'
            local valor = (`numerator' / `denominator') * 100 
            
-           post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (`valor')
+           post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (`valor')
      }
      else {
            /* generate a line with missing value */
-           post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.)
+           post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.)
      }
      
   }
@@ -361,9 +382,12 @@ program scl_inequal
   local pais : word 1 of $current_slice
   local ano : word 2 of $current_slice
   local geografia_id : word 3 of $current_slice
-  local clase1 : word 4 of $current_slice
-  local clase2 : word 5 of $current_slice
-  local clase3 : word 6 of $current_slice
+  local sexo : word 4 of $current_slice
+  local area : word 5 of $current_slice
+  local nivel_educativo : word 6 of $current_slice
+  local quintil_ingreso : word 7 of $current_slice
+  local grupo_etario : word 8 of $current_slice
+  local etnicidad : word 9 of $current_slice
   
    scl_if_compose `if'
   local xif `"`s(xif)'"'
@@ -377,12 +401,12 @@ program scl_inequal
     local valor =`r(`typeind')' * 100
 		
 	
-	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`typeind' of `indvar'"') (`valor')
+	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`typeind' of `indvar'"') (`valor')
 	
 	}
 	if _rc != 0 {
    /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("`indname'") (`"`typeind' of `indvar'"') (.)
+	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`typeind' of `indvar'"') (.)
 	}
   
  end 
@@ -447,6 +471,7 @@ if scalar(Found)==0 {
 local paises  /*ARG BHS BOL BRA BRB BLZ CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY*/ PER/*DOM SUR TTO URY VEN */
 local anos  /*2006 2007 2008 2009*/ 2010 /*2011 2012 2013 2014 2015 2016 2017 2018 2019 */
 local geografia_id total_nacional
+local etnicidad No_aplica
 
 	noisily display "Empezando calculos..."
 
@@ -455,7 +480,7 @@ local geografia_id total_nacional
 			tempfile microdato_`pais'
 			tempname pmicrodato_`pais'
 
-			postfile `pmicrodato_`pais'' str4 tiempo_id str3 pais_id str25(fuente geografia_id clase1 clase2 clase3 tema indicador) str35 description valor using `microdato_`pais'', replace
+			postfile `pmicrodato_`pais'' str4 tiempo_id str3 pais_id str25(fuente geografia_id sexo area quintil_ingreso nivel_educativo grupo_etario etnicidad tema indicador) str35 description valor using `microdato_`pais'', replace
 			postclose `pmicrodato_`pais''
 			use `microdato_`pais'', clear
 
@@ -471,8 +496,8 @@ local geografia_id total_nacional
 
 			** Este postfile da estructura a la base:
 
-			* postfile `ptablas' str30(tiempo_id pais_id geografia_id clase1 clase2 nivel_id tema indicador valor muestra) using `tablas', replace
-			postfile `ptablas_`pais'' str4 tiempo_id str3 pais_id str25(fuente geografia_id clase1 clase2 clase3 tema indicador) str35 description valor /* muestra */ using `tablas_`pais'', replace
+			* postfile `ptablas' str30(tiempo_id pais_id geografia_id sexo area nivel_id tema indicador valor muestra) using `tablas', replace
+			postfile `ptablas_`pais'' str4 tiempo_id str3 pais_id str25(fuente geografia_id sexo area quintil_ingreso nivel_educativo grupo_etario etnicidad tema indicador) str35 description valor /* muestra */ using `tablas_`pais'', replace
 			
 			
 			
@@ -481,7 +506,7 @@ local geografia_id total_nacional
 			 * Encuentra el archivo para este país/año
 			 cap use "${source}\\`pais'\\`encuestas'\data_arm\\`pais'_`ano'`rondas'_BID.dta" , clear
 
-			 
+			 foreach encuesta of local encuestas {
 			 /* 
 			   Alternatively, if you want to test a certain collection of .dta files,
 			   uncomment the code below which will search for all .dta files in the $source
@@ -500,6 +525,7 @@ local geografia_id total_nacional
 						* variables de clase
 							
 					cap {
+						gen No_aplica  =  1
 						gen byte Total  =  1
 						gen Primaria  =  1
 						gen Secundaria  =  1
@@ -573,7 +599,7 @@ local geografia_id total_nacional
 					* 1.2: Indicators for each topic		
 *****************************************************************************************************************************************
 				
-/*
+
 						************************************************
 						  global tema "demografia"
 						************************************************
@@ -581,16 +607,19 @@ local geografia_id total_nacional
 						// Authors: Daniela Zuluaga
 						************************************************
 					
-						local clases Total quintil_1 /*quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano*/
-						local clases2 Total Rural Urbano
+						
+						local areas Total Rural Urbano  
+						local quintil_ingresos Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 
 		
-						foreach clase1 of local clases {
-							foreach clase2 of local clases2 {								
-								local clase3 Total // formerly called "nivel". If "no_aplica", use Total.
-								
+						foreach quintil_ingreso of local quintil_ingresos {
+							foreach area of local areas {								
+								local nivel_educativo No_aplica // formerly called "nivel". If "no_aplica", use Total.
+								local sexo No_aplica
+								local grupo_etario No_aplica
+								local etnicidad No_aplica 
 								
 								/* Parameters of current disaggregation levels, used by all commands */
-								global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+								global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
 								noisily display "$tema: $current_slice"
 								
 								//======== CALCULATE INDICATORS ================================================
@@ -664,18 +693,21 @@ local geografia_id total_nacional
 								scl_median ///
 								pobedad_ci edad_ci if edad_ci!=. 
 									
-								}/*cierro clase2*/		
-							} /*cierro clase*/
+								}/*cierro area*/		
+							} /*cierro quintil*/
 							
-							local clases Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 
+							local quintil_ingresos Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 
 															
-							foreach clase1 of local clases {
-								local clase2 Total
-								local clase3 Total							
+							foreach quintil_ingreso of local quintil_ingresos {
+								local area No_aplica
+								local nivel_educativo No_aplica							
+								local sexo No_aplica
+								local grupo_etario No_aplica
+								local etnicidad No_aplica
 								
 								
 								/* Parameters of current disaggregation levels, used by all commands */
-								global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+								global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
 								noisily display "$tema: $current_slice"	
 										
 								//======== CALCULATE INDICATORS ================================================
@@ -686,7 +718,7 @@ local geografia_id total_nacional
 										
 							} /*cierro clase*/			    
 											
-								
+							
 											
 							************************************************
 							  global tema "educacion"
@@ -695,35 +727,36 @@ local geografia_id total_nacional
 							// Authors: Angela Lopez 
 							************************************************				
 									
-							local clases  Total Hombre Mujer quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano
-							local clases2 Total Hombre Mujer Rural Urbano
+							local sexos Total Hombre Mujer  
+							local areas Total Rural Urbano
+							local quintil_ingresos Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5
 							
-							
-							foreach clase1 of local clases {	
-								foreach clase2 of local clases2 {
+							foreach sexo of local sexos {	
+								foreach area of local areas {
+									foreach quintil_ingreso of local quintil_ingresos {
+									
+										local etnicidad No_aplica
+										local nivel_educativos Prescolar Primaria Secundaria Superior
 								
-								
-									local clases3 Prescolar Primaria Secundaria Superior
-								
-									foreach clase3 of local clases3 {								
-						
+										foreach nivel_educativo of local nivel_educativos {								
+										local grupo_etario No_aplica
 									
 										/* Parameters of current disaggregation levels, used by all commands */
-										global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+										global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
 										noisily display "$tema: $current_slice"
 
 										//======== CALCULATE INDICATORS ================================================
 										local sfix ""
-										if `"`clase3'"'=="Prescolar"  local sfix pres
-										else if `"`clase3'"'=="Primaria"   local sfix prim
-										else if `"`clase3'"'=="Secundaria" local sfix seco
-										else if `"`clase3'"'=="Superior"   local sfix tert
+										if `"`nivel_educativo'"'=="Prescolar"  local sfix pres
+										else if `"`nivel_educativo'"'=="Primaria"   local sfix prim
+										else if `"`nivel_educativo'"'=="Secundaria" local sfix seco
+										else if `"`nivel_educativo'"'=="Superior"   local sfix tert
 										
 									
 									
 						 * Tasa asistencia Bruta  
 											
-										if ("`clase3'"=="Prescolar") {
+										if ("`nivel_educativo'"=="Prescolar") {
 										//the code for Prescolar uses a different program,
 										// because the "if" condition for the numerator is different
 										// of that of the denominator
@@ -755,16 +788,16 @@ local geografia_id total_nacional
 								    													
 															
 															
-									} /* cierre clases3 */
+									} /* cierro nivel educativo */
 											
 										
-									local clases3 age_4_5 age_6_11 age_12_14 age_15_17 age_18_23
+									local grupo_etarios age_4_5 age_6_11 age_12_14 age_15_17 age_18_23
 									
-									foreach clase3 of local clases3 {								
-								
+									foreach grupo_etario of local grupo_etarios {								
+									local nivel_educativo No_aplica
 											
 						* Parameters of current disaggregation levels, used by all commands 
-								global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+								global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
 								noisily display "$tema: $current_slice"
 
 											
@@ -778,76 +811,79 @@ local geografia_id total_nacional
 									tasa_no_asis_edad asiste_ci 0
 									 
 													
-									} /*cierro clases3 */
+									} /*cierro grupo etario */
+									
 						* Años_Escolaridad y Años_Escuela			
 										
-									local clases3 anos_0 anos_1_5 anos_6 anos_7_11 anos_12 anos_13_o_mas
+									local nivel_educativos anos_0 anos_1_5 anos_6 anos_7_11 anos_12 anos_13_o_mas
 									
-									foreach clase3 of local clases3 {
-											
-											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3' 
+									foreach nivel_educativo of local nivel_educativos {
+									local grupo_etario No_aplica
+									
+											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
 											noisily display "$tema: $current_slice"
 																			
 											
 																							
-													cap estpost tab `clase3' [w=round(factor_ci)] if  age_25_mas==1 & `clase1'==1 & `clase2'==1 & (aedu_ci !=. | edad_ci !=.), m
+													cap estpost tab `nivel_educativo' [w=round(factor_ci)] if  age_25_mas==1 & `sexo'==1 & `area'==1 & (aedu_ci !=. | edad_ci !=.), m
 													if _rc == 0 {
 													mat proporcion = e(pct)
 													local valor = proporcion[1,2]
 													
-													estpost tab `clase3' 	if age_25_mas==1 & `clase1'==1 & `clase2'==1 & (aedu_ci !=. | edad_ci !=.), m
+													estpost tab `nivel_educativo' 	if age_25_mas==1 & `sexo'==1 & `area'==1 & (aedu_ci !=. | edad_ci !=.), m
 													mat nivel = e(b)
 													local muestra = nivel[1,2]
 																								
-													post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("Años_Escolaridad_25_mas") ("%clase3/pop_25+") (`valor')
+													post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("Años_Escolaridad_25_mas") ("%nivel_educativo/pop_25+") (`valor')
 													} /* cierro if */
 													
 													else {
 															
-													post $output ("`ano'") ("`pais'") ("`encuestas'") ("`geografia_id'") ("`clase1'") ("`clase2'") ("`clase3'") ("$tema") ("Años_Escolaridad_25_mas") ("%clase3/pop_25+") (.)
+													post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("Años_Escolaridad_25_mas") ("%nivel_educativo/pop_25+") (.)
 														
 													} /* cierro else */
 													
-									} /* cierro clase 3 */		
+									} /* cierro nivel educativo 3 */		
 										
 										
 						* Ninis_2	
 								
-									local clases3 age_15_24 age_15_29
+									local grupo_etarios age_15_24 age_15_29
 									
-									foreach clase3 of local clases3 {
-										
-										global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+									foreach grupo_etario of local grupo_etarios {
+									local nivel_educativo No_aplica
+									
+										global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
 										noisily display "$tema: $current_slice"
 											
 										scl_pct ///
 										Ninis_2 nini 1 & edad_ci !=.
 										
-										} /*cierro clases3 */
+										} /*cierro grupo_etario */
 										
 								
 						* Tasa_terminacion_c	
 						
-									local clases3 Primaria Secundaria 
+									local nivel_educativos Primaria Secundaria 
 								
-									foreach clase3 of local clases3 {								
-						
+									foreach nivel_educativo of local nivel_educativos {								
+									local grupo_etario No_aplica
 									
 										/* Parameters of current disaggregation levels, used by all commands */
-										global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+										global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
 										noisily display "$tema: $current_slice"
 										
 										
 										
 										local sfix ""
 										    
-											 if `"`clase3'"'=="Primaria"   local sfix primaria
-										else if `"`clase3'"'=="Secundaria" local sfix secundaria
+											 if `"`nivel_educativo'"'=="Primaria"   local sfix primaria
+										else if `"`nivel_educativo'"'=="Secundaria" local sfix secundaria
 										
 										local agetermfix ""
 										    
-										     if `"`clase3'"'=="Primaria"   local agetermfix p_c
-										else if `"`clase3'"'=="Secundaria" local agetermfix s_c
+										     if `"`nivel_educativo'"'=="Primaria"   local agetermfix p_c
+										else if `"`nivel_educativo'"'=="Secundaria" local agetermfix s_c
 
 										
 										// numerator and denominator
@@ -864,13 +900,13 @@ local geografia_id total_nacional
 											
 						 * Tasa de abandono escolar temprano "Leavers"
 											
-									local clases3 age_18_24 
+									local grupo_etarios age_18_24 
 								
-									foreach clase3 of local clases3 {								
-						
+									foreach grupo_etario of local grupo_etarios {								
+									local nivel_educativo No_aplica
 									
 										/* Parameters of current disaggregation levels, used by all commands */
-										global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+										global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
 										noisily display "$tema: $current_slice"
 
 										
@@ -884,13 +920,13 @@ local geografia_id total_nacional
 												
 						* Tasa de sobreedad  								
 										
-									local clases3 Primaria 
+									local nivel_educativo Primaria 
 								
-									foreach clase3 of local clases3 {								
-						
+									foreach nivel_educativo of local nivel_educativos {								
+									local grupo_etario No_aplica
 									
 										/* Parameters of current disaggregation levels, used by all commands */
-										global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+										global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
 										noisily display "$tema: $current_slice"
 
 										
@@ -907,12 +943,12 @@ local geografia_id total_nacional
 										
 									} /*cierro clases3 */	
 																			
-										
-									} /* cierro clase2 */
-							}	/* cierro clase1 */			
+								}/*cierro quintil*/
+							} /* cierro area */
+						}	/* cierro sexo */			
 				
 									
-								
+							
 								***************************************************
 								  global tema "laboral"
 								***************************************************
@@ -920,17 +956,22 @@ local geografia_id total_nacional
 								// Authors: Alvaro Altamirano y Stephanie González
 								***************************************************			
 								
-								local clases  Total Hombre Mujer quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano
-								local clases2 Total Hombre Mujer Rural Urbano
-								local clases3 Total age_15_24 age_15_29 age_15_64 age_25_64 age_65_mas 
+								local sexos Total Hombre Mujer 
+								local area Total Rural Urbano
+								local grupo_etarios Total age_15_24 age_15_29 age_15_64 age_25_64 age_65_mas 
+								local quintil_ingresos Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 
 							
-								foreach clase1 of local clases {
-									foreach clase2 of local clases2 {
-										foreach clase3 of local clases3 {
-										
+								foreach sexo of local sexos {
+									foreach area of local areas {
+										foreach quintil_ingreso of local quintil_ingresos {
+											foreach grupo_etario of local grupo_etarios {
+											
+											
+											local nivel_educativo No_aplica
+											local etnicidad No_aplica
 										
 											/* Parameters of current disaggregation levels, used by all commands */
-											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
 											noisily display "$tema: $current_slice"	
 
 											//======== CALCULATE INDICATORS ================================================
@@ -1136,7 +1177,7 @@ local geografia_id total_nacional
 											scl_mean ///
 												ingreso_hor_prom hwage if condocup_ci==1
 												
-							} /* cierro clase3 */	
+							} /* cierro grupo etario */	
 
 											scl_pct ///
 												pensionista_65_mas pensiont_ci 1 if age_65_mas==1	
@@ -1167,9 +1208,9 @@ local geografia_id total_nacional
 																			
 										
 										
-								
-								}/*cierro clase2*/
-							} /* cierro clase*/ 
+									} /*cierro quintiles*/
+								}/*cierro area*/
+							} /* cierro sexo*/ 
 					
 				
 				
@@ -1180,15 +1221,19 @@ local geografia_id total_nacional
 							// Authors: Daniela Zuluaga
 							************************************************
 								
-								local clases 	Total Hombre Mujer Rural Urbano
-								local clases2	Total Hombre Mujer
-								local clases3	Total age_00_04 age_05_14 age_15_24 age_25_64 age_65_mas
+								local sexos Total Hombre Mujer 
+								local areas	Total Rural Urbano
+								local grupo_etarios	Total age_00_04 age_05_14 age_15_24 age_25_64 age_65_mas
 								
-								foreach clase1 of local clases {
-									foreach clase2 of local clases2 {
-										foreach clase3 of local clases3 {
+								foreach sexo of local sexos {
+									foreach area of local areas {
+										foreach grupo_etario of local grupo_etarios {
+											local quintil_ingreso No_aplica
+											local nivel_educativo No_aplica
+											local etnicidad No_aplica
+											
 											/* Parameters of current disaggregation levels, used by all commands */
-											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
 											noisily display "$tema: $current_slice"	
 								
 								
@@ -1214,23 +1259,24 @@ local geografia_id total_nacional
 									            rich rich 1 if rich!=. 
 
 			
-										} /* cierro clase3 */	
-									}/*cierro clase2*/
-								} /* cierro clase*/ 
-	*/				
-								local clases Total Urbano Rural
-								local clases2 Total
-								local clases3 Total 
-								
-								foreach clase1 of local clases {
-									foreach clase2 of local clases2 {
-										foreach clase3 of local clases3 {
-											/* Parameters of current disaggregation levels, used by all commands */
-													global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
-													noisily display "$tema: $current_slice"	
-													
-												
+										} /* cierro grupo_etario */	
+									}/*cierro area*/
+								} /* cierro sexo*/ 
 				
+								local areas  Total Urbano Rural
+													
+								
+									foreach area of local areas {
+										local sexo No_aplica
+										local grupo_etario No_aplica
+										local quintil_ingreso No_aplica
+										local nivel_educativo No_aplica
+										local etnicidad No_aplica
+										
+											/* Parameters of current disaggregation levels, used by all commands */
+												global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
+												noisily display "$tema: $current_slice"	
+															
 													
 												 /* Coeficiente de Gini para el ingreso per cápita del hogar*/
 												scl_inequal ///
@@ -1252,23 +1298,24 @@ local geografia_id total_nacional
 												scl_mean ///
 												ylmfem_ch shareylmfem_ch if jefe_ci==1 & shareylmfem_ch!=. 
 															 
-														
-													
-										} /* cierro clase3 */	
-									}/*cierro clase2*/
-								} /* cierro clase*/ 
-														
-	/*													
+															
+									}/*cierro area*/
+							
+																										
 								
-								local clases Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano
-								local clases2 Total
-								local clases3 Total
-			
-								foreach clase1 of local clases {
-									foreach clase2 of local clases2 {
-										foreach clase3 of local clases3 {
+								local quintil_ingresos Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 
+								local areas Total Rural Urbano
+										
+								foreach quintil_ingreso of local quintil_ingresos {
+									foreach area of local areas {
+										local sexo No_aplica
+										local nivel_educativo No_aplica
+										local grupo_etario No_aplica
+										local etnicidad No_aplica
+										
+										
 											/* Parameters of current disaggregation levels, used by all commands */
-													global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+													global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
 													noisily display "$tema: $current_slice"	
 													
 													
@@ -1277,9 +1324,9 @@ local geografia_id total_nacional
 														indexrem indexrem 1 
 
 							
-										} /* cierro clase3 */	
-									}/*cierro clase2*/
-								} /* cierro clase*/ 					
+										} /* cierro area */	
+									}/*cierro quintil_ingresos*/
+											
 			
 		
 								************************************************
@@ -1289,15 +1336,19 @@ local geografia_id total_nacional
 								// Authors: Daniela Zuluaga
 								************************************************
 								
-								local clases 	Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 Rural Urbano
-								local clases2 	Total Rural Urbano
-								local clases3	Total
+								local quintil_ingresos 	Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 
+								local areas Total Rural Urbano
+						
 								
-								foreach clase1 of local clases {
-									foreach clase2 of local clases2 {
-										foreach clase3 of local clases3 {
+								foreach quintil_ingreso of local quintil_ingresos {
+									foreach area of local areas {
+										local sexo No_aplica
+										local nivel_educativo No_aplica
+										local grupo_etario No_aplica
+										local etnicidad No_aplica
+										
 											/* Parameters of current disaggregation levels, used by all commands */
-											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
 											noisily display "$tema: $current_slice"	
 								
 					
@@ -1351,10 +1402,10 @@ local geografia_id total_nacional
 									            estable_ch estable_ch 1 if jefe_ci==1 &  estable_ch!=.
 												
 			
-											}/*cierro clases3*/		
-										} /*cierro clases2*/
-								} /*cierro clases*/
-*/
+											}/*cierro area*/		
+										} /*cierro quintil_ingreso*/
+								
+
 								
 				/*			
 								
@@ -1364,15 +1415,20 @@ local geografia_id total_nacional
 								// Division: GDI
 								// Authors: Nathalia Maya, Maria Antonella Pereira, Cesar Lins de Oliveira
 								************************************************
-								local clases 	Total Hombre Mujer
-								local clases2 	Total Rural Urbano
-								local clases3	Total
+								local sexos 	Total Hombre Mujer
+								local areas 	Total Rural Urbano
 								
-								foreach clase1 of local clases {
-									foreach clase2 of local clases2 {
-										foreach clase3 of local clases3 {
+								
+								foreach sexo of local sexos {
+									foreach area of local areas {
+										local quintil_ingreso No_aplica
+										local nivel_educativo No_aplica
+										local grupo_etario No_aplica
+										local etnicidad No_aplica
+										
+										
 											/* Parameters of current disaggregation levels, used by all commands */
-											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
 											noisily display "$tema: $current_slice"	
 								
 												* Porcentaje población afrodescendiente 
@@ -1407,9 +1463,9 @@ local geografia_id total_nacional
 												   pdis_ch dis_ch "Con Discapacidad" 
 																
 												
-											}/*cierro clases3*/		
-										} /*cierro clases2*/
-								} /*cierro clases*/
+											}/*cierro area*/		
+										} /*cierro sexo*/
+							
 									
 								
 								************************************************
@@ -1418,15 +1474,20 @@ local geografia_id total_nacional
 								// Division: MIG
 								// Authors: Fernando Morales Velandia
 								************************************************
-								local clases 	Total /* Hombre Mujer */
-								local clases2 	Total /* Rural Urbano */
-								local clases3	Total
+								local sexos 	Total /* Hombre Mujer */
+								local areas 	Total /* Rural Urbano */
 								
-								foreach clase1 of local clases {
-									foreach clase2 of local clases2 {
-										foreach clase3 of local clases3 {
+								
+								foreach sexo of local clases {
+									foreach area of local clases2 {
+									
+										local quintil_ingreso No_aplica
+										local nivel_educativo No_aplica
+										local grupo_etario No_aplica
+										local etnicidad No_aplica
+										
 											/* Parameters of current disaggregation levels, used by all commands */
-											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
 											noisily display "$tema: $current_slice"	
 											
 								
@@ -1444,7 +1505,7 @@ local geografia_id total_nacional
 								
 											}/*cierro clases3*/		
 										} /*cierro clases2*/
-								} /*cierro clases*/
+								
 							
 						
 								************************************************
@@ -1453,15 +1514,20 @@ local geografia_id total_nacional
 								// Division: SPH
 								// Authors: Carolina Rivashe
 								************************************************
-								local clases 	Total Hombre Mujer 
-								local clases2 	Total Rural Urbano 
-								local clases3	Total gpo_ingneto1 gpo_ingneto2 gpo_ingneto3 gpo_ingneto4 
+								local sexos Total Hombre Mujer 
+								local areas Total Rural Urbano 
+								local quintil_ingresos	Total gpo_ingneto1 gpo_ingneto2 gpo_ingneto3 gpo_ingneto4 
 								
-								foreach clase1 of local clases {
-									foreach clase2 of local clases2 {
-										foreach clase3 of local clases3 {
+								foreach sexo of local sexos {
+									foreach area of local areas {
+										foreach quintil_ingreso of local quintil_ingresos {
+
+										local nivel_educativo No_aplica
+										local grupo_etario No_aplica
+										local etnicidad No_aplica
+																					
 											/* Parameters of current disaggregation levels, used by all commands */
-											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
 											noisily display "$tema: $current_slice"	
 									
 											* Porcentaje de la población que beneficiario de PTMC *
@@ -1476,18 +1542,24 @@ local geografia_id total_nacional
 													pnc	pension_ci "1" if pension_ch!=. & mayor64_ci==1
 													
 													
-												}/*cierro clases3*/		
-										} /*cierro clases2*/
-								} /*cierro clases*/
+												}/*cierro quintil_ingreso*/		
+										} /*cierro areas*/
+								} /*cierro sexos*/
 								
-								local clases 	Total Hombre Mujer 
-								local clases2 	Total Rural Urbano 
-								local clases3 	Total 
-								foreach clase1 of local clases {
-									foreach clase2 of local clases2 {
-										foreach clase3 of local clases3 {
+								local sexos Total Hombre Mujer 
+								local areas Total Rural Urbano 
+							
+								foreach sexo of local sexos {
+									foreach area of local areas {
+										
+										local quintil_ingreso No_aplica
+										local nivel_educativo No_aplica
+										local grupo_etario No_aplica
+										local etnicidad No_aplica
+																			
 											/* Parameters of current disaggregation levels, used by all commands */
-											global current_slice `pais' `ano' `geografia_id' `clase1' `clase2' `clase3'
+											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
+											
 											noisily display "$tema: $current_slice"	
 													
 											* Porcentaje de beneficiaios PTMC en pobreza extrema (# PTMC en PE / Total PTMC)*
@@ -1506,9 +1578,9 @@ local geografia_id total_nacional
 												scl_ratio ///
 													ptmc_np ptmc_ingneto4 ptmc_ch													
 											
-												}/*cierro clases3*/		
-										} /*cierro clases2*/
-								} /*cierro clases*/		
+									}/*cierro areas*/		
+								} /*cierro sexos*/
+							
 						*/ 
 			
 
@@ -1528,8 +1600,10 @@ local geografia_id total_nacional
 
 			save "${out}\indicadores_encuestas_hogares_scl_`pais'.dta", replace 
 			*clear
-			} /* cierro anos */
-		} /* cierro paises */
+			
+			}/*cierro encuestas*/
+		} /* cierro anos */
+	} /* cierro paises */
 } /* cierro quietly */
 
 
@@ -1546,7 +1620,7 @@ local geografia_id total_nacional
 * Variables de formato 
 
 ***** include "${input}/var_formato.do"
-***** order tiempo tiempo_id pais_id geografia_id clase clase_id clase2 clase2_id nivel nivel_id tema indicador tipo valor muestra
+***** order tiempo tiempo_id pais_id geografia_id clase clase_id area area_id nivel nivel_id tema indicador tipo valor muestra
 
 
 *carpeta tmp
