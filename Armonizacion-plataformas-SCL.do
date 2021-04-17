@@ -343,12 +343,12 @@ program scl_ratio_2conds
   local etnicidad : word 9 of $current_slice
     
   display `"$tema - `indname'"'
-  capture quietly sum `indvarnum' [w=round(factor_ch)] `numcond' & `sexo'==1 & `area'==1 & `nivel_educativo'==1
+  capture quietly sum `indvarnum' [w=round(factor_ch)] `numcond' `xif' 
   
   if _rc == 0 {
     local numerator = `r(sum)'
      
-     capture quietly sum `indvarden' [w=round(factor_ch)] `dencond' & `sexo'==1 & `area'==1 & `nivel_educativo'==1
+     capture quietly sum `indvarden' [w=round(factor_ch)] `dencond' `xif'
      if _rc==0 {
            capture local denominator = `r(sum)'
            local valor = (`numerator' / `denominator') * 100 
@@ -435,19 +435,19 @@ if "${source}"=="" {
 /*
  Location of the .do files to include
 */
-global input	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Input"
-global out 	 "`mydir'\calculo_indicadores_encuestas_hogares_scl\Output"
+	global input	"`mydir'\calidad\calculo_indicadores_encuestas_hogares_scl\Input"
+	global out 	 "`mydir'\calidad\calculo_indicadores_encuestas_hogares_scl\Output"
 /*
 * Location for temporary files. This folder is on MS TEAMS.
 * 
 * NOTE: template.dta must be in this folder.
 */
-global covidtmp  "`mydir'\calculo_indicadores_encuestas_hogares_scl\Output"
+	global covidtmp  "`mydir'\calidad\calculo_indicadores_encuestas_hogares_scl\Output"
 
 //alternatively, this folder might be under the following path
 mata:st_numscalar("Found", direxists("$covidtmp"))
 if scalar(Found)==0  {
-	global covidtmp  "`mydir'\calculo_indicadores_encuestas_hogares_scl\Output"
+	global covidtmp  "`mydir'\calidad\calculo_indicadores_encuestas_hogares_scl\Output"
 	//check if it was found now
 	mata:st_numscalar("Found", direxists("$covidtmp"))
 }
@@ -468,7 +468,7 @@ if scalar(Found)==0 {
 
 ** Creo locales principales:
 						
-local paises  /*ARG BHS BOL BRA BRB BLZ CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY*/ PER/*DOM SUR TTO URY VEN */
+local paises  /*ARG BHS BOL BRA BRB BLZ CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN */PRY PER/*DOM SUR TTO URY VEN */
 local anos  /*2006 2007 2008 2009*/ 2010 /*2011 2012 2013 2014 2015 2016 2017 2018 2019 */
 local geografia_id total_nacional
 local etnicidad No_aplica
@@ -825,12 +825,12 @@ local etnicidad No_aplica
 																			
 											
 																							
-													cap estpost tab `nivel_educativo' [w=round(factor_ci)] if  age_25_mas==1 & `sexo'==1 & `area'==1 & (aedu_ci !=. | edad_ci !=.), m
+													cap estpost tab `nivel_educativo' [w=round(factor_ci)] if  age_25_mas==1 & `sexo'==1 & `area'==1 &  `quintil_ingreso'==1 & (aedu_ci !=. | edad_ci !=.) , m
 													if _rc == 0 {
 													mat proporcion = e(pct)
 													local valor = proporcion[1,2]
 													
-													estpost tab `nivel_educativo' 	if age_25_mas==1 & `sexo'==1 & `area'==1 & (aedu_ci !=. | edad_ci !=.), m
+													estpost tab `nivel_educativo' 	if age_25_mas==1 & `sexo'==1 & `area'==1 &  `quintil_ingreso'==1 & (aedu_ci !=. | edad_ci !=.), m
 													mat nivel = e(b)
 													local muestra = nivel[1,2]
 																								
@@ -955,7 +955,7 @@ local etnicidad No_aplica
 								// Division: LMK
 								// Authors: Alvaro Altamirano y Stephanie González
 								***************************************************			
-								
+	/*							
 								local sexos Total Hombre Mujer 
 								local area Total Rural Urbano
 								local grupo_etarios Total age_15_24 age_15_29 age_15_64 age_25_64 age_65_mas 
@@ -1212,7 +1212,7 @@ local etnicidad No_aplica
 								}/*cierro area*/
 							} /* cierro sexo*/ 
 					
-				
+	*/			
 				
 							************************************************
 							  global tema "pobreza"
@@ -1611,7 +1611,14 @@ local etnicidad No_aplica
                         2: Save and Export results
 ====================================================================*/
 
-
+foreach pais of local paises { 
+	        
+			
+			use "${out}\indicadores_encuestas_hogares_scl_`pais'.dta"
+			export delimited using "${out}//indicadores_encuestas_hogares_`pais'.csv", replace
+			
+						
+} 
 
 * guardo el archivo temporal
 * (this file will be ignored by GitHub)
