@@ -1407,7 +1407,7 @@ local etnicidad No_aplica
 								
 
 								
-				/*			
+						
 								
 							    ************************************************
 								  global tema "diversidad"
@@ -1440,9 +1440,6 @@ local etnicidad No_aplica
 												/* Porcentaje población ni Afrodescendiente ni indígena*/
 												scl_pct ///
 												    pnoafronoindi_ci afroind_ci "Otros"
-                                              	/* Porcentaje población Afro-indígena (Garífuna)*/
-											    scl_pct ///
-												   pafroindi_ci afroind_ci "Afro-indígena"
                                                 /* Porcentaje de hogares con jefatura afrodescendiente */ 
 										        scl_pct ///
 												   pjefe_afro_ch afroind_ch "Afro-descendiente" 
@@ -1452,9 +1449,6 @@ local etnicidad No_aplica
 											    /* Porcentaje de hogares con jefatura ni afrodescendiente ni indígena*/ 
 									            scl_pct ///												   
                                                    pjefe_noafronoindi_ch afroind_ch "Otros"
-											    /* Porcentaje de hogares con jefatura Afro-indígena (Garífuna)*/ 
-											    scl_pct ///												   
-												   pjefe_afroindi_ch afroind_ch "Afro-indígena"
                                                /* Porcentaje de personas que reportan tener alguna dificultad en actividades de la vida diaria */
 											    scl_pct ///												   
                                                    pdis_ci dis_ci "Con Discapacidad"
