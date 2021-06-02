@@ -22,10 +22,12 @@ set maxvar 120000, perm
 *ssc install quantiles inequal7
  cap ssc install estout
  cap ssc install inequal7
+ set max_memory 200g, permanently
+set segmentsize  400m, permanently
  
- cd "C:\Users\alop\OneDrive - Inter-American Development Bank Group\Desktop\Git_repositories"
+ cd "C:\Users\ALOP\OneDrive - Inter-American Development Bank Group\Desktop\Git_repositories\calidad\calculo_indicadores_encuestas_hogares_scl/"
  
-qui {
+*qui {
 
 /**** if composition utility function ****************************
  scl_if_compose sexo area nivel_educativo if ...
@@ -87,25 +89,32 @@ program scl_pct
 	local xif `"`s(xif)'"'
 	sreturn clear
 	 
-	 
-  cap sum `indvar' [w=round(factor_ch)] `xif' & `indvar'==`indcat' 
+	cap svy:proportion `indvar' `xif'  
   
-    
   if _rc == 0 {
 	    
-  local numerator = `r(sum_w)'
-  cap sum `indvar' [w=round(factor_ch)] `xif' 
-  local denominator = `r(sum_w)'
-  local valor = (`numerator' / `denominator') * 100  
+    mat valores=r(table)
+	local valor =valores[1,`indcat'] *100
+	
+	estat cv
+	mat error_standar=r(se)
+	local se = error_standar[1,`indcat'] 
+	
+	mat cv=r(cv)
+	local cv = cv[1,`indcat'] 
+	
+	estat size
+	mat muestra=r(_N)
+	local muestra = muestra[1,`indcat'] 
+	di `muestra'
   	
-	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"sum of `indvar'"') (`valor')
+	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"sum of `indvar'"') (`valor') (`se') (`cv') (`muestra')
 	
   }
   if _rc != 0 {
    /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"sum of `indvar'"') (.)
+	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"sum of `indvar'"') (.) (.) (.) (.)
   }
-  
   
   
 end
@@ -142,17 +151,31 @@ program scl_nivel
  
   
   display `"$tema - `indname'"'
-  capture quietly sum `indvar' [w=round(factor_ch)] `xif' & `indvar'==`indcat'
+  
+  cap svy:total `indvar' `xif'  
   
   if _rc == 0 {
-    capture local valor = `r(sum_w)'
-	
-	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"sum of `indvar'"') (`valor')
+	    
+   mat temp=e(b)
+   mat muestra = e(N)
+   
+	local valor = temp[1,`indcat']
+	local muestra = `e(N)'
+   
+	estat cv 
+	mat cova= r(cv)
+	mat ste= r(se)
+
+	local cv = cova[1,`indcat']
+	local se = ste[1,`indcat']
+  
+
+	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"sum of `indvar'"') (`valor') (`se') (`cv') (`muestra')
 	
   }
   else {
    /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"sum of `indvar'"') (.)
+	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"sum of `indvar'"') (.) (.) (.) (.)
   }
   
 end
@@ -187,19 +210,31 @@ program scl_mean
  
   
   display `"$tema - `indname'"'
-  capture quietly sum `indvar' [w=round(factor_ch)] `xif'
+	
+	cap svy:mean `indvar' `xif'  
   
   if _rc == 0 {
-    capture local valor = `r(mean)'
+	    
+    mat valores=r(table)
+	local valor =valores[1,1] *100
 	
-	if ""=="`valor'" local valor = .
+	estat cv
+	mat error_standar=r(se)
+	local se = error_standar[1,1] *100
 	
-	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"mean of `indvar'"') (`valor')
+	mat cv=r(cv)
+	local cv = cv[1,1] 
+	
+	estat size
+	mat muestra=r(_N)
+	local muestra = muestra[1,1] 
+	
+	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"mean of `indvar'"') (`valor') (`se') (`cv') (`muestra')
 	
   }
   else {
    /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"mean of `indvar'"') (.)
+	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"mean of `indvar'"') (.) (.) (.) (.)
   }
   
 end
@@ -233,19 +268,27 @@ program scl_median
  
   
   display `"$tema - `indname'"'
-  capture quietly sum `indvar' [w=round(factor_ch)] `xif', detail
-  
+  _pctile `indvar'  [pweight=factor_ch]  `xif', p(50) 
+   
   if _rc == 0 {
-    capture local valor = `r(p50)'
+   
+	return list
+	local valor = `r(r1)' 
+	estat cv
+	mat error_standar=r(se)
+	local se = error_standar[1,1] 
+	mat cv=r(cv)
+	local cv = cv[1,1] 
+	estat size
+	mat muestra=r(_N)
+	local muestra = muestra[1,1] 
 	
-	if ""=="`valor'" local valor = .
-	
-	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"median of `indvar'"') (`valor')
+	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"median of `indvar'"') (`valor') (`se') (`cv') (`muestra')
 	
   }
   else {
    /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"median of `indvar'"') (.)
+	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"median of `indvar'"') (.) (.) (.) (.)
   }
   
 end
@@ -287,25 +330,34 @@ program scl_ratio
    
   
    display `"$tema - `indname'"'
-  capture quietly sum `indvarnum' [w=round(factor_ch)] `xif'
-
+   
+   cap svy:ratio `indvarnum'/`indvarden' `xif'  
   
   if _rc == 0 {
-    local numerator = `r(sum)'
+	    
+    mat valores=r(table)
+	local valor =valores[1,1] *100
 	
-	capture quietly sum `indvarden' [w=round(factor_ch)] `xif'
-	if _rc==0 {
-		capture local denominator = `r(sum)'
-		local valor = (`numerator' / `denominator') * 100 
-		
-		post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (`valor')
+	estat cv
+	mat error_standar=r(se)
+	local se = error_standar[1,1] *100
+	
+	mat cv=r(cv)
+	local cv = cv[1,1] 
+	
+	estat size
+	mat muestra=r(_N)
+	local muestra = muestra[1,1] 
+	
+   		
+		post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (`valor') (`se') (`cv') (`muestra')
 	}
 		
 	else {
 		/* generate a line with missing value */
-		post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.)
+		post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.) (.) (.) (.)
 	}
-  }
+  
   
   
 end
@@ -343,24 +395,42 @@ program scl_ratio_2conds
   local etnicidad : word 9 of $current_slice
     
   display `"$tema - `indname'"'
-  capture quietly sum `indvarnum' [w=round(factor_ch)] `numcond' `xif' 
+  
+   cap svy:total `indvarnum' if `numcond' & `sexo'==1 & `area'==1 &  `quintil_ingreso'==1 
+	mat temp=e(b)
+	local numerador = temp[1,1]
+  
+   cap svy:total `indvarden' if `dencond' & `sexo'==1 & `area'==1 &  `quintil_ingreso'==1 
+   mat temp2=e(b)
+   local denominador = temp2[1,1]   
+
+  
+  cap svy:ratio `numerador'/`denominador'  
   
   if _rc == 0 {
-    local numerator = `r(sum)'
-     
-     capture quietly sum `indvarden' [w=round(factor_ch)] `dencond' `xif'
-     if _rc==0 {
-           capture local denominator = `r(sum)'
-           local valor = (`numerator' / `denominator') * 100 
+	    
+    mat valores=r(table)
+	local valor =valores[1,1] *100
+	
+	estat cv
+	mat error_standar=r(se)
+	local se = error_standar[1,1] *100
+	
+	mat cv=r(cv)
+	local cv = cv[1,1] 
+	
+	estat size
+	mat muestra=r(_N)
+	local muestra = muestra[1,1] 
+  
            
-           post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (`valor')
+           post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (`valor') (`se') (`cv') (`muestra')
      }
      else {
            /* generate a line with missing value */
-           post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.)
+           post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.) (.) (.) (.)
      }
      
-  }
 
 end
 
@@ -401,12 +471,12 @@ program scl_inequal
     local valor =`r(`typeind')' * 100
 		
 	
-	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`typeind' of `indvar'"') (`valor')
+	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`typeind' of `indvar'"') (`valor') (`se') (`cv') (`muestra')
 	
 	}
 	if _rc != 0 {
    /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`typeind' of `indvar'"') (.)
+	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`typeind' of `indvar'"') (.) (.) (.) (.)
 	}
   
  end 
@@ -422,32 +492,32 @@ program scl_inequal
 */
 
 local mydir = c(pwd) /* GitHub folder */
-
+di c(pwd)
 *
 * If you want to set a local folder instead, set this global macro before running the code.
 * If $source is empty, then by default the shared folder will be used (must be at the IDB or
 * connected to the VPN)
 
-if "${source}"=="" {
-	global source   "C:\Users\alop\OneDrive - Inter-American Development Bank Group\Desktop\harmonized" //if you have a local copy of the .dta files, change here to use your local copy 
-}
+*if "${source}"=="" {
+	global source   "C:\Users\ALOP\OneDrive - Inter-American Development Bank Group\Desktop\harmonized" //if you have a local copy of the .dta files, change here to use your local copy 
+*}
 
 /*
  Location of the .do files to include
 */
-	global input	"`mydir'\calidad\calculo_indicadores_encuestas_hogares_scl\Input"
-	global out 	 "`mydir'\calidad\calculo_indicadores_encuestas_hogares_scl\Output"
+	global input	"`mydir'\Input"
+	global out 	 "`mydir'\Output"
 /*
 * Location for temporary files. This folder is on MS TEAMS.
 * 
 * NOTE: template.dta must be in this folder.
 */
-	global covidtmp  "`mydir'\calidad\calculo_indicadores_encuestas_hogares_scl\Output"
+	global covidtmp  "`mydir'\Output"
 
 //alternatively, this folder might be under the following path
 mata:st_numscalar("Found", direxists("$covidtmp"))
 if scalar(Found)==0  {
-	global covidtmp  "`mydir'\calidad\calculo_indicadores_encuestas_hogares_scl\Output"
+	global covidtmp  "`mydir'\Output"
 	//check if it was found now
 	mata:st_numscalar("Found", direxists("$covidtmp"))
 }
@@ -468,19 +538,23 @@ if scalar(Found)==0 {
 
 ** Creo locales principales:
 						
-local paises  /*ARG BHS BOL BRA BRB BLZ CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN */PRY PER/*DOM SUR TTO URY VEN */
-local anos  /*2006 2007 2008 2009*/ 2010 /*2011 2012 2013 2014 2015 2016 2017 2018 2019 */
+*global paises  /*ARG BHS BOL BRB BRA  BLZ */ BRA CHL /*COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN */
+local anos  2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 
+
+global paises ARG
+local anos 2018 
+
 local geografia_id total_nacional
 local etnicidad No_aplica
 
 	noisily display "Empezando calculos..."
 
-	foreach pais of local paises {
-		
+	foreach pais of global paises {
+		    
 			tempfile microdato_`pais'
 			tempname pmicrodato_`pais'
 
-			postfile `pmicrodato_`pais'' str4 tiempo_id str3 pais_id str25(fuente geografia_id sexo area quintil_ingreso nivel_educativo grupo_etario etnicidad tema indicador) str35 description valor using `microdato_`pais'', replace
+			postfile `pmicrodato_`pais'' str4 tiempo_id str3 pais_id str25(fuente geografia_id sexo area quintil_ingreso nivel_educativo grupo_etario etnicidad tema indicador) str35 description valor se cv sample using `microdato_`pais'', replace
 			postclose `pmicrodato_`pais''
 			use `microdato_`pais'', clear
 
@@ -497,16 +571,16 @@ local etnicidad No_aplica
 			** Este postfile da estructura a la base:
 
 			* postfile `ptablas' str30(tiempo_id pais_id geografia_id sexo area nivel_id tema indicador valor muestra) using `tablas', replace
-			postfile `ptablas_`pais'' str4 tiempo_id str3 pais_id str25(fuente geografia_id sexo area quintil_ingreso nivel_educativo grupo_etario etnicidad tema indicador) str35 description valor /* muestra */ using `tablas_`pais'', replace
+			postfile `ptablas_`pais'' str4 tiempo_id str3 pais_id str25(fuente geografia_id sexo area quintil_ingreso nivel_educativo grupo_etario etnicidad tema indicador) str35 description valor se cv sample using `tablas_`pais'', replace
 			
 			
 			
 			* En este dofile de encuentra el diccionario de encuestas y rondas de la región
 			 include "${input}\Directorio HS LAC.do" 
 			 * Encuentra el archivo para este país/año
-			 cap use "${source}\\`pais'\\`encuestas'\data_arm\\`pais'_`ano'`rondas'_BID.dta" , clear
-
-			 foreach encuesta of local encuestas {
+			 cap use "${source}\\`pais'\\$encuestas\data_arm\\`pais'_`ano'${rondas}_BID.dta" , clear
+di `_rc'
+			 *foreach encuesta of local encuestas {
 			 /* 
 			   Alternatively, if you want to test a certain collection of .dta files,
 			   uncomment the code below which will search for all .dta files in the $source
@@ -520,10 +594,34 @@ local etnicidad No_aplica
 
 				if _rc == 0 { 
 					//* Si esta base de datos existe, entonces haga: */
-					noisily display "Calculando \\`pais'\\`encuestas'\data_arm\\`pais'_`ano'`rondas'_BID.dta..."		
+					noisily display "Calculando \\`pais'\\$encuestas\data_arm\\`pais'_`ano'$rondas_BID.dta..."		
 														
+						
+						* setting up quality var
+						cap sum upm_ci
+						if _rc==0{
+						
+							if `r(N)' > 0 {
+								cap sum estrato_ci
+								if `r(N)' > 0 {
+									svyset [w=factor_ch], psu(upm_ci) strata(estrato_ci)
+								}
+								if `r(N)' == 0{
+									svyset [w=factor_ch], psu(upm_ci) 
+								}
+							}
+							cap sum upm_ci
+							if `r(N)' == 0 {
+									svyset [w=factor_ch]
+							}
+						}
+						if _rc ~= 0 {
+									svyset [w=factor_ch]
+						}
+						
+						
 						* variables de clase
-							
+						
 					cap {
 						gen No_aplica  =  1
 						gen byte Total  =  1
@@ -576,7 +674,7 @@ local etnicidad No_aplica
 					
 				}
 				if _rc ~= 0  {
-				
+pause				
 					/* IN the case the dta file DOES NOT EXIST for this country/year, we are going
 					  to execute the rest of the code ANYWAY. The reason is: regardless if the 
 					  file exists or not, all indicators will be generated in the same way, 
@@ -589,7 +687,7 @@ local etnicidad No_aplica
 					  
 					  /* use an empty file which contains all variables */
 
-					  use "${covidtmp}\template.dta", clear
+					  use "${input}\template.dta", clear
 
 					
 				}
@@ -599,7 +697,7 @@ local etnicidad No_aplica
 					* 1.2: Indicators for each topic		
 *****************************************************************************************************************************************
 				
-
+/*
 						************************************************
 						  global tema "demografia"
 						************************************************
@@ -627,47 +725,47 @@ local etnicidad No_aplica
 									
 								/* Porcentaje de hogares con jefatura femenina */
 								scl_pct ///
-								jefa_ch jefa_ch 1 if jefa_ch!=. & sexo_ci!=.												
+								jefa_ch jefa_ch 2 if jefa_ch!=. & sexo_ci!=.												
 										
 								/* Porcentaje de hogares con jefatura económica femenina */
 								scl_pct ///
-								jefaecon_ch hhfem_ch 1 if hhfem_ch!=. & sexo_ci!=.											
+								jefaecon_ch hhfem_ch 2 if hhfem_ch!=. & sexo_ci!=.											
 										
 								/* Porcentaje de población femenina*/
 								scl_pct ///
-								pobfem_ci pobfem_ci 1 if pobfem_ci!=. 
+								pobfem_ci pobfem_ci 2 if pobfem_ci!=. 
 																						
 								/* Porcentaje de hogares con al menos un miembro de 0-5 años*/
 								scl_pct ///
-								miembro6_ch miembro6_ch 1 if miembro6_ch !=. 
+								miembro6_ch miembro6_ch 2 if miembro6_ch !=. 
 												
 								* Porcentaje de hogares con al menos un miembro entre 6-16 años*
 								scl_pct ///
-								miembro6y16_ch miembro6y16_ch 1 if  miembro6y16_ch!=.
+								miembro6y16_ch miembro6y16_ch 2 if  miembro6y16_ch!=.
 																													
 								* Porcentaje de hogares con al menos un miembro de 65 años o más*
 								cap scl_pct ///
-								miembro65_ch miembro65_ch 1 
+								miembro65_ch miembro65_ch 2 
 												
 								* Porcentaje de hogares unipersonales*
 								scl_pct ///
-								unip_ch unip_ch 1 
+								unip_ch unip_ch 2 
 																									
 								* Porcentaje de hogares nucleares*
 								scl_pct ///
-								nucl_ch nucl_ch 1 
+								nucl_ch nucl_ch 2 
 																
 								* Porcentaje de hogares ampliados*
 						        scl_pct ///
-								ampl_ch ampl_ch 1 
+								ampl_ch ampl_ch 2 
 																																
 								* Porcentaje de hogares compuestos*
 								scl_pct ///
-								comp_ch comp_ch 1 
+								comp_ch comp_ch 2 
 																	
 								* Porcentaje de hogares corresidentes*
 							    scl_pct ///
-								corres_ch corres_ch 1 				
+								corres_ch corres_ch 2 				
 
 								*Razón de dependencia*
 								scl_mean ///
@@ -679,15 +777,15 @@ local etnicidad No_aplica
 																
 								* Porcentaje de población menor de 18 años*
 								scl_pct ///
-							    pob18_ci pob18_ci 1 if pob18_ci!=.
+							    pob18_ci pob18_ci 2 if pob18_ci!=.
 																									
 								* Porcentaje de población de 65+ años*
 								scl_pct ///
-								pob65_ci pob65_ci 1 if pob65_ci!=.
+								pob65_ci pob65_ci 2 if pob65_ci!=.
 																			
 								* Porcentaje de individuos en union formal o informal*
 								scl_pct ///
-								union_ci union_ci 1 if union_ci!=.
+								union_ci union_ci 2 if union_ci!=.
 																								
 								* Edad mediana de la población en años *
 								scl_median ///
@@ -718,7 +816,7 @@ local etnicidad No_aplica
 										
 							} /*cierro clase*/			    
 											
-							
+*/				
 											
 							************************************************
 							  global tema "educacion"
@@ -756,35 +854,21 @@ local etnicidad No_aplica
 									
 						 * Tasa asistencia Bruta  
 											
-										if ("`nivel_educativo'"=="Prescolar") {
+										
 										//the code for Prescolar uses a different program,
 										// because the "if" condition for the numerator is different
 										// of that of the denominator
 												
 											scl_ratio ///
-												tasa_bruta_asis asis_`sfix' age_`sfix' if asiste_ci!=.
+												tasa_bruta_asis asis_`sfix' age_`sfix' & asiste_ci!=.
 											
-										}
-										
-										else {
-										//all the others have the same "if" condition for both
-										// numerator and denominator
-											local numerator_condition `"if edad_ci>=6 & asiste_ci!=."'
-											local denominator_condition `"if asiste_ci!=."'
-
-											scl_ratio_2conds ///
-												tasa_bruta_asis asis_`sfix' age_`sfix' `"`numerator_condition'"' `"`denominator_condition'"'
-											
-										}
 			
 			
 						 * Tasa asistencia Neta				
-										// numerator and denominator
-											local numerator_condition `"if asiste_ci!=. & age_`sfix'==1"'
-											local denominator_condition `"if asiste_ci!=."'					
+										// numerator and denominator				
 						 
-											scl_ratio_2conds ///
-												tasa_neta_asis asis_`sfix' age_`sfix' `"`numerator_condition'"' `"`denominator_condition'"'								
+											scl_ratio /// 
+												tasa_neta_asis asis_net_`sfix' age_`sfix' & asiste_ci!=.						
 								    													
 															
 															
@@ -804,11 +888,11 @@ local etnicidad No_aplica
 												
 						* Tasa asistencia grupo etario *
 									scl_pct ///
-									tasa_asis_edad asiste_ci 1
+									tasa_asis_edad asiste_ci 2
 																																				
 						* Tasa No Asistencia grupo etario *
 									scl_pct ///
-									tasa_no_asis_edad asiste_ci 0
+									tasa_no_asis_edad asiste_ci 1
 									 
 													
 									} /*cierro grupo etario */
@@ -820,28 +904,12 @@ local etnicidad No_aplica
 									foreach nivel_educativo of local nivel_educativos {
 									local grupo_etario No_aplica
 									
-											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
+											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `quintil_ingreso'  `grupo_etario' `etnicidad'
 											noisily display "$tema: $current_slice"
 																			
+													scl_pct ///
+													Años_Escolaridad_25_mas `nivel_educativo' 2 if (aedu_ci !=. | edad_ci !=.)
 											
-																							
-													cap estpost tab `nivel_educativo' [w=round(factor_ci)] if  age_25_mas==1 & `sexo'==1 & `area'==1 &  `quintil_ingreso'==1 & (aedu_ci !=. | edad_ci !=.) , m
-													if _rc == 0 {
-													mat proporcion = e(pct)
-													local valor = proporcion[1,2]
-													
-													estpost tab `nivel_educativo' 	if age_25_mas==1 & `sexo'==1 & `area'==1 &  `quintil_ingreso'==1 & (aedu_ci !=. | edad_ci !=.), m
-													mat nivel = e(b)
-													local muestra = nivel[1,2]
-																								
-													post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("Años_Escolaridad_25_mas") ("%nivel_educativo/pop_25+") (`valor')
-													} /* cierro if */
-													
-													else {
-															
-													post $output ("`ano'") ("`pais'") ("`encuesta'") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("Años_Escolaridad_25_mas") ("%nivel_educativo/pop_25+") (.)
-														
-													} /* cierro else */
 													
 									} /* cierro nivel educativo 3 */		
 										
@@ -857,7 +925,7 @@ local etnicidad No_aplica
 										noisily display "$tema: $current_slice"
 											
 										scl_pct ///
-										Ninis_2 nini 1 & edad_ci !=.
+										Ninis_2 nini 2 & edad_ci !=.
 										
 										} /*cierro grupo_etario */
 										
@@ -887,11 +955,10 @@ local etnicidad No_aplica
 
 										
 										// numerator and denominator
-											local numerator_condition `"if t`sfix'!=. & age_term_`agetermfix'==1"'
-											local denominator_condition `"if t`sfix'!=."'					
+				
 						 
-											scl_ratio_2conds ///
-												tasa_terminacion_c t`sfix' age_term_`agetermfix' `"`numerator_condition'"' `"`denominator_condition'"'		
+										scl_ratio ///
+											tasa_terminacion_c t_cond_`sfix' age_term_`agetermfix' 		
 									
 										
 										} /*cierro clases3 */
@@ -912,15 +979,15 @@ local etnicidad No_aplica
 										
 										/* Tasa asistencia Bruta  */
 										scl_pct ///
-											leavers leavers 1 if edad_ci !=.
+											leavers leavers 2 if edad_ci !=.
 										
 										} /*cierro clases3 */	
 										
-										
+									
 												
 						* Tasa de sobreedad  								
 										
-									local nivel_educativo Primaria 
+									local nivel_educativos Primaria 
 								
 									foreach nivel_educativo of local nivel_educativos {								
 									local grupo_etario No_aplica
@@ -928,17 +995,12 @@ local etnicidad No_aplica
 										/* Parameters of current disaggregation levels, used by all commands */
 										global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
 										noisily display "$tema: $current_slice"
-
-										
-										/* Tasa sobreedad */
-										
-										
-										// numerator and denominator
-											local numerator_condition `"if asiste_ci!=. & age_prim_sobre==1"'
-											local denominator_condition `"if asiste_ci!=."'					
+									
+										/* Tasa sobreedad */										
+										// numerator and denominator				
 						 
-											scl_ratio_2conds ///
-											tasa_sobre_edad age_prim_sobre asis_prim_c `"`numerator_condition'"' `"`denominator_condition'"'		
+										scl_ratio ///
+										tasa_sobre_edad age_prim_sobre asis_prim_c 		
 										
 										
 									} /*cierro clases3 */	
@@ -947,15 +1009,15 @@ local etnicidad No_aplica
 							} /* cierro area */
 						}	/* cierro sexo */			
 				
-									
-							
+										
+	/*					
 								***************************************************
 								  global tema "laboral"
 								***************************************************
 								// Division: LMK
 								// Authors: Alvaro Altamirano y Stephanie González
 								***************************************************			
-	/*							
+							
 								local sexos Total Hombre Mujer 
 								local area Total Rural Urbano
 								local grupo_etarios Total age_15_24 age_15_29 age_15_64 age_25_64 age_65_mas 
@@ -975,7 +1037,7 @@ local etnicidad No_aplica
 											noisily display "$tema: $current_slice"	
 
 											//======== CALCULATE INDICATORS ================================================
-													
+												
 											scl_pct ///
 												tasa_ocupacion condocup_ci 1 if pet==1
 										
@@ -1172,10 +1234,11 @@ local etnicidad No_aplica
 												formalidad_3 formal_ci 1 if condocup_ci==1 & categopri_ci==3	
 
 											scl_pct ///
-												formalidad_4 formal_ci "1" if condocup_ci==1 & categopri_ci==2
+												formalidad_4 formal_ci 1 if condocup_ci==1 & categopri_ci==2
 																		
 											scl_mean ///
-												ingreso_hor_prom hwage if condocup_ci==1
+											ingreso_hor_prom hwage if condocup_ci==1 
+										
 												
 							} /* cierro grupo etario */	
 
@@ -1183,7 +1246,7 @@ local etnicidad No_aplica
 												pensionista_65_mas pensiont_ci 1 if age_65_mas==1	
 																																					
 											scl_nivel ///
-												num_pensionista_65_mas age_65_mas if pensiont_ci==1 								
+												num_pensionista_65_mas age_65_mas 1 if pensiont_ci==1 								
 
 											scl_pct ///
 												pensionista_cont_65_mas pension_ci 1 if age_65_mas==1	
@@ -1212,7 +1275,7 @@ local etnicidad No_aplica
 								}/*cierro area*/
 							} /* cierro sexo*/ 
 					
-	*/			
+	/*		
 				
 							************************************************
 							  global tema "pobreza"
@@ -1240,23 +1303,23 @@ local etnicidad No_aplica
 								
 												* Porcentaje poblacion que vive con menos de 3.1 USD diarios per capita*
 												scl_pct ///
-									            pobreza31 poor31 1 if poor31!=. 
+									            pobreza31 poor31 2 if poor31!=. 
 															
 												*Porcentaje poblacion que vive con menos de 5 USD diarios per capita
 												scl_pct ///
-									            pobreza poor 1 if poor!=. 
+									            pobreza poor 2 if poor!=. 
 																
 												* Porcentaje de la población con ingresos entre 5 y 12.4 USD diarios per capita*
 												scl_pct ///
-									            vulnerable vulnerable 1 if vulnerable!=. 
+									            vulnerable vulnerable 2 if vulnerable!=. 
 		
                                                  * Porcentaje de la población con ingresos entre 12.4 y 64 USD diarios per capita*
 												scl_pct ///
-									            middle middle 1 if middle!=. 
+									            middle middle 2 if middle!=. 
 															
                                                  * Porcentaje de la población con ingresos mayores 64 USD diarios per capita*
 												scl_pct ///
-									            rich rich 1 if rich!=. 
+									            rich rich 2 if rich!=. 
 
 			
 										} /* cierro grupo_etario */	
@@ -1321,7 +1384,7 @@ local etnicidad No_aplica
 													
 													/* Porcentaje de hogares que reciben remesas del exterior */
 													scl_pct ///
-														indexrem indexrem 1 
+														indexrem indexrem 2 
 
 							
 										} /* cierro area */	
@@ -1355,43 +1418,43 @@ local etnicidad No_aplica
 						
 											   * % de hogares con servicio de agua de acueducto*
 											   scl_pct ///
-									           aguared_ch aguared_ch 1 if jefe_ci==1 & aguared_ch!=. 
+									           aguared_ch aguared_ch 2 if jefe_ci==1 & aguared_ch!=. 
 																
 											   * % de hogares con acceso a servicios de saneamiento mejorados*
 											   scl_pct ///
-									           des2_ch des2_ch 1 if jefe_ci==1 & des2_ch!=. 							
+									           des2_ch des2_ch 2 if jefe_ci==1 & des2_ch!=. 							
 																														
 											   * % de hogares con electricidad *
 											   scl_pct ///
-									           luz_ch luz_ch 1 if jefe_ci==1 &  luz_ch!=. 
+									           luz_ch luz_ch 2 if jefe_ci==1 &  luz_ch!=. 
 																												
 										       * % hogares con pisos de tierra *
 										        scl_pct ///
-									            dirtf_ch dirtf_ch 1 if jefe_ci==1 &  dirtf_ch!=. 
+									            dirtf_ch dirtf_ch 2 if jefe_ci==1 &  dirtf_ch!=. 
 														
 											   * % de hogares con refrigerador *
 											    scl_pct ///
-									            refrig_ch freezer_ch 1 if jefe_ci==1 &  freezer_ch!=. 
+									            refrig_ch freezer_ch 2 if jefe_ci==1 &  freezer_ch!=. 
 
 												* % de hogares con carro particular*
 												scl_pct ///
-									            auto_ch auto_ch 1 if jefe_ci==1 &  auto_ch!=. 													
+									            auto_ch auto_ch 2 if jefe_ci==1 &  auto_ch!=. 													
 																
 												* % de hogares con acceso a internet *
 												scl_pct ///
-									            internet_ch internet_ch 1 if jefe_ci==1 &  internet_ch!=. 
+									            internet_ch internet_ch 2 if jefe_ci==1 &  internet_ch!=. 
 																			
 												* % de hogares con teléfono celular*
 												scl_pct ///
-									            cel_ch cel_ch 1 if jefe_ci==1 &  cel_ch!=.
+									            cel_ch cel_ch 2 if jefe_ci==1 &  cel_ch!=.
 																
 											    * % de hogares con techos de materiales no permanentes*
 												scl_pct ///
-									            techonp_ch techonp_ch 1 if jefe_ci==1 &  techonp_ch!=.
+									            techonp_ch techonp_ch 2 if jefe_ci==1 &  techonp_ch!=.
 
 												* % de hogares con paredes de materiales no permanentes*
 											    cap scl_pct ///
-									            parednp_ch parednp_ch 1 if jefe_ci==1 &  parednp_ch!=.
+									            parednp_ch parednp_ch 2 if jefe_ci==1 &  parednp_ch!=.
 
 												* Número de miembros por cuarto*
 												scl_mean ///
@@ -1399,7 +1462,7 @@ local etnicidad No_aplica
 												
 												*% de hogares con estatus residencial estable *
 												scl_pct ///
-									            estable_ch estable_ch 1 if jefe_ci==1 &  estable_ch!=.
+									            estable_ch estable_ch 2 if jefe_ci==1 &  estable_ch!=.
 												
 			
 											}/*cierro area*/		
@@ -1407,7 +1470,7 @@ local etnicidad No_aplica
 								
 
 								
-				/*			
+		*/			
 								
 							    ************************************************
 								  global tema "diversidad"
@@ -1599,24 +1662,25 @@ local etnicidad No_aplica
 		
 
 			save "${out}\indicadores_encuestas_hogares_scl_`pais'.dta", replace 
-			*clear
 			
-			}/*cierro encuestas*/
+			
+			*}/*cierro encuestas*/
 		} /* cierro anos */
 	} /* cierro paises */
-} /* cierro quietly */
+*} /* cierro quietly */
 
-
+/*
 /*====================================================================
                         2: Save and Export results
 ====================================================================*/
-
+local paises  ARG BHS BOL  BRA  BLZ BRB CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
 foreach pais of local paises { 
 	        
 			
 			use "${out}\indicadores_encuestas_hogares_scl_`pais'.dta"
-			export delimited using "${out}//indicadores_encuestas_hogares_`pais'.csv", replace
-			
+			include "${input}\dataframe_format.do"
+			export delimited using "${out}\\indicadores_encuestas_hogares_`pais'.csv", replace
+			unicode convertfile "${out}\indicadores_encuestas_hogares_`pais'.csv" "${covidtmp}\indicadores_encuestas_hogares_`pais'.csv", dstencoding(latin1) replace 
 						
 } 
 
