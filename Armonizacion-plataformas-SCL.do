@@ -217,6 +217,7 @@ program scl_mean
 	    
     mat valores=r(table)
 	local valor =valores[1,1] 
+
 	
 	estat cv
 	mat error_standar=r(se)
@@ -1660,3 +1661,4 @@ foreach div of local divisiones {
  		
 
 /* End
+
