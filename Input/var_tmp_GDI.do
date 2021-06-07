@@ -1,15 +1,20 @@
-	* 1. Discapacidad
-	             
-			* 1.1 Hogares con al menos una persona con discapacidad
-			cap bys idh_ch: egen num_dis_ch=total(dis_ci), m
-			cap recode num_dis_ch (1/max=1), gen (dis_ch)
 
-     * 2. Variables de raza
-            * 1.1 Variable de raza individual
-			cap clonevar afroind_ci = raza_ci
-			
-			*1.2 Variable de raza del jefe del hogar asignado a todos los miembros del hogar
-			cap gen afroind_jefe_ch= afroind_ci if jefe_ci==1
-            cap bys idh_ch: egen afroind_ch= total (afroind_jefe_ch)
-			
-			
+/*====================================================================
+project:       Imputación de la variable afroind_ci 
+Author:        Maria Antonella Pereira y Nathalia Maya
+Dependencies:  SCL/GDI - IDB 
+----------------------------------------------------------------------
+Creation Date:    22 Abril 2021 
+Modification Date:   
+Do-file version:    01
+References:          
+Output:             Excel-DTA file
+====================================================================*/
+
+/*=================================================================================
+ Program description: imputando valores de afroind_ci del jefe del hogar a los hijos (en países con restricciones de edad) 
+===================================================================================*/
+
+replace afroind_ci=afroind_ch if afroind_ci==9 & relacion_ci==3 //se generaron missings por los jefes de hogar que tienen missings
+replace afroind_ci=. if afroind_ci==9
+
