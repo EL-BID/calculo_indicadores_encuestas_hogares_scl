@@ -467,11 +467,10 @@ if scalar(Found)==0 {
 
 ** Creo locales principales:
 						
-*global paises  /*ARG BHS BOL BRB BRA  BLZ */ BRA CHL /*COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN */
+global paises ARG BHS BOL BRB BRA BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
 local anos  2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 
-
 global paises CRI
-local anos 2009 2010
+
 
 local geografia_id total_nacional
 local etnicidad No_aplica
