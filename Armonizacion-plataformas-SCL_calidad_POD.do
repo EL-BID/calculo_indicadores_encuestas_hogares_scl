@@ -94,18 +94,18 @@ program scl_pct
   if _rc == 0 {
 	    
     mat valores=r(table)
-	local valor =valores[1,`indcat'] *100
+	local valor = valores[1,colnumb(valores,`"`indcat'.`indvar'"')]*100
 	
 	estat cv
 	mat error_standar=r(se)
-	local se = error_standar[1,`indcat'] *100
+	local se = error_standar[1,colnumb(error_standar,`"`indcat'.`indvar'"')]*100
 	
 	mat cv=r(cv)
-	local cv = cv[1,`indcat'] 
+	local cv = cv[1,colnumb(cv,`"`indcat'.`indvar'"')]
 	
 	estat size
 	mat muestra=r(_N)
-	local muestra = muestra[1,`indcat'] 
+	local muestra = muestra[1,colnumb(muestra,`"`indcat'.`indvar'"')]
 	di `muestra'
   	
 	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"sum of `indvar'"') (`valor') (`se') (`cv') (`muestra')
@@ -653,47 +653,47 @@ local etnicidad No_aplica
 									
 								/* Porcentaje de hogares con jefatura femenina */
 								scl_pct ///
-								jefa_ch jefa_ch 2 if jefa_ch!=. & sexo_ci!=.												
+								jefa_ch jefa_ch "1" if jefa_ch!=. & sexo_ci!=.												
 										
 								/* Porcentaje de hogares con jefatura económica femenina */
 								scl_pct ///
-								jefaecon_ch hhfem_ch 2 if hhfem_ch!=. & sexo_ci!=.											
+								jefaecon_ch hhfem_ch "1" if hhfem_ch!=. & sexo_ci!=.											
 										
 								/* Porcentaje de población femenina*/
 								scl_pct ///
-								pobfem_ci pobfem_ci 2 if pobfem_ci!=. 
+								pobfem_ci pobfem_ci "1" if pobfem_ci!=. 
 																						
 								/* Porcentaje de hogares con al menos un miembro de 0-5 años*/
 								scl_pct ///
-								miembro6_ch miembro6_ch 2 if miembro6_ch !=. 
+								miembro6_ch miembro6_ch "1" if miembro6_ch !=. 
 												
 								* Porcentaje de hogares con al menos un miembro entre 6-16 años*
 								scl_pct ///
-								miembro6y16_ch miembro6y16_ch 2 if  miembro6y16_ch!=.
+								miembro6y16_ch miembro6y16_ch "1" if  miembro6y16_ch!=.
 																													
 								* Porcentaje de hogares con al menos un miembro de 65 años o más*
 								cap scl_pct ///
-								miembro65_ch miembro65_ch 2 
+								miembro65_ch miembro65_ch "1" 
 												
 								* Porcentaje de hogares unipersonales*
 								scl_pct ///
-								unip_ch unip_ch 2 
+								unip_ch unip_ch "1" 
 																									
 								* Porcentaje de hogares nucleares*
 								scl_pct ///
-								nucl_ch nucl_ch 2 
+								nucl_ch nucl_ch "1" 
 																
 								* Porcentaje de hogares ampliados*
 						        scl_pct ///
-								ampl_ch ampl_ch 2 
+								ampl_ch ampl_ch "1" 
 																																
 								* Porcentaje de hogares compuestos*
 								scl_pct ///
-								comp_ch comp_ch 2 
+								comp_ch comp_ch "1" 
 																	
 								* Porcentaje de hogares corresidentes*
 							    scl_pct ///
-								corres_ch corres_ch 2 				
+								corres_ch corres_ch "1" 				
 
 								*Razón de dependencia*
 								scl_mean ///
@@ -705,15 +705,15 @@ local etnicidad No_aplica
 																
 								* Porcentaje de población menor de 18 años*
 								scl_pct ///
-							    pob18_ci pob18_ci 2 if pob18_ci!=.
+							    pob18_ci pob18_ci "1" if pob18_ci!=.
 																									
 								* Porcentaje de población de 65+ años*
 								scl_pct ///
-								pob65_ci pob65_ci 2 if pob65_ci!=.
+								pob65_ci pob65_ci "1" if pob65_ci!=.
 																			
 								* Porcentaje de individuos en union formal o informal*
 								scl_pct ///
-								union_ci union_ci 2 if union_ci!=.
+								union_ci union_ci "1" if union_ci!=.
 																								
 								* Edad mediana de la población en años *
 								scl_median ///
@@ -816,11 +816,11 @@ local etnicidad No_aplica
 												
 						* Tasa asistencia grupo etario *
 									scl_pct ///
-									tasa_asis_edad asiste_ci 2
+									tasa_asis_edad asiste_ci "1"
 																																				
 						* Tasa No Asistencia grupo etario *
 									scl_pct ///
-									tasa_no_asis_edad asiste_ci 1
+									tasa_no_asis_edad asiste_ci "0"
 									 
 													
 									} /*cierro grupo etario */
@@ -836,7 +836,7 @@ local etnicidad No_aplica
 											noisily display "$tema: $current_slice"
 																			
 													scl_pct ///
-													Años_Escolaridad_25_mas `nivel_educativo' 2 if (aedu_ci !=. | edad_ci !=.)
+													Años_Escolaridad_25_mas `nivel_educativo' "1" if (aedu_ci !=. | edad_ci !=.)
 											
 													
 									} /* cierro nivel educativo 3 */		
@@ -853,7 +853,7 @@ local etnicidad No_aplica
 										noisily display "$tema: $current_slice"
 											
 										scl_pct ///
-										Ninis_2 nini 2 & edad_ci !=.
+										Ninis_2 nini "1" & edad_ci !=.
 										
 										} /*cierro grupo_etario */
 										
@@ -907,7 +907,7 @@ local etnicidad No_aplica
 										
 										/* Tasa asistencia Bruta  */
 										scl_pct ///
-											leavers leavers 2 if edad_ci !=.
+											leavers leavers "1" if edad_ci !=.
 										
 										} /*cierro clases3 */	
 										
@@ -967,16 +967,16 @@ local etnicidad No_aplica
 											//======== CALCULATE INDICATORS ================================================
 												
 											scl_pct ///
-												tasa_ocupacion condocup_ci 1 if pet==1
+												tasa_ocupacion condocup_ci "1" if pet==1
 										
 											scl_pct ///
-												tasa_desocupacion condocup_ci 2 if pea==1
+												tasa_desocupacion condocup_ci "2" if pea==1
 										
 											scl_ratio ///
 												tasa_participacion pea pet
 										
 											scl_pct ///
-												ocup_suf_salario liv_wage 2 if liv_wage!=. & condocup_ci==1
+												ocup_suf_salario liv_wage "1" if liv_wage!=. & condocup_ci==1
 										
 											scl_mean ///
 												ingreso_mens_prom ylab_ppp if condocup_ci==1 & ylab_ppp!=.
@@ -994,7 +994,7 @@ local etnicidad No_aplica
 												salminmes_ppp salmm_ppp if condocup_ci==1 & salmm_ppp!=.
 
 											scl_pct ///
-												sal_menor_salmin menorwmin 2 if condocup_ci==1											
+												sal_menor_salmin menorwmin "1" if condocup_ci==1											
 
 											scl_mean ///
 												salmin_hora hsmin_ppp if condocup_ci==1 & hsmin_ppp!=.
@@ -1003,19 +1003,19 @@ local etnicidad No_aplica
 												salmin_mes salmm_ci if condocup_ci==1 & salmm_ci!=.
 
 											scl_pct ///
-												tasa_asalariados asalariado 2 if condocup_ci==1																	
+												tasa_asalariados asalariado "1" if condocup_ci==1																	
 											
 											scl_pct ///
-												tasa_independientes ctapropia 2 if condocup_ci==1																	
+												tasa_independientes ctapropia "1" if condocup_ci==1																	
 
 											scl_pct ///
-												tasa_patrones patron 2 if condocup_ci==1																	
+												tasa_patrones patron "1" if condocup_ci==1																	
 
 											scl_pct ///
-												tasa_sinremuneracion sinremuner 2 if condocup_ci==1																	
+												tasa_sinremuneracion sinremuner "1" if condocup_ci==1																	
 											
 											scl_pct ///
-												subempleo subemp_ci 2 if condocup_ci==1																	
+												subempleo subemp_ci "1" if condocup_ci==1																	
 											
 											scl_mean ///
 												inglaboral_ppp_formales ylab_ppp if condocup_ci==1 & formal_ci==1
@@ -1045,124 +1045,124 @@ local etnicidad No_aplica
 												nivel_subempleo subemp_ci 1 if condocup_ci==1
 
 											scl_pct ///
-												tasa_agro agro 2 if condocup_ci==1																	
+												tasa_agro agro "1" if condocup_ci==1																	
 											
 											scl_nivel ///
 												nivel_agro agro 1 if condocup_ci==1
 											
 											scl_pct ///
-												tasa_minas minas 2 if condocup_ci==1																	
+												tasa_minas minas "1" if condocup_ci==1																	
 	
 											scl_nivel ///
 												nivel_minas minas 1 if condocup_ci==1										
 																			
 											scl_pct ///
-												tasa_industria industria 2 if condocup_ci==1		
+												tasa_industria industria "1" if condocup_ci==1		
 												
 											scl_nivel ///
 												nivel_industria industria 1 if condocup_ci==1										
 
 											scl_pct ///
-												tasa_sspublicos sspublicos 2 if condocup_ci==1		
+												tasa_sspublicos sspublicos "1" if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_sspublicos sspublicos 1 if condocup_ci==1										
 
 											scl_pct ///
-												tasa_construccion construccion 2 if condocup_ci==1		
+												tasa_construccion construccion "1" if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_construccion construccion 1 if condocup_ci==1												
 
 											scl_pct ///
-												tasa_comercio comercio 2 if condocup_ci==1		
+												tasa_comercio comercio "1" if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_comercio comercio 1 if condocup_ci==1	
 												
 											scl_pct ///
-												tasa_transporte transporte 2 if condocup_ci==1		
+												tasa_transporte transporte "1" if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_transporte transporte 1 if condocup_ci==1																			
 																			
 											scl_pct ///
-												tasa_financiero financiero 2 if condocup_ci==1		
+												tasa_financiero financiero "1" if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_financiero financiero 1 if condocup_ci==1																			
 							
 											scl_pct ///
-												tasa_servicios servicios 2 if condocup_ci==1		
+												tasa_servicios servicios "1" if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_servicios servicios 1 if condocup_ci==1																				
 								
 											scl_pct ///
-												tasa_profestecnico profestecnico 2 if condocup_ci==1		
+												tasa_profestecnico profestecnico "1" if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_profestecnico profestecnico 1 if condocup_ci==1																					
 
 											scl_pct ///
-												tasa_director director 2 if condocup_ci==1		
+												tasa_director director "1" if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_director director 1 if condocup_ci==1																					
 																
 											scl_pct ///
-												tasa_administrativo administrativo 2 if condocup_ci==1		
+												tasa_administrativo administrativo "1" if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_administrativo administrativo 1 if condocup_ci==1																			
 																																						
 											scl_pct ///
-												tasa_comerciantes comerciantes 2 if condocup_ci==1		
+												tasa_comerciantes comerciantes "1" if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_comerciantes comerciantes 1 if condocup_ci==1																			
 
 											scl_pct ///
-												tasa_trabss trabss 2 if condocup_ci==1		
+												tasa_trabss trabss "1" if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_trabss trabss 1 if condocup_ci==1	
 												
 											scl_pct ///
-												tasa_trabagricola trabagricola 2 if condocup_ci==1		
+												tasa_trabagricola trabagricola "1" if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_trabagricola trabagricola 1 if condocup_ci==1																									
 									
 											scl_pct ///
-												tasa_obreros obreros 2 if condocup_ci==1		
+												tasa_obreros obreros "1" if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_obreros obreros 1 if condocup_ci==1																									
 
 											scl_pct ///
-												tasa_ffaa ffaa 2 if condocup_ci==1		
+												tasa_ffaa ffaa "1" if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_ffaa ffaa 1 if condocup_ci==1																									
 
 											scl_pct ///
-												tasa_otrostrab otrostrab 2 if condocup_ci==1		
+												tasa_otrostrab otrostrab "1" if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_otrostrab otrostrab 1 if condocup_ci==1											
 
 											scl_pct ///
-												empleo_publico spublico_ci 2 if condocup_ci==1		
+												empleo_publico spublico_ci "1" if condocup_ci==1		
 
 											scl_pct ///
-												formalidad_2 formal_ci 2 if condocup_ci==1		
+												formalidad_2 formal_ci "1" if condocup_ci==1		
 												
 											scl_pct ///
-												formalidad_3 formal_ci 2 if condocup_ci==1 & categopri_ci==3	
+												formalidad_3 formal_ci "1" if condocup_ci==1 & categopri_ci==3	
 
 											scl_pct ///
-												formalidad_4 formal_ci 2 if condocup_ci==1 & categopri_ci==2
+												formalidad_4 formal_ci "1" if condocup_ci==1 & categopri_ci==2
 																		
 											scl_mean ///
 											ingreso_hor_prom hwage if condocup_ci==1 
@@ -1171,31 +1171,31 @@ local etnicidad No_aplica
 							} /* cierro grupo etario */	
 
 											scl_pct ///
-												pensionista_65_mas pensiont_ci 2 if age_65_mas==1	
+												pensionista_65_mas pensiont_ci "1" if age_65_mas==1	
 																																					
 											scl_nivel ///
 												num_pensionista_65_mas age_65_mas 1 if pensiont_ci==1 								
 
 											scl_pct ///
-												pensionista_cont_65_mas pension_ci 2 if age_65_mas==1	
+												pensionista_cont_65_mas pension_ci "1" if age_65_mas==1	
 												
 											scl_pct ///
-												pensionista_nocont_65_mas pensionsub_ci 2 if age_65_mas==1	
+												pensionista_nocont_65_mas pensionsub_ci "1" if age_65_mas==1	
 																				
 											scl_pct ///
-												pensionista_ocup_65_mas pensiont_ci 2 if age_65_mas==1 & condocup_ci==1
+												pensionista_ocup_65_mas pensiont_ci "1" if age_65_mas==1 & condocup_ci==1
 
 											scl_mean ///
-												y_pen_cont_ppp ypen_ppp "1" if ypen_ppp!=. & age_65_mas==1
+												y_pen_cont_ppp ypen_ppp 1 if ypen_ppp!=. & age_65_mas==1
 
 											scl_mean ///
-												y_pen_cont ypen_ci "1" if ypen_ci!=. & age_65_mas==1
+												y_pen_cont ypen_ci 1 if ypen_ci!=. & age_65_mas==1
 												
 											scl_mean ///
-												y_pen_nocont ypensub_ci "1" if ypensub_ci!=. & age_65_mas==1
+												y_pen_nocont ypensub_ci 1 if ypensub_ci!=. & age_65_mas==1
 																			
 											scl_mean ///
-												y_pen_total ypent_ci "1" if ypent_ci!=. & age_65_mas==1
+												y_pen_total ypent_ci 1 if ypent_ci!=. & age_65_mas==1
 																				
 										
 										
@@ -1231,23 +1231,23 @@ local etnicidad No_aplica
 								
 												* Porcentaje poblacion que vive con menos de 3.1 USD diarios per capita*
 												scl_pct ///
-									            pobreza31 poor31 2 if poor31!=. 
+									            pobreza31 poor31 "1" if poor31!=. 
 															
 												*Porcentaje poblacion que vive con menos de 5 USD diarios per capita
 												scl_pct ///
-									            pobreza poor 2 if poor!=. 
+									            pobreza poor "1" if poor!=. 
 																
 												* Porcentaje de la población con ingresos entre 5 y 12.4 USD diarios per capita*
 												scl_pct ///
-									            vulnerable vulnerable 2 if vulnerable!=. 
+									            vulnerable vulnerable "1" if vulnerable!=. 
 		
                                                  * Porcentaje de la población con ingresos entre 12.4 y 64 USD diarios per capita*
 												scl_pct ///
-									            middle middle 2 if middle!=. 
+									            middle middle "1" if middle!=. 
 															
                                                  * Porcentaje de la población con ingresos mayores 64 USD diarios per capita*
 												scl_pct ///
-									            rich rich 2 if rich!=. 
+									            rich rich "1" if rich!=. 
 
 			
 										} /* cierro grupo_etario */	
@@ -1312,7 +1312,7 @@ local etnicidad No_aplica
 													
 													/* Porcentaje de hogares que reciben remesas del exterior */
 													scl_pct ///
-														indexrem indexrem 2 
+														indexrem indexrem "1" 
 
 							
 										} /* cierro area */	
@@ -1346,11 +1346,11 @@ local etnicidad No_aplica
 						
 											   * % de hogares con servicio de agua de acueducto*
 											   scl_pct ///
-									           aguared_ch aguared_ch 2 if jefe_ci==1 & aguared_ch!=. 
+									           aguared_ch aguared_ch "1" if jefe_ci==1 & aguared_ch!=. 
 																
 											   * % de hogares con acceso a servicios de saneamiento mejorados*
 											   scl_pct ///
-									           des2_ch des2_ch 2 if jefe_ci==1 & des2_ch!=. 							
+									           des2_ch des2_ch "1" if jefe_ci==1 & des2_ch!=. 							
 																														
 											   * % de hogares con electricidad *
 											   scl_pct ///
@@ -1358,31 +1358,31 @@ local etnicidad No_aplica
 																												
 										       * % hogares con pisos de tierra *
 										        scl_pct ///
-									            dirtf_ch dirtf_ch 2 if jefe_ci==1 &  dirtf_ch!=. 
+									            dirtf_ch dirtf_ch "1" if jefe_ci==1 &  dirtf_ch!=. 
 														
 											   * % de hogares con refrigerador *
 											    scl_pct ///
-									            refrig_ch freezer_ch 2 if jefe_ci==1 &  freezer_ch!=. 
+									            refrig_ch freezer_ch "1" if jefe_ci==1 &  freezer_ch!=. 
 
 												* % de hogares con carro particular*
 												scl_pct ///
-									            auto_ch auto_ch 2 if jefe_ci==1 &  auto_ch!=. 													
+									            auto_ch auto_ch "1" if jefe_ci==1 &  auto_ch!=. 													
 																
 												* % de hogares con acceso a internet *
 												scl_pct ///
-									            internet_ch internet_ch 2 if jefe_ci==1 &  internet_ch!=. 
+									            internet_ch internet_ch "1" if jefe_ci==1 &  internet_ch!=. 
 																			
 												* % de hogares con teléfono celular*
 												scl_pct ///
-									            cel_ch cel_ch 2 if jefe_ci==1 &  cel_ch!=.
+									            cel_ch cel_ch "1" if jefe_ci==1 &  cel_ch!=.
 																
 											    * % de hogares con techos de materiales no permanentes*
 												scl_pct ///
-									            techonp_ch techonp_ch 2 if jefe_ci==1 &  techonp_ch!=.
+									            techonp_ch techonp_ch "1" if jefe_ci==1 &  techonp_ch!=.
 
 												* % de hogares con paredes de materiales no permanentes*
 											    cap scl_pct ///
-									            parednp_ch parednp_ch 2 if jefe_ci==1 &  parednp_ch!=.
+									            parednp_ch parednp_ch "1" if jefe_ci==1 &  parednp_ch!=.
 
 												* Número de miembros por cuarto*
 												scl_mean ///
@@ -1390,13 +1390,15 @@ local etnicidad No_aplica
 												
 												*% de hogares con estatus residencial estable *
 												scl_pct ///
-									            estable_ch estable_ch 2 if jefe_ci==1 &  estable_ch!=.
+									            estable_ch estable_ch "1" if jefe_ci==1 &  estable_ch!=.
 												
 			
 											}/*cierro area*/		
 										} /*cierro quintil_ingreso*/
 								
 
+								
+					
 								
 							    ************************************************
 								  global tema "diversidad"
@@ -1422,37 +1424,36 @@ local etnicidad No_aplica
 								
 												* Porcentaje población afrodescendiente 
 												scl_pct ///
-													pafro_ci afroind_ci "Afro-descendiente"
+													pafro_ci afroind_ci "2"
 												/* Porcentaje población indígena */
 												scl_pct ///
-												    pindi_ci afroind_ci "Indígena" 
+												    pindi_ci afroind_ci "1" 
 												/* Porcentaje población ni Afrodescendiente ni indígena*/
+												scl_pct ///
+												    pnoafronoindi_ci afroind_ci "9"
 
-											    scl_pct ///
-												   pafroindi_ci afroind_ci "Afro-indígena"
                                                 /* Porcentaje de hogares con jefatura afrodescendiente */ 
 										        scl_pct ///
-												   pjefe_afro_ch afroind_ch "Afro-descendiente" 
+												   pjefe_afro_ch afroind_ch "2" 
 												/* Porcentaje de hogares con jefatura indígena */ 
 										        scl_pct ///												   
-												   pjefe_indi_ch afroind_ch "Indígena" 
+												   pjefe_indi_ch afroind_ch "1" 
 											    /* Porcentaje de hogares con jefatura ni afrodescendiente ni indígena*/ 
 									            scl_pct ///												   
-                                                   pjefe_noafronoindi_ch afroind_ch "Otros"
-												/* Porcentaje de personas que reportan tener alguna dificultad en actividades de la vida diaria */
+                                                   pjefe_noafronoindi_ch afroind_ch "9"
+
+                                               /* Porcentaje de personas que reportan tener alguna dificultad en actividades de la vida diaria */
 											    scl_pct ///												   
-                                                   pdis_ci dis_ci "Con Discapacidad"
+                                                   pdis_ci dis_ci "1"
 												/* Porcentaje de hogares con miembros que reportan tener alguna dificultad en realizar actividades de la vida diaria. */
                                                 scl_pct ///
-												   pdis_ch dis_ch "Con Discapacidad" 
+												   pdis_ch dis_ch "1" 
 																
 												
 											}/*cierro area*/		
 										} /*cierro sexo*/
 							
-
-			/*							
-
+									
 								
 								************************************************
 								  global tema "migracion"
@@ -1479,7 +1480,7 @@ local etnicidad No_aplica
 								
 											/* Porcentaje de migrantes en el pais */
 											scl_pct ///
-												migrante_ci migrante_ci "1" 
+												migrante_ci migrante_ci "1"
 																				
 											/* Porcentaje de migrantes antiguos (5 años o mas) en el pais */
 											scl_pct ///
@@ -1487,12 +1488,12 @@ local etnicidad No_aplica
 												
 											/* Porcentaje de migrantes LAC en el pais */
 											scl_pct ///
-												migrantelac_ci migrantelac_ci "1" 
+												migrantelac_ci migrantelac_ci "1"
 								
 											}/*cierro clases3*/		
 										} /*cierro clases2*/
 								
-							
+			/*					
 						
 								************************************************
 								  global tema "programas sociales"
@@ -1568,6 +1569,8 @@ local etnicidad No_aplica
 								} /*cierro sexos*/
 							
 						*/ 
+			
+
 			
 
 
