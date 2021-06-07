@@ -98,7 +98,7 @@ program scl_pct
 	
 	estat cv
 	mat error_standar=r(se)
-	local se = error_standar[1,`indcat'] 
+	local se = error_standar[1,`indcat'] *100
 	
 	mat cv=r(cv)
 	local cv = cv[1,`indcat'] 
@@ -216,11 +216,11 @@ program scl_mean
   if _rc == 0 {
 	    
     mat valores=r(table)
-	local valor =valores[1,1] *100
+	local valor =valores[1,1] 
 	
 	estat cv
 	mat error_standar=r(se)
-	local se = error_standar[1,1] *100
+	local se = error_standar[1,1] 
 	
 	mat cv=r(cv)
 	local cv = cv[1,1] 
@@ -362,79 +362,6 @@ program scl_ratio
   
 end
 	
-/***** scl_ratio_2conds ********************************************
-Calculates ratio indicators using
-two variables (1st the numerator, 2nd the denominator).
-Accepts two conditions as text (last two arguments, see example).
-Both conditions must be provided, if either of the
-conditions is unnecessary set “if 1” as the condition.
-E.g., 
-local numerator_condition `"if edad_ci>=6 & asiste_ci!=."'
-local denominator_condition `"if asiste_ci!=."'
-scl_ratio_2conds ///
-   tasa_bruta_asis asis_prim age_prim `"`numerator_condition'"' `"`denominator_condition'"'
-******************************************************************/
-capture program drop scl_ratio_2conds                                                        
-program scl_ratio_2conds
-  syntax anything
-  /* parameters of the indicator */
-  local indname : word 1 of `anything'
-  local indvarnum : word 2 of `anything'
-  local indvarden : word 3 of `anything'
-  local numcond : word 4 of `anything'
-  local dencond : word 5 of `anything'
-  /* paramaters of the current disaggregation (comes from $current_slice global macro) */
-  local pais : word 1 of $current_slice
-  local ano : word 2 of $current_slice
-  local geografia_id : word 3 of $current_slice
-  local sexo : word 4 of $current_slice
-  local area : word 5 of $current_slice
-  local nivel_educativo : word 6 of $current_slice
-  local quintil_ingreso : word 7 of $current_slice
-  local grupo_etario : word 8 of $current_slice
-  local etnicidad : word 9 of $current_slice
-    
-  display `"$tema - `indname'"'
-  
-   cap svy:total `indvarnum' if `numcond' & `sexo'==1 & `area'==1 &  `quintil_ingreso'==1 
-	mat temp=e(b)
-	local numerador = temp[1,1]
-  
-   cap svy:total `indvarden' if `dencond' & `sexo'==1 & `area'==1 &  `quintil_ingreso'==1 
-   mat temp2=e(b)
-   local denominador = temp2[1,1]   
-
-  
-  cap svy:ratio `numerador'/`denominador'  
-  
-  if _rc == 0 {
-	    
-    mat valores=r(table)
-	local valor =valores[1,1] *100
-	
-	estat cv
-	mat error_standar=r(se)
-	local se = error_standar[1,1] *100
-	
-	mat cv=r(cv)
-	local cv = cv[1,1] 
-	
-	estat size
-	mat muestra=r(_N)
-	local muestra = muestra[1,1] 
-  
-           
-           post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (`valor') (`se') (`cv') (`muestra')
-     }
-     else {
-           /* generate a line with missing value */
-           post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`indvarnum'/`indvarden'"') (.) (.) (.) (.)
-     }
-     
-
-end
-
-
 /***** scl_inequal **************************************************
  Calculates gini and theil indicators using
  the given variable.
@@ -459,17 +386,19 @@ program scl_inequal
   local grupo_etario : word 8 of $current_slice
   local etnicidad : word 9 of $current_slice
   
-   scl_if_compose `if'
+  scl_if_compose `if'
   local xif `"`s(xif)'"'
   sreturn clear
  
   
   display `"$tema - `indname'"'
   						
-	capture quietly inequal7 `indvar' [w=round(factor_ci)] `xif'
+	capture quietly svylorenz `indvar'  `xif'
 	if _rc == 0 {
-    local valor =`r(`typeind')' * 100
-		
+    local valor =e(gini)
+	local se = e(se_gini)
+	local cv =.
+	local muestra=.
 	
 	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"`typeind' of `indvar'"') (`valor') (`se') (`cv') (`muestra')
 	
@@ -541,8 +470,8 @@ if scalar(Found)==0 {
 *global paises  /*ARG BHS BOL BRB BRA  BLZ */ BRA CHL /*COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN */
 local anos  2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 
 
-global paises ARG
-local anos 2018 
+global paises CRI
+local anos 2009 2010
 
 local geografia_id total_nacional
 local etnicidad No_aplica
@@ -579,7 +508,7 @@ local etnicidad No_aplica
 			 include "${input}\Directorio HS LAC.do" 
 			 * Encuentra el archivo para este país/año
 			 cap use "${source}\\`pais'\\$encuestas\data_arm\\`pais'_`ano'${rondas}_BID.dta" , clear
-di `_rc'
+
 			 *foreach encuesta of local encuestas {
 			 /* 
 			   Alternatively, if you want to test a certain collection of .dta files,
@@ -596,10 +525,10 @@ di `_rc'
 					//* Si esta base de datos existe, entonces haga: */
 					noisily display "Calculando \\`pais'\\$encuestas\data_arm\\`pais'_`ano'$rondas_BID.dta..."		
 														
-						
+					
 						* setting up quality var
 						cap sum upm_ci
-						if _rc==0{
+						if _rc==0 {
 						
 							if `r(N)' > 0 {
 								cap sum estrato_ci
@@ -674,7 +603,7 @@ di `_rc'
 					
 				}
 				if _rc ~= 0  {
-pause				
+				
 					/* IN the case the dta file DOES NOT EXIST for this country/year, we are going
 					  to execute the rest of the code ANYWAY. The reason is: regardless if the 
 					  file exists or not, all indicators will be generated in the same way, 
@@ -697,7 +626,7 @@ pause
 					* 1.2: Indicators for each topic		
 *****************************************************************************************************************************************
 				
-/*
+
 						************************************************
 						  global tema "demografia"
 						************************************************
@@ -816,7 +745,7 @@ pause
 										
 							} /*cierro clase*/			    
 											
-*/				
+		/*		
 											
 							************************************************
 							  global tema "educacion"
@@ -1010,7 +939,7 @@ pause
 						}	/* cierro sexo */			
 				
 										
-	/*					
+					
 								***************************************************
 								  global tema "laboral"
 								***************************************************
@@ -1044,11 +973,11 @@ pause
 											scl_pct ///
 												tasa_desocupacion condocup_ci 2 if pea==1
 										
-											scl_pct ///
-												tasa_participacion pea 1 if pet==1
+											scl_ratio ///
+												tasa_participacion pea pet
 										
 											scl_pct ///
-												ocup_suf_salario liv_wage 1 if liv_wage!=. & condocup_ci==1
+												ocup_suf_salario liv_wage 2 if liv_wage!=. & condocup_ci==1
 										
 											scl_mean ///
 												ingreso_mens_prom ylab_ppp if condocup_ci==1 & ylab_ppp!=.
@@ -1066,7 +995,7 @@ pause
 												salminmes_ppp salmm_ppp if condocup_ci==1 & salmm_ppp!=.
 
 											scl_pct ///
-												sal_menor_salmin menorwmin 1 if condocup_ci==1											
+												sal_menor_salmin menorwmin 2 if condocup_ci==1											
 
 											scl_mean ///
 												salmin_hora hsmin_ppp if condocup_ci==1 & hsmin_ppp!=.
@@ -1075,19 +1004,19 @@ pause
 												salmin_mes salmm_ci if condocup_ci==1 & salmm_ci!=.
 
 											scl_pct ///
-												tasa_asalariados asalariado 1 if condocup_ci==1																	
+												tasa_asalariados asalariado 2 if condocup_ci==1																	
 											
 											scl_pct ///
-												tasa_independientes ctapropia 1 if condocup_ci==1																	
+												tasa_independientes ctapropia 2 if condocup_ci==1																	
 
 											scl_pct ///
-												tasa_patrones patron 1 if condocup_ci==1																	
+												tasa_patrones patron 2 if condocup_ci==1																	
 
 											scl_pct ///
-												tasa_sinremuneracion sinremuner 1 if condocup_ci==1																	
+												tasa_sinremuneracion sinremuner 2 if condocup_ci==1																	
 											
 											scl_pct ///
-												subempleo subemp_ci 1 if condocup_ci==1																	
+												subempleo subemp_ci 2 if condocup_ci==1																	
 											
 											scl_mean ///
 												inglaboral_ppp_formales ylab_ppp if condocup_ci==1 & formal_ci==1
@@ -1117,124 +1046,124 @@ pause
 												nivel_subempleo subemp_ci 1 if condocup_ci==1
 
 											scl_pct ///
-												tasa_agro agro 1 if condocup_ci==1																	
+												tasa_agro agro 2 if condocup_ci==1																	
 											
 											scl_nivel ///
 												nivel_agro agro 1 if condocup_ci==1
 											
 											scl_pct ///
-												tasa_minas minas 1 if condocup_ci==1																	
+												tasa_minas minas 2 if condocup_ci==1																	
 	
 											scl_nivel ///
 												nivel_minas minas 1 if condocup_ci==1										
 																			
 											scl_pct ///
-												tasa_industria industria 1 if condocup_ci==1		
+												tasa_industria industria 2 if condocup_ci==1		
 												
 											scl_nivel ///
 												nivel_industria industria 1 if condocup_ci==1										
 
 											scl_pct ///
-												tasa_sspublicos sspublicos 1 if condocup_ci==1		
+												tasa_sspublicos sspublicos 2 if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_sspublicos sspublicos 1 if condocup_ci==1										
 
 											scl_pct ///
-												tasa_construccion construccion 1 if condocup_ci==1		
+												tasa_construccion construccion 2 if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_construccion construccion 1 if condocup_ci==1												
 
 											scl_pct ///
-												tasa_comercio comercio 1 if condocup_ci==1		
+												tasa_comercio comercio 2 if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_comercio comercio 1 if condocup_ci==1	
 												
 											scl_pct ///
-												tasa_transporte transporte 1 if condocup_ci==1		
+												tasa_transporte transporte 2 if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_transporte transporte 1 if condocup_ci==1																			
 																			
 											scl_pct ///
-												tasa_financiero financiero 1 if condocup_ci==1		
+												tasa_financiero financiero 2 if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_financiero financiero 1 if condocup_ci==1																			
 							
 											scl_pct ///
-												tasa_servicios servicios 1 if condocup_ci==1		
+												tasa_servicios servicios 2 if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_servicios servicios 1 if condocup_ci==1																				
 								
 											scl_pct ///
-												tasa_profestecnico profestecnico 1 if condocup_ci==1		
+												tasa_profestecnico profestecnico 2 if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_profestecnico profestecnico 1 if condocup_ci==1																					
 
 											scl_pct ///
-												tasa_director director 1 if condocup_ci==1		
+												tasa_director director 2 if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_director director 1 if condocup_ci==1																					
 																
 											scl_pct ///
-												tasa_administrativo administrativo 1 if condocup_ci==1		
+												tasa_administrativo administrativo 2 if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_administrativo administrativo 1 if condocup_ci==1																			
 																																						
 											scl_pct ///
-												tasa_comerciantes comerciantes 1 if condocup_ci==1		
+												tasa_comerciantes comerciantes 2 if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_comerciantes comerciantes 1 if condocup_ci==1																			
 
 											scl_pct ///
-												tasa_trabss trabss 1 if condocup_ci==1		
+												tasa_trabss trabss 2 if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_trabss trabss 1 if condocup_ci==1	
 												
 											scl_pct ///
-												tasa_trabagricola trabagricola 1 if condocup_ci==1		
+												tasa_trabagricola trabagricola 2 if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_trabagricola trabagricola 1 if condocup_ci==1																									
 									
 											scl_pct ///
-												tasa_obreros obreros 1 if condocup_ci==1		
+												tasa_obreros obreros 2 if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_obreros obreros 1 if condocup_ci==1																									
 
 											scl_pct ///
-												tasa_ffaa ffaa 1 if condocup_ci==1		
+												tasa_ffaa ffaa 2 if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_ffaa ffaa 1 if condocup_ci==1																									
 
 											scl_pct ///
-												tasa_otrostrab otrostrab 1 if condocup_ci==1		
+												tasa_otrostrab otrostrab 2 if condocup_ci==1		
 
 											scl_nivel ///
 												nivel_otrostrab otrostrab 1 if condocup_ci==1											
 
 											scl_pct ///
-												empleo_publico spublico_ci 1 if condocup_ci==1		
+												empleo_publico spublico_ci 2 if condocup_ci==1		
 
 											scl_pct ///
-												formalidad_2 formal_ci 1 if condocup_ci==1		
+												formalidad_2 formal_ci 2 if condocup_ci==1		
 												
 											scl_pct ///
-												formalidad_3 formal_ci 1 if condocup_ci==1 & categopri_ci==3	
+												formalidad_3 formal_ci 2 if condocup_ci==1 & categopri_ci==3	
 
 											scl_pct ///
-												formalidad_4 formal_ci 1 if condocup_ci==1 & categopri_ci==2
+												formalidad_4 formal_ci 2 if condocup_ci==1 & categopri_ci==2
 																		
 											scl_mean ///
 											ingreso_hor_prom hwage if condocup_ci==1 
@@ -1243,19 +1172,19 @@ pause
 							} /* cierro grupo etario */	
 
 											scl_pct ///
-												pensionista_65_mas pensiont_ci 1 if age_65_mas==1	
+												pensionista_65_mas pensiont_ci 2 if age_65_mas==1	
 																																					
 											scl_nivel ///
 												num_pensionista_65_mas age_65_mas 1 if pensiont_ci==1 								
 
 											scl_pct ///
-												pensionista_cont_65_mas pension_ci 1 if age_65_mas==1	
+												pensionista_cont_65_mas pension_ci 2 if age_65_mas==1	
 												
 											scl_pct ///
-												pensionista_nocont_65_mas pensionsub_ci 1 if age_65_mas==1	
+												pensionista_nocont_65_mas pensionsub_ci 2 if age_65_mas==1	
 																				
 											scl_pct ///
-												pensionista_ocup_65_mas pensiont_ci 1 if age_65_mas==1 & condocup_ci==1
+												pensionista_ocup_65_mas pensiont_ci 2 if age_65_mas==1 & condocup_ci==1
 
 											scl_mean ///
 												y_pen_cont_ppp ypen_ppp "1" if ypen_ppp!=. & age_65_mas==1
@@ -1268,14 +1197,14 @@ pause
 																			
 											scl_mean ///
 												y_pen_total ypent_ci "1" if ypent_ci!=. & age_65_mas==1
-																			
+																				
 										
 										
 									} /*cierro quintiles*/
 								}/*cierro area*/
 							} /* cierro sexo*/ 
 					
-	/*		
+		
 				
 							************************************************
 							  global tema "pobreza"
@@ -1326,7 +1255,7 @@ pause
 									}/*cierro area*/
 								} /* cierro sexo*/ 
 				
-								local areas  Total Urbano Rural
+							local areas  Total Urbano Rural
 													
 								
 									foreach area of local areas {
@@ -1343,19 +1272,19 @@ pause
 													
 												 /* Coeficiente de Gini para el ingreso per cápita del hogar*/
 												scl_inequal ///
-												ginihh pc_ytot_ch gini 
+												ginihh pc_ytot_ch 
 							
 												/* Coeficiente de Gini para salarios por hora*/
 												scl_inequal ///
-												gini ylmhopri_ci gini 
+												gini ylmhopri_ci 
 								
 												/* Coeficiente de theil para el ingreso per cápita del hogar*/
-												 scl_inequal ///
-												theilhh pc_ytot_ch theil 
+												* scl_inequal ///
+												*theilhh pc_ytot_ch theil 
 								
 												/* Coeficiente de theil para salarios por hora*/
-												scl_inequal ///
-												theil ylmhopri_ci theil 
+												*scl_inequal ///
+												*theil ylmhopri_ci theil 
 															
 												* Porcentaje del ingreso laboral del hogar contribuido por las mujeres 
 												scl_mean ///
@@ -1470,7 +1399,7 @@ pause
 								
 
 								
-		*/			
+					
 								
 							    ************************************************
 								  global tema "diversidad"
@@ -1669,18 +1598,21 @@ pause
 	} /* cierro paises */
 *} /* cierro quietly */
 
-/*
+
 /*====================================================================
                         2: Save and Export results
 ====================================================================*/
-local paises  ARG BHS BOL  BRA  BLZ BRB CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
+
+
+local paises  ARG BHS BOL BRA BLZ BRB CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
+local paises CRI
 foreach pais of local paises { 
 	        
 			
-			use "${out}\indicadores_encuestas_hogares_scl_`pais'.dta"
-			include "${input}\dataframe_format.do"
+			*use "${out}\indicadores_encuestas_hogares_scl_`pais'.dta"
+			*include "${input}\dataframe_format.do"
 			export delimited using "${out}\\indicadores_encuestas_hogares_`pais'.csv", replace
-			unicode convertfile "${out}\indicadores_encuestas_hogares_`pais'.csv" "${covidtmp}\indicadores_encuestas_hogares_`pais'.csv", dstencoding(latin1) replace 
+			*unicode convertfile "${out}\indicadores_encuestas_hogares_`pais'.csv" "${covidtmp}\indicadores_encuestas_hogares_`pais'.csv", dstencoding(latin1) replace 
 						
 } 
 

@@ -1,6 +1,6 @@
 
 
-drop fuente geografia_id tema description
+drop geografia_id tema description
 
 gen iddate = "year"
 gen idgeo = "country" 
@@ -64,6 +64,7 @@ replace area = "NA" if area == "No_aplica"
 replace area = "rural" if area == "Rural"                 
 replace area = "urban" if area == "Urbano"                 
  
+order iddate year idgeo isoalpha3 fuente indicator area quintile sex education_level age ethnicity value se cv sample
 
                 
       
