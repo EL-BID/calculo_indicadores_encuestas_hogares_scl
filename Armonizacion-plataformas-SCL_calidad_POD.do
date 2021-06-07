@@ -467,7 +467,7 @@ if scalar(Found)==0 {
 
 ** Creo locales principales:
 						
-*global paises  /*ARG BHS BOL BRB BRA  BLZ */ BRA CHL /*COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN */
+global paises  ARG BHS BOL BRB BRA  BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
 local anos  2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 
 global paises CRI
 
@@ -1398,8 +1398,6 @@ local etnicidad No_aplica
 								
 
 								
-				
-								
 							    ************************************************
 								  global tema "diversidad"
 								************************************************
@@ -1441,8 +1439,7 @@ local etnicidad No_aplica
 											    /* Porcentaje de hogares con jefatura ni afrodescendiente ni indígena*/ 
 									            scl_pct ///												   
                                                    pjefe_noafronoindi_ch afroind_ch "Otros"
-											
-                                               /* Porcentaje de personas que reportan tener alguna dificultad en actividades de la vida diaria */
+												/* Porcentaje de personas que reportan tener alguna dificultad en actividades de la vida diaria */
 											    scl_pct ///												   
                                                    pdis_ci dis_ci "Con Discapacidad"
 												/* Porcentaje de hogares con miembros que reportan tener alguna dificultad en realizar actividades de la vida diaria. */
@@ -1453,7 +1450,9 @@ local etnicidad No_aplica
 											}/*cierro area*/		
 										} /*cierro sexo*/
 							
+
 			/*							
+
 								
 								************************************************
 								  global tema "migracion"
