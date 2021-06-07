@@ -529,7 +529,7 @@ local etnicidad No_aplica
 						* setting up quality var
 						cap sum upm_ci
 						if _rc==0 {
-						
+						 
 							if `r(N)' > 0 {
 								cap sum estrato_ci
 								if `r(N)' > 0 {
