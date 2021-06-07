@@ -25,9 +25,9 @@ set maxvar 120000, perm
  set max_memory 200g, permanently
 set segmentsize  400m, permanently
  
- cd "C:\Users\ALOP\OneDrive - Inter-American Development Bank Group\Desktop\Git_repositories\calidad\calculo_indicadores_encuestas_hogares_scl/"
+ cd "/home/alop/private/otras_branches/calculo_indicadores_encuestas_hogares_scl/"
  
-*qui {
+qui {
 
 /**** if composition utility function ****************************
  scl_if_compose sexo area nivel_educativo if ...
@@ -89,8 +89,6 @@ program scl_pct
 	local xif `"`s(xif)'"'
 	sreturn clear
 	 
-	 
-	 
 	cap svy:proportion `indvar' `xif'  
   
   if _rc == 0 {
@@ -100,14 +98,14 @@ program scl_pct
 	
 	estat cv
 	mat error_standar=r(se)
-	local se = error_standar[1,colnumb(tables,`"`indcat'.`indvar'"')]*100
+	local se = error_standar[1,colnumb(error_standar,`"`indcat'.`indvar'"')]*100
 	
 	mat cv=r(cv)
-	local cv = cv[1,colnumb(tables,`"`indcat'.`indvar'"')]
+	local cv = cv[1,colnumb(cv,`"`indcat'.`indvar'"')]
 	
 	estat size
 	mat muestra=r(_N)
-	local muestra = muestra[1,colnumb(tables,`"`indcat'.`indvar'"')]
+	local muestra = muestra[1,colnumb(muestra,`"`indcat'.`indvar'"')]
 	di `muestra'
   	
 	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"sum of `indvar'"') (`valor') (`se') (`cv') (`muestra')
@@ -219,7 +217,6 @@ program scl_mean
 	    
     mat valores=r(table)
 	local valor =valores[1,1] 
-
 	
 	estat cv
 	mat error_standar=r(se)
@@ -431,25 +428,25 @@ di c(pwd)
 * connected to the VPN)
 
 *if "${source}"=="" {
-	global source   "C:\Users\ALOP\OneDrive - Inter-American Development Bank Group\Desktop\harmonized" //if you have a local copy of the .dta files, change here to use your local copy 
+	global source   "/home/alop/shared/Data_Governance/harmonized/" //if you have a local copy of the .dta files, change here to use your local copy 
 *}
 
 /*
  Location of the .do files to include
 */
-	global input	"`mydir'\Input"
-	global out 	 "`mydir'\Output"
+	global input	"`mydir'/Input"
+	global out 	 "`mydir'/Output"
 /*
 * Location for temporary files. This folder is on MS TEAMS.
 * 
 * NOTE: template.dta must be in this folder.
 */
-	global covidtmp  "`mydir'\Output"
+	global covidtmp  "/home/alop/shared/Data_Governance/indicators/"
 
 //alternatively, this folder might be under the following path
 mata:st_numscalar("Found", direxists("$covidtmp"))
 if scalar(Found)==0  {
-	global covidtmp  "`mydir'\Output"
+	global covidtmp  "/home/alop/shared/Data_Governance/indicators/"
 	//check if it was found now
 	mata:st_numscalar("Found", direxists("$covidtmp"))
 }
@@ -470,10 +467,9 @@ if scalar(Found)==0 {
 
 ** Creo locales principales:
 						
-global paises ARG BHS BOL BRB BRA BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
+global paises  ARG BHS BOL BRB BRA  BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
 local anos  2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 
 global paises CRI
-local anos 2009
 
 
 local geografia_id total_nacional
@@ -491,7 +487,7 @@ local etnicidad No_aplica
 			use `microdato_`pais'', clear
 
 
-			save "${out}\indicadores_encuestas_hogares_scl_`pais'.dta", replace 
+			save "${out}/indicadores_encuestas_hogares_scl_`pais'.dta", replace 
 		
 		
 		foreach ano of local anos {	
@@ -508,9 +504,9 @@ local etnicidad No_aplica
 			
 			
 			* En este dofile de encuentra el diccionario de encuestas y rondas de la región
-			 include "${input}\Directorio HS LAC.do" 
+			 include "${input}/Directorio HS LAC.do" 
 			 * Encuentra el archivo para este país/año
-			 cap use "${source}\\`pais'\\$encuestas\data_arm\\`pais'_`ano'${rondas}_BID.dta" , clear
+			 cap use "${source}/`pais'//$encuestas/data_arm//`pais'_`ano'${rondas}_BID.dta" , clear
 
 			 *foreach encuesta of local encuestas {
 			 /* 
@@ -526,13 +522,13 @@ local etnicidad No_aplica
 
 				if _rc == 0 { 
 					//* Si esta base de datos existe, entonces haga: */
-					noisily display "Calculando \\`pais'\\$encuestas\data_arm\\`pais'_`ano'$rondas_BID.dta..."		
+					noisily display "Calculando //`pais'//$encuestas/data_arm//`pais'_`ano'$rondas_BID.dta..."		
 														
 					
 						* setting up quality var
 						cap sum upm_ci
-						if _rc==0 {
-						 
+						if _rc==0{
+						
 							if `r(N)' > 0 {
 								cap sum estrato_ci
 								if `r(N)' > 0 {
@@ -592,13 +588,13 @@ local etnicidad No_aplica
 					* Variables intermedias 
 			} //end capture
 						* Educación: niveles y edades teóricas cutomizadas  
-							include "${input}\var_tmp_EDU.do"
+							include "${input}/var_tmp_EDU.do"
 						* Mercado laboral 
-							include "${input}\var_tmp_LMK.do"
+							include "${input}/var_tmp_LMK.do"
 						* Pobreza, vivienda, demograficas
-							include "${input}\var_tmp_SOC.do"
+							include "${input}/var_tmp_SOC.do"
 						* Inclusion
-							include "${input}\var_tmp_GDI.do"	
+						**	include "${input}/var_tmp_GDI.do"	
 							
 					* base de datos de microdatos con variables intermedias
 					********** include "${input}/append_calculo_microdatos_scl.do"	
@@ -619,7 +615,7 @@ local etnicidad No_aplica
 					  
 					  /* use an empty file which contains all variables */
 
-					  use "${input}\template.dta", clear
+					  use "${input}/template.dta", clear
 
 					
 				}
@@ -1575,6 +1571,8 @@ local etnicidad No_aplica
 						*/ 
 			
 
+			
+
 
  
 			postclose `ptablas_`pais''
@@ -1585,14 +1583,14 @@ local etnicidad No_aplica
 			* recode muestra 0=.
 			save `tablas_`pais'', replace 
 			
-			use "${out}\indicadores_encuestas_hogares_scl_`pais'.dta"
+			use "${out}/indicadores_encuestas_hogares_scl_`pais'.dta"
 			append using  `tablas_`pais''
 		
 
-			save "${out}\indicadores_encuestas_hogares_scl_`pais'.dta", replace 
+			save "${out}/indicadores_encuestas_hogares_scl_`pais'.dta", replace 
 			
 			
-			*}/*cierro encuestas*/
+			}/*cierro encuestas*/
 		} /* cierro anos */
 	} /* cierro paises */
 *} /* cierro quietly */
@@ -1601,16 +1599,15 @@ local etnicidad No_aplica
 /*====================================================================
                         2: Save and Export results
 ====================================================================*/
-
-
 local paises  ARG BHS BOL BRA BLZ BRB CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
+local paises CRI
 foreach pais of local paises { 
 	        
 			
-			*use "${out}\indicadores_encuestas_hogares_scl_`pais'.dta"
-			*include "${input}\dataframe_format.do"
-			export delimited using "${out}\\indicadores_encuestas_hogares_`pais'.csv", replace
-			*unicode convertfile "${out}\indicadores_encuestas_hogares_`pais'.csv" "${covidtmp}\indicadores_encuestas_hogares_`pais'.csv", dstencoding(latin1) replace 
+			use "${out}/indicadores_encuestas_hogares_scl_`pais'.dta"
+			include "${input}/dataframe_format.do"
+			export delimited using "${out}//indicadores_encuestas_hogares_`pais'.csv", replace
+			*unicode convertfile "${out}/indicadores_encuestas_hogares_`pais'.csv" "${covidtmp}/indicadores_encuestas_hogares_`pais'.csv", dstencoding(latin1) replace 
 						
 } 
 
@@ -1659,4 +1656,3 @@ foreach div of local divisiones {
  		
 
 /* End
-
