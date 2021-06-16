@@ -19,7 +19,7 @@ Output:             Excel-DTA file
 	             
 			* 1.1 Muejeres jefe de hogar 
                 gen jefa_ci=(sexo_ci==2 & jefe_ci==1)
-                replace jefa_ci=. if sexo_ci==. | jefe_ci==.
+                *replace jefa_ci=. if sexo_ci==. | jefe_ci==.
                 bys idh_ch: gen jefa_ch=sum(jefa_ci) if jefe==1
 	    	* 1.2 Hogares unipersonales con miembro empleado
                 gen unipemp=(emp_ci==1 & nmiembros_ch==1)

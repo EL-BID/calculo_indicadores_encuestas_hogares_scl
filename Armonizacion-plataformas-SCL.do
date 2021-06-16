@@ -22,12 +22,14 @@ set maxvar 120000, perm
 *ssc install quantiles inequal7
  cap ssc install estout
  cap ssc install inequal7
+ cap ssc install svylorenz
+ 
  set max_memory 200g, permanently
 set segmentsize  400m, permanently
  
  cd "C:\Users\ALOP\OneDrive - Inter-American Development Bank Group\Desktop\Git_repositories\calidad\calculo_indicadores_encuestas_hogares_scl/"
  
-*qui {
+qui {
 
 /**** if composition utility function ****************************
  scl_if_compose sexo area nivel_educativo if ...
@@ -49,10 +51,10 @@ program scl_if_compose, sclass
  
  if "`if'"!="" {
      /* most common case */
-	 sreturn local xif `"`if' & `sexo'==1 & `area'==1 & `nivel_educativo'==1 & `quintil_ingreso'==1 & `grupo_etario'==1 "'
+	 sreturn local xif `"`if' & `sexo'==1 & `area'==1 & `nivel_educativo'==1 & `quintil_ingreso'==1 & `grupo_etario'==1 & `etnicidad'==1 "'
   }
   else {
-	 sreturn local xif `"if `sexo'==1 & `area'==1 & `nivel_educativo'==1 & `quintil_ingreso'==1 & `grupo_etario'==1 "'
+	 sreturn local xif `"if `sexo'==1 & `area'==1 & `nivel_educativo'==1 & `quintil_ingreso'==1 & `grupo_etario'==1 & `etnicidad'==1 "'
   }
   
 end
@@ -94,20 +96,22 @@ program scl_pct
 	cap svy:proportion `indvar' `xif'  
   
   if _rc == 0 {
-	    
+	 
+	
+	 
     mat valores=r(table)
 	local valor = valores[1,colnumb(valores,`"`indcat'.`indvar'"')]*100
 	
 	estat cv
 	mat error_standar=r(se)
-	local se = error_standar[1,colnumb(tables,`"`indcat'.`indvar'"')]*100
+	local se = error_standar[1,colnumb(error_standar,`"`indcat'.`indvar'"')]*100
 	
 	mat cv=r(cv)
-	local cv = cv[1,colnumb(tables,`"`indcat'.`indvar'"')]
+	local cv = cv[1,colnumb(cv,`"`indcat'.`indvar'"')]
 	
 	estat size
 	mat muestra=r(_N)
-	local muestra = muestra[1,colnumb(tables,`"`indcat'.`indvar'"')]
+	local muestra = muestra[1,1]
 	di `muestra'
   	
 	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"sum of `indvar'"') (`valor') (`se') (`cv') (`muestra')
@@ -472,8 +476,8 @@ if scalar(Found)==0 {
 						
 global paises ARG BHS BOL BRB BRA BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
 local anos  2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 
-global paises CRI
-local anos 2009
+global paises ARG
+local anos 2018
 
 
 local geografia_id total_nacional
@@ -481,19 +485,7 @@ local etnicidad No_aplica
 
 	noisily display "Empezando calculos..."
 
-	foreach pais of global paises {
-		    
-			tempfile microdato_`pais'
-			tempname pmicrodato_`pais'
-
-			postfile `pmicrodato_`pais'' str4 tiempo_id str3 pais_id str25(fuente geografia_id sexo area quintil_ingreso nivel_educativo grupo_etario etnicidad tema indicador) str35 description valor se cv sample using `microdato_`pais'', replace
-			postclose `pmicrodato_`pais''
-			use `microdato_`pais'', clear
-
-
-			save "${out}\indicadores_encuestas_hogares_scl_`pais'.dta", replace 
-		
-		
+	foreach pais of global paises {   
 		foreach ano of local anos {	
 			
 			tempfile tablas_`pais'
@@ -554,7 +546,7 @@ local etnicidad No_aplica
 						
 						* variables de clase
 						
-					cap {
+					
 						gen No_aplica  =  1
 						gen byte Total  =  1
 						gen Primaria  =  1
@@ -565,7 +557,12 @@ local etnicidad No_aplica
 						gen Mujer  = (sexo_ci==2)
 						gen Urbano = (zona_c==1)
 						gen Rural  = (zona_c==0)
-					
+						gen Indi = (afroind_ci==1),
+						gen Afro = (afroind_ci==2)
+						gen Otro = (afroind_ci==3)
+						gen HogarIndi =(afroind_ch==1)
+						gen HogarAfro = (afroind_ch==2) 
+						gen HogarOtro = (afroind_ch==3)
 						
 						if "`pais'" == "HND" | ("`pais'" == "NIC" & "`ano'" == "2009")  {
 							drop quintil 
@@ -590,7 +587,7 @@ local etnicidad No_aplica
 						 gen quintil_5=1 if suma1>4*`ppquintil2' & suma1<=5*`ppquintil2'						
 			
 					* Variables intermedias 
-			} //end capture
+			//end capture
 						* Educación: niveles y edades teóricas cutomizadas  
 							include "${input}\var_tmp_EDU.do"
 						* Mercado laboral 
@@ -640,112 +637,118 @@ local etnicidad No_aplica
 						
 						local areas Total Rural Urbano  
 						local quintil_ingresos Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 
+						local etnicidades Total HogarIndi HogarAfro HogarOtro
 		
 						foreach quintil_ingreso of local quintil_ingresos {
-							foreach area of local areas {								
+							foreach area of local areas {	
+								foreach etnicidad of local etnicidades {
+								
 								local nivel_educativo No_aplica // formerly called "nivel". If "no_aplica", use Total.
 								local sexo No_aplica
-								local grupo_etario No_aplica
-								local etnicidad No_aplica 
+								local grupo_etario No_aplica 
+							
 								
-								/* Parameters of current disaggregation levels, used by all commands */
-								global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
-								noisily display "$tema: $current_slice"
+									/* Parameters of current disaggregation levels, used by all commands */
+									global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
+									noisily display "$tema: $current_slice"
 								
 								//======== CALCULATE INDICATORS ================================================
 								
-									
-								/* Porcentaje de hogares con jefatura femenina */
-								scl_pct ///
-								jefa_ch jefa_ch "1" if jefa_ch!=. & sexo_ci!=.												
 										
-								/* Porcentaje de hogares con jefatura económica femenina */
-								scl_pct ///
-								jefaecon_ch hhfem_ch "1" if hhfem_ch!=. & sexo_ci!=.											
-										
-								/* Porcentaje de población femenina*/
-								scl_pct ///
-								pobfem_ci pobfem_ci "1" if pobfem_ci!=. 
-																						
-								/* Porcentaje de hogares con al menos un miembro de 0-5 años*/
-								scl_pct ///
-								miembro6_ch miembro6_ch "1" if miembro6_ch !=. 
-												
-								* Porcentaje de hogares con al menos un miembro entre 6-16 años*
-								scl_pct ///
-								miembro6y16_ch miembro6y16_ch "1" if  miembro6y16_ch!=.
-																													
-								* Porcentaje de hogares con al menos un miembro de 65 años o más*
-								cap scl_pct ///
-								miembro65_ch miembro65_ch "1" 
-												
-								* Porcentaje de hogares unipersonales*
-								scl_pct ///
-								unip_ch unip_ch "1" 
-																									
-								* Porcentaje de hogares nucleares*
-								scl_pct ///
-								nucl_ch nucl_ch "1" 
-																
-								* Porcentaje de hogares ampliados*
-						        scl_pct ///
-								ampl_ch ampl_ch "1" 
-																																
-								* Porcentaje de hogares compuestos*
-								scl_pct ///
-								comp_ch comp_ch "1" 
+									/* Porcentaje de hogares con jefatura femenina */
+									scl_pct ///
+									jefa_ch jefa_ch "1" if jefa_ch!=. & sexo_ci!=.												
+											
+									/* Porcentaje de hogares con jefatura económica femenina */
+									scl_pct ///
+									jefaecon_ch hhfem_ch "1" if hhfem_ch!=. & sexo_ci!=.											
+											
+									/* Porcentaje de población femenina*/
+									scl_pct ///
+									pobfem_ci pobfem_ci "1" if pobfem_ci!=. 
+																							
+									/* Porcentaje de hogares con al menos un miembro de 0-5 años*/
+									scl_pct ///
+									miembro6_ch miembro6_ch "1" if miembro6_ch !=. 
+													
+									* Porcentaje de hogares con al menos un miembro entre 6-16 años*
+									scl_pct ///
+									miembro6y16_ch miembro6y16_ch "1" if  miembro6y16_ch!=.
+																														
+									* Porcentaje de hogares con al menos un miembro de 65 años o más*
+									cap scl_pct ///
+									miembro65_ch miembro65_ch "1" 
+													
+									* Porcentaje de hogares unipersonales*
+									scl_pct ///
+									unip_ch unip_ch "1" 
+																										
+									* Porcentaje de hogares nucleares*
+									scl_pct ///
+									nucl_ch nucl_ch "1" 
 																	
-								* Porcentaje de hogares corresidentes*
-							    scl_pct ///
-								corres_ch corres_ch "1" 				
+									* Porcentaje de hogares ampliados*
+									scl_pct ///
+									ampl_ch ampl_ch "1" 
+																																	
+									* Porcentaje de hogares compuestos*
+									scl_pct ///
+									comp_ch comp_ch "1" 
+																		
+									* Porcentaje de hogares corresidentes*
+									scl_pct ///
+									corres_ch corres_ch "1" 				
 
-								*Razón de dependencia*
-								scl_mean ///
-								depen_ch depen_ch if jefe_ci==1 & depen_ch!=.				
-										
-								* Número promedio de miembros del hogar*
-								scl_mean ///
-								tamh_ch nmiembros_ch if jefe_ci==1 & nmiembros_ch!=. 
-																
-								* Porcentaje de población menor de 18 años*
-								scl_pct ///
-							    pob18_ci pob18_ci "1" if pob18_ci!=.
+									*Razón de dependencia*
+									scl_mean ///
+									depen_ch depen_ch if jefe_ci==1 & depen_ch!=.				
+											
+									* Número promedio de miembros del hogar*
+									scl_mean ///
+									tamh_ch nmiembros_ch if jefe_ci==1 & nmiembros_ch!=. 
+																	
+									* Porcentaje de población menor de 18 años*
+									scl_pct ///
+									pob18_ci pob18_ci "1" if pob18_ci!=.
+																										
+									* Porcentaje de población de 65+ años*
+									scl_pct ///
+									pob65_ci pob65_ci "1" if pob65_ci!=.
+																				
+									* Porcentaje de individuos en union formal o informal*
+									scl_pct ///
+									union_ci union_ci "1" if union_ci!=.
 																									
-								* Porcentaje de población de 65+ años*
-								scl_pct ///
-								pob65_ci pob65_ci "1" if pob65_ci!=.
-																			
-								* Porcentaje de individuos en union formal o informal*
-								scl_pct ///
-								union_ci union_ci "1" if union_ci!=.
-																								
-								* Edad mediana de la población en años *
-								scl_median ///
-								pobedad_ci edad_ci if edad_ci!=. 
-									
-								}/*cierro area*/		
-							} /*cierro quintil*/
+									* Edad mediana de la población en años *
+									scl_median ///
+									pobedad_ci edad_ci if edad_ci!=. 
+								}/*cierro etnicidad*/	
+							}/*cierro area*/		
+						} /*cierro quintil*/
 							
 							local quintil_ingresos Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 
-															
+							local etnicidades Total Indi Afro Otro								
+							
 							foreach quintil_ingreso of local quintil_ingresos {
-								local area No_aplica
-								local nivel_educativo No_aplica							
-								local sexo No_aplica
-								local grupo_etario No_aplica
-								local etnicidad No_aplica
+								foreach etnicidad of local etnicidades {
 								
+									local area No_aplica
+									local nivel_educativo No_aplica							
+									local sexo No_aplica
+									local grupo_etario No_aplica
+																
+									
+									/* Parameters of current disaggregation levels, used by all commands */
+									global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
+									noisily display "$tema: $current_slice"	
+											
+									//======== CALCULATE INDICATORS ================================================
+									
+									/* Porcentaje de población que reside en zonas urbanas*/
+									scl_pct ///
+									urbano_ci urbano_ci 1 if urbano_ci!=. 
 								
-								/* Parameters of current disaggregation levels, used by all commands */
-								global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
-								noisily display "$tema: $current_slice"	
-										
-								//======== CALCULATE INDICATORS ================================================
-								
-								/* Porcentaje de población que reside en zonas urbanas*/
-								scl_pct ///
-								urbano_ci urbano_ci 1 if urbano_ci!=. 
-										
+								} /*cierro etnicidad*/
 							} /*cierro clase*/			    
 											
 			
@@ -760,186 +763,188 @@ local etnicidad No_aplica
 							local sexos Total Hombre Mujer  
 							local areas Total Rural Urbano
 							local quintil_ingresos Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5
+							local etnicidades Total Indi Afro Otro	
 							
 							foreach sexo of local sexos {	
 								foreach area of local areas {
 									foreach quintil_ingreso of local quintil_ingresos {
-									
-										local etnicidad No_aplica
-										local nivel_educativos Prescolar Primaria Secundaria Superior
-								
-										foreach nivel_educativo of local nivel_educativos {								
-										local grupo_etario No_aplica
-									
-										/* Parameters of current disaggregation levels, used by all commands */
-										global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
-										noisily display "$tema: $current_slice"
-
-										//======== CALCULATE INDICATORS ================================================
-										local sfix ""
-										if `"`nivel_educativo'"'=="Prescolar"  local sfix pres
-										else if `"`nivel_educativo'"'=="Primaria"   local sfix prim
-										else if `"`nivel_educativo'"'=="Secundaria" local sfix seco
-										else if `"`nivel_educativo'"'=="Superior"   local sfix tert
+										foreach etnicidad of local etnicidades {
 										
+											local nivel_educativos Prescolar Primaria Secundaria Superior
 									
-									
-						 * Tasa asistencia Bruta  
-											
+											foreach nivel_educativo of local nivel_educativos {								
+											local grupo_etario No_aplica
 										
-										//the code for Prescolar uses a different program,
-										// because the "if" condition for the numerator is different
-										// of that of the denominator
-												
-											scl_ratio ///
-												tasa_bruta_asis asis_`sfix' age_`sfix' & asiste_ci!=.
-											
-			
-			
-						 * Tasa asistencia Neta				
-										// numerator and denominator				
-						 
-											scl_ratio /// 
-												tasa_neta_asis asis_net_`sfix' age_`sfix' & asiste_ci!=.						
-								    													
-															
-															
-									} /* cierro nivel educativo */
-											
-										
-									local grupo_etarios age_4_5 age_6_11 age_12_14 age_15_17 age_18_23
-									
-									foreach grupo_etario of local grupo_etarios {								
-									local nivel_educativo No_aplica
-											
-						* Parameters of current disaggregation levels, used by all commands 
-								global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
-								noisily display "$tema: $current_slice"
-
-											
-												
-						* Tasa asistencia grupo etario *
-									scl_pct ///
-									tasa_asis_edad asiste_ci "1"
-																																				
-						* Tasa No Asistencia grupo etario *
-									scl_pct ///
-									tasa_no_asis_edad asiste_ci "0"
-									 
-													
-									} /*cierro grupo etario */
-									
-						* Años_Escolaridad y Años_Escuela			
-										
-									local nivel_educativos anos_0 anos_1_5 anos_6 anos_7_11 anos_12 anos_13_o_mas
-									
-									foreach nivel_educativo of local nivel_educativos {
-									local grupo_etario No_aplica
-									
-											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `quintil_ingreso'  `grupo_etario' `etnicidad'
+											/* Parameters of current disaggregation levels, used by all commands */
+											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
 											noisily display "$tema: $current_slice"
-																			
-													scl_pct ///
-													Años_Escolaridad_25_mas `nivel_educativo' "1" if (aedu_ci !=. | edad_ci !=.)
-											
-													
-									} /* cierro nivel educativo 3 */		
-										
-										
-						* Ninis_2	
-								
-									local grupo_etarios age_15_24 age_15_29
-									
-									foreach grupo_etario of local grupo_etarios {
-									local nivel_educativo No_aplica
-									
-										global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
-										noisily display "$tema: $current_slice"
-											
-										scl_pct ///
-										Ninis_2 nini "1" & edad_ci !=.
-										
-										} /*cierro grupo_etario */
-										
-								
-						* Tasa_terminacion_c	
-						
-									local nivel_educativos Primaria Secundaria 
-								
-									foreach nivel_educativo of local nivel_educativos {								
-									local grupo_etario No_aplica
-									
-										/* Parameters of current disaggregation levels, used by all commands */
-										global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
-										noisily display "$tema: $current_slice"
-										
-										
-										
-										local sfix ""
-										    
-											 if `"`nivel_educativo'"'=="Primaria"   local sfix primaria
-										else if `"`nivel_educativo'"'=="Secundaria" local sfix secundaria
-										
-										local agetermfix ""
-										    
-										     if `"`nivel_educativo'"'=="Primaria"   local agetermfix p_c
-										else if `"`nivel_educativo'"'=="Secundaria" local agetermfix s_c
 
-										
-										// numerator and denominator
-				
-						 
-										scl_ratio ///
-											tasa_terminacion_c t_cond_`sfix' age_term_`agetermfix' 		
-									
-										
-										} /*cierro clases3 */
-										
-								
+											//======== CALCULATE INDICATORS ================================================
+											local sfix ""
+											if `"`nivel_educativo'"'=="Prescolar"  local sfix pres
+											else if `"`nivel_educativo'"'=="Primaria"   local sfix prim
+											else if `"`nivel_educativo'"'=="Secundaria" local sfix seco
+											else if `"`nivel_educativo'"'=="Superior"   local sfix tert
 											
-						 * Tasa de abandono escolar temprano "Leavers"
-											
-									local grupo_etarios age_18_24 
-								
-									foreach grupo_etario of local grupo_etarios {								
-									local nivel_educativo No_aplica
-									
-										/* Parameters of current disaggregation levels, used by all commands */
-										global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
-										noisily display "$tema: $current_slice"
-
 										
-										/* Tasa asistencia Bruta  */
-										scl_pct ///
-											leavers leavers "1" if edad_ci !=.
 										
-										} /*cierro clases3 */	
-										
-									
+							 * Tasa asistencia Bruta  
 												
-						* Tasa de sobreedad  								
+											
+											//the code for Prescolar uses a different program,
+											// because the "if" condition for the numerator is different
+											// of that of the denominator
+													
+												scl_ratio ///
+													tasa_bruta_asis asis_`sfix' age_`sfix' & asiste_ci!=.
+												
+				
+				
+							 * Tasa asistencia Neta				
+											// numerator and denominator				
+							 
+												scl_ratio /// 
+													tasa_neta_asis asis_net_`sfix' age_`sfix' & asiste_ci!=.						
+																							
+															
+															
+										} /* cierro nivel educativo */
+											
 										
-									local nivel_educativos Primaria 
-								
-									foreach nivel_educativo of local nivel_educativos {								
-									local grupo_etario No_aplica
-									
-										/* Parameters of current disaggregation levels, used by all commands */
+											local grupo_etarios age_4_5 age_6_11 age_12_14 age_15_17 age_18_23
+											
+											foreach grupo_etario of local grupo_etarios {								
+											local nivel_educativo No_aplica
+													
+								* Parameters of current disaggregation levels, used by all commands 
 										global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
 										noisily display "$tema: $current_slice"
-									
-										/* Tasa sobreedad */										
-										// numerator and denominator				
-						 
-										scl_ratio ///
-										tasa_sobre_edad age_prim_sobre asis_prim_c 		
+
+													
+														
+								* Tasa asistencia grupo etario *
+											scl_pct ///
+											tasa_asis_edad asiste_ci "1"
+																																						
+								* Tasa No Asistencia grupo etario *
+											scl_pct ///
+											tasa_no_asis_edad asiste_ci "0"
+											 
+															
+											} /*cierro grupo etario */
+											
+								* Años_Escolaridad y Años_Escuela			
+												
+											local nivel_educativos anos_0 anos_1_5 anos_6 anos_7_11 anos_12 anos_13_o_mas
+											
+											foreach nivel_educativo of local nivel_educativos {
+											local grupo_etario No_aplica
+											
+													global current_slice `pais' `ano' `geografia_id' `sexo' `area' `quintil_ingreso'  `grupo_etario' `etnicidad'
+													noisily display "$tema: $current_slice"
+																					
+															scl_pct ///
+															Años_Escolaridad_25_mas `nivel_educativo' "1" if (aedu_ci !=. | edad_ci !=.)
+													
+															
+											} /* cierro nivel educativo 3 */		
+												
+												
+								* Ninis_2	
+										
+											local grupo_etarios age_15_24 age_15_29
+											
+											foreach grupo_etario of local grupo_etarios {
+											local nivel_educativo No_aplica
+											
+												global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
+												noisily display "$tema: $current_slice"
+													
+												scl_pct ///
+												Ninis_2 nini "1" & edad_ci !=.
+												
+												} /*cierro grupo_etario */
+												
+										
+								* Tasa_terminacion_c	
+								
+											local nivel_educativos Primaria Secundaria 
+										
+											foreach nivel_educativo of local nivel_educativos {								
+											local grupo_etario No_aplica
+											
+												/* Parameters of current disaggregation levels, used by all commands */
+												global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
+												noisily display "$tema: $current_slice"
+												
+												
+												
+												local sfix ""
+													
+													 if `"`nivel_educativo'"'=="Primaria"   local sfix primaria
+												else if `"`nivel_educativo'"'=="Secundaria" local sfix secundaria
+												
+												local agetermfix ""
+													
+													 if `"`nivel_educativo'"'=="Primaria"   local agetermfix p_c
+												else if `"`nivel_educativo'"'=="Secundaria" local agetermfix s_c
+
+												
+												// numerator and denominator
+						
+								 
+												scl_ratio ///
+													tasa_terminacion_c t_cond_`sfix' age_term_`agetermfix' 		
+											
+												
+												} /*cierro clases3 */
+												
+										
+													
+								 * Tasa de abandono escolar temprano "Leavers"
+													
+											local grupo_etarios age_18_24 
+										
+											foreach grupo_etario of local grupo_etarios {								
+											local nivel_educativo No_aplica
+											
+												/* Parameters of current disaggregation levels, used by all commands */
+												global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
+												noisily display "$tema: $current_slice"
+
+												
+												/* Tasa asistencia Bruta  */
+												scl_pct ///
+													leavers leavers "1" if edad_ci !=.
+												
+												} /*cierro clases3 */	
+												
+											
+														
+								* Tasa de sobreedad  								
+												
+											local nivel_educativos Primaria 
+										
+											foreach nivel_educativo of local nivel_educativos {								
+											local grupo_etario No_aplica
+											
+												/* Parameters of current disaggregation levels, used by all commands */
+												global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
+												noisily display "$tema: $current_slice"
+											
+												/* Tasa sobreedad */										
+												// numerator and denominator				
+								 
+												scl_ratio ///
+												tasa_sobre_edad age_prim_sobre asis_prim_c 		
 										
 										
-									} /*cierro clases3 */	
-																			
+											} /*cierro nivel educativo */	
+											
+									}/*cierro etnicidad*/										
 								}/*cierro quintil*/
 							} /* cierro area */
-						}	/* cierro sexo */			
+						}/* cierro sexo */			
 				
 										
 					
@@ -954,255 +959,257 @@ local etnicidad No_aplica
 								local area Total Rural Urbano
 								local grupo_etarios Total age_15_24 age_15_29 age_15_64 age_25_64 age_65_mas 
 								local quintil_ingresos Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 
+								local etnicidades Total Indi Afro Otro	
 							
 								foreach sexo of local sexos {
 									foreach area of local areas {
 										foreach quintil_ingreso of local quintil_ingresos {
-											foreach grupo_etario of local grupo_etarios {
+											foreach etnicidad of local etnicidades {
+												foreach grupo_etario of local grupo_etarios {
 											
 											
-											local nivel_educativo No_aplica
-											local etnicidad No_aplica
-										
-											/* Parameters of current disaggregation levels, used by all commands */
-											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
-											noisily display "$tema: $current_slice"	
-
-											//======== CALCULATE INDICATORS ================================================
+												local nivel_educativo No_aplica
 												
-											scl_pct ///
-												tasa_ocupacion condocup_ci "1" if pet==1
-										
-											scl_pct ///
-												tasa_desocupacion condocup_ci "2" if pea==1
-										
-											scl_ratio ///
-												tasa_participacion pea pet
-										
-											scl_pct ///
-												ocup_suf_salario liv_wage "1" if liv_wage!=. & condocup_ci==1
-										
-											scl_mean ///
-												ingreso_mens_prom ylab_ppp if condocup_ci==1 & ylab_ppp!=.
-
-											scl_mean ///
-												ingreso_hor_prom_ppp hwage_ppp if condocup_ci==1 & hwage_ppp!=.
-					
-											scl_mean ///
-												horas_trabajadas horastot_ci if condocup_ci==1 & horastot_ci!=.
-
-											scl_mean ///
-												dura_desempleo durades_ci if condocup_ci==2 & durades_ci!=.
-																
-											scl_mean ///
-												salminmes_ppp salmm_ppp if condocup_ci==1 & salmm_ppp!=.
-
-											scl_pct ///
-												sal_menor_salmin menorwmin "1" if condocup_ci==1											
-
-											scl_mean ///
-												salmin_hora hsmin_ppp if condocup_ci==1 & hsmin_ppp!=.
-
-											scl_mean ///
-												salmin_mes salmm_ci if condocup_ci==1 & salmm_ci!=.
-
-											scl_pct ///
-												tasa_asalariados asalariado "1" if condocup_ci==1																	
 											
-											scl_pct ///
-												tasa_independientes ctapropia "1" if condocup_ci==1																	
+												/* Parameters of current disaggregation levels, used by all commands */
+												global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
+												noisily display "$tema: $current_slice"	
 
-											scl_pct ///
-												tasa_patrones patron "1" if condocup_ci==1																	
-
-											scl_pct ///
-												tasa_sinremuneracion sinremuner "1" if condocup_ci==1																	
+												//======== CALCULATE INDICATORS ================================================
+													
+												scl_pct ///
+													tasa_ocupacion condocup_ci "1" if pet==1
 											
-											scl_pct ///
-												subempleo subemp_ci "1" if condocup_ci==1																	
+												scl_pct ///
+													tasa_desocupacion condocup_ci "2" if pea==1
 											
-											scl_mean ///
-												inglaboral_ppp_formales ylab_ppp if condocup_ci==1 & formal_ci==1
-												
-											scl_mean ///
-												inglaboral_ppp_informales ylab_ppp if condocup_ci==1 & formal_ci==0
+												scl_ratio ///
+													tasa_participacion pea pet
+											
+												scl_pct ///
+													ocup_suf_salario liv_wage "1" if liv_wage!=. & condocup_ci==1
+											
+												scl_mean ///
+													ingreso_mens_prom ylab_ppp if condocup_ci==1 & ylab_ppp!=.
 
-											scl_mean ///
-												inglaboral_formales ylab_ci if condocup_ci==1 & formal_ci==1
+												scl_mean ///
+													ingreso_hor_prom_ppp hwage_ppp if condocup_ci==1 & hwage_ppp!=.
+						
+												scl_mean ///
+													horas_trabajadas horastot_ci if condocup_ci==1 & horastot_ci!=.
 
-											scl_mean ///
-												inglaboral_informales ylab_ci if condocup_ci==1 & formal_ci==0
+												scl_mean ///
+													dura_desempleo durades_ci if condocup_ci==2 & durades_ci!=.
+																	
+												scl_mean ///
+													salminmes_ppp salmm_ppp if condocup_ci==1 & salmm_ppp!=.
+
+												scl_pct ///
+													sal_menor_salmin menorwmin "1" if condocup_ci==1											
+
+												scl_mean ///
+													salmin_hora hsmin_ppp if condocup_ci==1 & hsmin_ppp!=.
+
+												scl_mean ///
+													salmin_mes salmm_ci if condocup_ci==1 & salmm_ci!=.
+
+												scl_pct ///
+													tasa_asalariados asalariado "1" if condocup_ci==1																	
 												
-											scl_nivel ///
-												nivel_asalariados asalariado 1 if condocup_ci==1
-			
-											scl_nivel ///
-												nivel_independientes ctapropia 1 if condocup_ci==1
+												scl_pct ///
+													tasa_independientes ctapropia "1" if condocup_ci==1																	
+
+												scl_pct ///
+													tasa_patrones patron "1" if condocup_ci==1																	
+
+												scl_pct ///
+													tasa_sinremuneracion sinremuner "1" if condocup_ci==1																	
 												
-											scl_nivel ///
-												nivel_patrones patron 1 if condocup_ci==1
+												scl_pct ///
+													subempleo subemp_ci "1" if condocup_ci==1																	
+												
+												scl_mean ///
+													inglaboral_ppp_formales ylab_ppp if condocup_ci==1 & formal_ci==1
+													
+												scl_mean ///
+													inglaboral_ppp_informales ylab_ppp if condocup_ci==1 & formal_ci==0
+
+												scl_mean ///
+													inglaboral_formales ylab_ci if condocup_ci==1 & formal_ci==1
+
+												scl_mean ///
+													inglaboral_informales ylab_ci if condocup_ci==1 & formal_ci==0
+													
+												scl_nivel ///
+													nivel_asalariados asalariado 1 if condocup_ci==1
+				
+												scl_nivel ///
+													nivel_independientes ctapropia 1 if condocup_ci==1
+													
+												scl_nivel ///
+													nivel_patrones patron 1 if condocup_ci==1
+																					
+												scl_nivel ///
+													nivel_sinremuneracion sinremuner 1 if condocup_ci==1
+
+												scl_nivel ///
+													nivel_subempleo subemp_ci 1 if condocup_ci==1
+
+												scl_pct ///
+													tasa_agro agro "1" if condocup_ci==1																	
+												
+												scl_nivel ///
+													nivel_agro agro 1 if condocup_ci==1
+												
+												scl_pct ///
+													tasa_minas minas "1" if condocup_ci==1																	
+		
+												scl_nivel ///
+													nivel_minas minas 1 if condocup_ci==1										
 																				
-											scl_nivel ///
-												nivel_sinremuneracion sinremuner 1 if condocup_ci==1
+												scl_pct ///
+													tasa_industria industria "1" if condocup_ci==1		
+													
+												scl_nivel ///
+													nivel_industria industria 1 if condocup_ci==1										
 
-											scl_nivel ///
-												nivel_subempleo subemp_ci 1 if condocup_ci==1
+												scl_pct ///
+													tasa_sspublicos sspublicos "1" if condocup_ci==1		
 
-											scl_pct ///
-												tasa_agro agro "1" if condocup_ci==1																	
-											
-											scl_nivel ///
-												nivel_agro agro 1 if condocup_ci==1
-											
-											scl_pct ///
-												tasa_minas minas "1" if condocup_ci==1																	
-	
-											scl_nivel ///
-												nivel_minas minas 1 if condocup_ci==1										
-																			
-											scl_pct ///
-												tasa_industria industria "1" if condocup_ci==1		
-												
-											scl_nivel ///
-												nivel_industria industria 1 if condocup_ci==1										
+												scl_nivel ///
+													nivel_sspublicos sspublicos 1 if condocup_ci==1										
 
-											scl_pct ///
-												tasa_sspublicos sspublicos "1" if condocup_ci==1		
+												scl_pct ///
+													tasa_construccion construccion "1" if condocup_ci==1		
 
-											scl_nivel ///
-												nivel_sspublicos sspublicos 1 if condocup_ci==1										
+												scl_nivel ///
+													nivel_construccion construccion 1 if condocup_ci==1												
 
-											scl_pct ///
-												tasa_construccion construccion "1" if condocup_ci==1		
+												scl_pct ///
+													tasa_comercio comercio "1" if condocup_ci==1		
 
-											scl_nivel ///
-												nivel_construccion construccion 1 if condocup_ci==1												
+												scl_nivel ///
+													nivel_comercio comercio 1 if condocup_ci==1	
+													
+												scl_pct ///
+													tasa_transporte transporte "1" if condocup_ci==1		
 
-											scl_pct ///
-												tasa_comercio comercio "1" if condocup_ci==1		
+												scl_nivel ///
+													nivel_transporte transporte 1 if condocup_ci==1																			
+																				
+												scl_pct ///
+													tasa_financiero financiero "1" if condocup_ci==1		
 
-											scl_nivel ///
-												nivel_comercio comercio 1 if condocup_ci==1	
-												
-											scl_pct ///
-												tasa_transporte transporte "1" if condocup_ci==1		
-
-											scl_nivel ///
-												nivel_transporte transporte 1 if condocup_ci==1																			
-																			
-											scl_pct ///
-												tasa_financiero financiero "1" if condocup_ci==1		
-
-											scl_nivel ///
-												nivel_financiero financiero 1 if condocup_ci==1																			
-							
-											scl_pct ///
-												tasa_servicios servicios "1" if condocup_ci==1		
-
-											scl_nivel ///
-												nivel_servicios servicios 1 if condocup_ci==1																				
+												scl_nivel ///
+													nivel_financiero financiero 1 if condocup_ci==1																			
 								
-											scl_pct ///
-												tasa_profestecnico profestecnico "1" if condocup_ci==1		
+												scl_pct ///
+													tasa_servicios servicios "1" if condocup_ci==1		
 
-											scl_nivel ///
-												nivel_profestecnico profestecnico 1 if condocup_ci==1																					
-
-											scl_pct ///
-												tasa_director director "1" if condocup_ci==1		
-
-											scl_nivel ///
-												nivel_director director 1 if condocup_ci==1																					
-																
-											scl_pct ///
-												tasa_administrativo administrativo "1" if condocup_ci==1		
-
-											scl_nivel ///
-												nivel_administrativo administrativo 1 if condocup_ci==1																			
-																																						
-											scl_pct ///
-												tasa_comerciantes comerciantes "1" if condocup_ci==1		
-
-											scl_nivel ///
-												nivel_comerciantes comerciantes 1 if condocup_ci==1																			
-
-											scl_pct ///
-												tasa_trabss trabss "1" if condocup_ci==1		
-
-											scl_nivel ///
-												nivel_trabss trabss 1 if condocup_ci==1	
-												
-											scl_pct ///
-												tasa_trabagricola trabagricola "1" if condocup_ci==1		
-
-											scl_nivel ///
-												nivel_trabagricola trabagricola 1 if condocup_ci==1																									
+												scl_nivel ///
+													nivel_servicios servicios 1 if condocup_ci==1																				
 									
-											scl_pct ///
-												tasa_obreros obreros "1" if condocup_ci==1		
+												scl_pct ///
+													tasa_profestecnico profestecnico "1" if condocup_ci==1		
 
-											scl_nivel ///
-												nivel_obreros obreros 1 if condocup_ci==1																									
+												scl_nivel ///
+													nivel_profestecnico profestecnico 1 if condocup_ci==1																					
 
-											scl_pct ///
-												tasa_ffaa ffaa "1" if condocup_ci==1		
+												scl_pct ///
+													tasa_director director "1" if condocup_ci==1		
 
-											scl_nivel ///
-												nivel_ffaa ffaa 1 if condocup_ci==1																									
+												scl_nivel ///
+													nivel_director director 1 if condocup_ci==1																					
+																	
+												scl_pct ///
+													tasa_administrativo administrativo "1" if condocup_ci==1		
 
-											scl_pct ///
-												tasa_otrostrab otrostrab "1" if condocup_ci==1		
+												scl_nivel ///
+													nivel_administrativo administrativo 1 if condocup_ci==1																			
+																																							
+												scl_pct ///
+													tasa_comerciantes comerciantes "1" if condocup_ci==1		
 
-											scl_nivel ///
-												nivel_otrostrab otrostrab 1 if condocup_ci==1											
+												scl_nivel ///
+													nivel_comerciantes comerciantes 1 if condocup_ci==1																			
 
-											scl_pct ///
-												empleo_publico spublico_ci "1" if condocup_ci==1		
+												scl_pct ///
+													tasa_trabss trabss "1" if condocup_ci==1		
 
-											scl_pct ///
-												formalidad_2 formal_ci "1" if condocup_ci==1		
-												
-											scl_pct ///
-												formalidad_3 formal_ci "1" if condocup_ci==1 & categopri_ci==3	
+												scl_nivel ///
+													nivel_trabss trabss 1 if condocup_ci==1	
+													
+												scl_pct ///
+													tasa_trabagricola trabagricola "1" if condocup_ci==1		
 
-											scl_pct ///
-												formalidad_4 formal_ci "1" if condocup_ci==1 & categopri_ci==2
-																		
-											scl_mean ///
-											ingreso_hor_prom hwage if condocup_ci==1 
+												scl_nivel ///
+													nivel_trabagricola trabagricola 1 if condocup_ci==1																									
 										
-												
-							} /* cierro grupo etario */	
+												scl_pct ///
+													tasa_obreros obreros "1" if condocup_ci==1		
 
-											scl_pct ///
-												pensionista_65_mas pensiont_ci "1" if age_65_mas==1	
-																																					
-											scl_nivel ///
-												num_pensionista_65_mas age_65_mas 1 if pensiont_ci==1 								
+												scl_nivel ///
+													nivel_obreros obreros 1 if condocup_ci==1																									
 
-											scl_pct ///
-												pensionista_cont_65_mas pension_ci "1" if age_65_mas==1	
-												
-											scl_pct ///
-												pensionista_nocont_65_mas pensionsub_ci "1" if age_65_mas==1	
-																				
-											scl_pct ///
-												pensionista_ocup_65_mas pensiont_ci "1" if age_65_mas==1 & condocup_ci==1
+												scl_pct ///
+													tasa_ffaa ffaa "1" if condocup_ci==1		
 
-											scl_mean ///
-												y_pen_cont_ppp ypen_ppp 1 if ypen_ppp!=. & age_65_mas==1
+												scl_nivel ///
+													nivel_ffaa ffaa 1 if condocup_ci==1																									
 
-											scl_mean ///
-												y_pen_cont ypen_ci 1 if ypen_ci!=. & age_65_mas==1
-												
-											scl_mean ///
-												y_pen_nocont ypensub_ci 1 if ypensub_ci!=. & age_65_mas==1
+												scl_pct ///
+													tasa_otrostrab otrostrab "1" if condocup_ci==1		
+
+												scl_nivel ///
+													nivel_otrostrab otrostrab 1 if condocup_ci==1											
+
+												scl_pct ///
+													empleo_publico spublico_ci "1" if condocup_ci==1		
+
+												scl_pct ///
+													formalidad_2 formal_ci "1" if condocup_ci==1		
+													
+												scl_pct ///
+													formalidad_3 formal_ci "1" if condocup_ci==1 & categopri_ci==3	
+
+												scl_pct ///
+													formalidad_4 formal_ci "1" if condocup_ci==1 & categopri_ci==2
 																			
-											scl_mean ///
-												y_pen_total ypent_ci 1 if ypent_ci!=. & age_65_mas==1
+												scl_mean ///
+												ingreso_hor_prom hwage if condocup_ci==1 
+										
+												
+								} /* cierro grupo etario */	
+
+												scl_pct ///
+													pensionista_65_mas pensiont_ci "1" if age_65_mas==1	
+																																						
+												scl_nivel ///
+													num_pensionista_65_mas age_65_mas 1 if pensiont_ci==1 								
+
+												scl_pct ///
+													pensionista_cont_65_mas pension_ci "1" if age_65_mas==1	
+													
+												scl_pct ///
+													pensionista_nocont_65_mas pensionsub_ci "1" if age_65_mas==1	
+																					
+												scl_pct ///
+													pensionista_ocup_65_mas pensiont_ci "1" if age_65_mas==1 & condocup_ci==1
+
+												scl_mean ///
+													y_pen_cont_ppp ypen_ppp 1 if ypen_ppp!=. & age_65_mas==1
+
+												scl_mean ///
+													y_pen_cont ypen_ci 1 if ypen_ci!=. & age_65_mas==1
+													
+												scl_mean ///
+													y_pen_nocont ypensub_ci 1 if ypensub_ci!=. & age_65_mas==1
+																				
+												scl_mean ///
+													y_pen_total ypent_ci 1 if ypent_ci!=. & age_65_mas==1
 																				
 										
-										
+										} /*cierro etnicidad*/
 									} /*cierro quintiles*/
 								}/*cierro area*/
 							} /* cierro sexo*/ 
@@ -1218,107 +1225,115 @@ local etnicidad No_aplica
 								
 								local sexos Total Hombre Mujer 
 								local areas	Total Rural Urbano
+								local etnicidades Total Indi Afro Otro
 								local grupo_etarios	Total age_00_04 age_05_14 age_15_24 age_25_64 age_65_mas
 								
 								foreach sexo of local sexos {
 									foreach area of local areas {
 										foreach grupo_etario of local grupo_etarios {
-											local quintil_ingreso No_aplica
-											local nivel_educativo No_aplica
-											local etnicidad No_aplica
+											foreach etnicidad of local etnicidades {
 											
-											/* Parameters of current disaggregation levels, used by all commands */
-											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
-											noisily display "$tema: $current_slice"	
-								
-								
-								
-												* Porcentaje poblacion que vive con menos de 3.1 USD diarios per capita*
-												scl_pct ///
-									            pobreza31 poor31 "1" if poor31!=. 
-															
-												*Porcentaje poblacion que vive con menos de 5 USD diarios per capita
-												scl_pct ///
-									            pobreza poor "1" if poor!=. 
+												local quintil_ingreso No_aplica
+												local nivel_educativo No_aplica
+												
+												
+												/* Parameters of current disaggregation levels, used by all commands */
+												global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
+												noisily display "$tema: $current_slice"	
+									
+									
+									
+													* Porcentaje poblacion que vive con menos de 3.1 USD diarios per capita*
+													scl_pct ///
+													pobreza31 poor31 "1" if poor31!=. 
 																
-												* Porcentaje de la población con ingresos entre 5 y 12.4 USD diarios per capita*
-												scl_pct ///
-									            vulnerable vulnerable "1" if vulnerable!=. 
-		
-                                                 * Porcentaje de la población con ingresos entre 12.4 y 64 USD diarios per capita*
-												scl_pct ///
-									            middle middle "1" if middle!=. 
-															
-                                                 * Porcentaje de la población con ingresos mayores 64 USD diarios per capita*
-												scl_pct ///
-									            rich rich "1" if rich!=. 
-
+													*Porcentaje poblacion que vive con menos de 5 USD diarios per capita
+													scl_pct ///
+													pobreza poor "1" if poor!=. 
+																	
+													* Porcentaje de la población con ingresos entre 5 y 12.4 USD diarios per capita*
+													scl_pct ///
+													vulnerable vulnerable "1" if vulnerable!=. 
 			
-										} /* cierro grupo_etario */	
+													 * Porcentaje de la población con ingresos entre 12.4 y 64 USD diarios per capita*
+													scl_pct ///
+													middle middle "1" if middle!=. 
+																
+													 * Porcentaje de la población con ingresos mayores 64 USD diarios per capita*
+													scl_pct ///
+													rich rich "1" if rich!=. 
+
+											} /*cierro etnicidad*/
+										} /*cierro grupo_etario */	
 									}/*cierro area*/
 								} /* cierro sexo*/ 
 				
 							local areas  Total Urbano Rural
-													
+							local etnicidades Total HogIndi HogAfro HogOtro						
 								
 									foreach area of local areas {
-										local sexo No_aplica
-										local grupo_etario No_aplica
-										local quintil_ingreso No_aplica
-										local nivel_educativo No_aplica
-										local etnicidad No_aplica
+										foreach etnicidad of local etnicidades {
 										
-											/* Parameters of current disaggregation levels, used by all commands */
-												global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
-												noisily display "$tema: $current_slice"	
-															
-													
-												 /* Coeficiente de Gini para el ingreso per cápita del hogar*/
-												scl_inequal ///
-												ginihh pc_ytot_ch 
-							
-												/* Coeficiente de Gini para salarios por hora*/
-												scl_inequal ///
-												gini ylmhopri_ci 
+											local sexo No_aplica
+											local grupo_etario No_aplica
+											local quintil_ingreso No_aplica
+											local nivel_educativo No_aplica
+											
+											
+												/* Parameters of current disaggregation levels, used by all commands */
+													global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
+													noisily display "$tema: $current_slice"	
+																
+														
+													 /* Coeficiente de Gini para el ingreso per cápita del hogar*/
+													scl_inequal ///
+													ginihh pc_ytot_ch 
 								
-												/* Coeficiente de theil para el ingreso per cápita del hogar*/
-												* scl_inequal ///
-												*theilhh pc_ytot_ch theil 
-								
-												/* Coeficiente de theil para salarios por hora*/
-												*scl_inequal ///
-												*theil ylmhopri_ci theil 
-															
-												* Porcentaje del ingreso laboral del hogar contribuido por las mujeres 
-												scl_mean ///
-												ylmfem_ch shareylmfem_ch if jefe_ci==1 & shareylmfem_ch!=. 
+													/* Coeficiente de Gini para salarios por hora*/
+													scl_inequal ///
+													gini ylmhopri_ci 
+									
+													/* Coeficiente de theil para el ingreso per cápita del hogar*/
+													* scl_inequal ///
+													*theilhh pc_ytot_ch theil 
+									
+													/* Coeficiente de theil para salarios por hora*/
+													*scl_inequal ///
+													*theil ylmhopri_ci theil 
+																
+													* Porcentaje del ingreso laboral del hogar contribuido por las mujeres 
+													scl_mean ///
+													ylmfem_ch shareylmfem_ch if jefe_ci==1 & shareylmfem_ch!=. 
 															 
-															
+										} /*cierro etnicidad*/
 									}/*cierro area*/
 							
 																										
 								
 								local quintil_ingresos Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 
 								local areas Total Rural Urbano
+								local etnicidades Total HogIndi HogAfro HogOtro
 										
 								foreach quintil_ingreso of local quintil_ingresos {
 									foreach area of local areas {
-										local sexo No_aplica
-										local nivel_educativo No_aplica
-										local grupo_etario No_aplica
-										local etnicidad No_aplica
+										foreach etnicidad of local etnicidades {
 										
-										
-											/* Parameters of current disaggregation levels, used by all commands */
-													global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
-													noisily display "$tema: $current_slice"	
-													
-													
-													/* Porcentaje de hogares que reciben remesas del exterior */
-													scl_pct ///
-														indexrem indexrem "1" 
+											local sexo No_aplica
+											local nivel_educativo No_aplica
+											local grupo_etario No_aplica
+											local etnicidad No_aplica
+											
+											
+												/* Parameters of current disaggregation levels, used by all commands */
+														global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
+														noisily display "$tema: $current_slice"	
+														
+														
+														/* Porcentaje de hogares que reciben remesas del exterior */
+														scl_pct ///
+															indexrem indexrem "1" 
 
-							
+											} /*cierro etnicidad*/
 										} /* cierro area */	
 									}/*cierro quintil_ingresos*/
 											
@@ -1333,14 +1348,16 @@ local etnicidad No_aplica
 								
 								local quintil_ingresos 	Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 
 								local areas Total Rural Urbano
-						
+								local etnicidades Total HogIndi HogAfro HogOtro
 								
 								foreach quintil_ingreso of local quintil_ingresos {
 									foreach area of local areas {
+										foreach etnicidad of local etnicidades {
+									
 										local sexo No_aplica
 										local nivel_educativo No_aplica
 										local grupo_etario No_aplica
-										local etnicidad No_aplica
+									
 										
 											/* Parameters of current disaggregation levels, used by all commands */
 											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
@@ -1396,7 +1413,7 @@ local etnicidad No_aplica
 												scl_pct ///
 									            estable_ch estable_ch "1" if jefe_ci==1 &  estable_ch!=.
 												
-			
+												}/*cierro etnicidades*/
 											}/*cierro area*/		
 										} /*cierro quintil_ingreso*/
 								
@@ -1434,7 +1451,7 @@ local etnicidad No_aplica
 												    pindi_ci afroind_ci "1" 
 												/* Porcentaje población ni Afrodescendiente ni indígena*/
 												scl_pct ///
-												    pnoafronoindi_ci afroind_ci "9"
+												    pnoafronoindi_ci afroind_ci "3"
 
                                                 /* Porcentaje de hogares con jefatura afrodescendiente */ 
 										        scl_pct ///
@@ -1444,7 +1461,7 @@ local etnicidad No_aplica
 												   pjefe_indi_ch afroind_ch "1" 
 											    /* Porcentaje de hogares con jefatura ni afrodescendiente ni indígena*/ 
 									            scl_pct ///												   
-                                                   pjefe_noafronoindi_ch afroind_ch "9"
+                                                   pjefe_noafronoindi_ch afroind_ch "3"
 
                                                /* Porcentaje de personas que reportan tener alguna dificultad en actividades de la vida diaria */
 											    scl_pct ///												   
@@ -1454,8 +1471,8 @@ local etnicidad No_aplica
 												   pdis_ch dis_ch "1" 
 																
 												
-											}/*cierro area*/		
-										} /*cierro sexo*/
+									}/*cierro area*/		
+								} /*cierro sexo*/
 							
 									
 								
@@ -1465,12 +1482,14 @@ local etnicidad No_aplica
 								// Division: MIG
 								// Authors: Fernando Morales Velandia
 								************************************************
-								local sexos 	Total /* Hombre Mujer */
-								local areas 	Total /* Rural Urbano */
+								local sexos 	Total Hombre Mujer 
+								local areas 	Total Rural Urbano 
+								local etnicidades Total	Afro Indi Otro
 								
 								
-								foreach sexo of local clases {
-									foreach area of local clases2 {
+								foreach sexo of local sexos {
+									foreach area of local areas {
+										foreach etnicidad of local etnicidades {
 									
 										local quintil_ingreso No_aplica
 										local nivel_educativo No_aplica
@@ -1494,8 +1513,9 @@ local etnicidad No_aplica
 											scl_pct ///
 												migrantelac_ci migrantelac_ci "1"
 								
-											}/*cierro clases3*/		
-										} /*cierro clases2*/
+										}/*cierro etnicidad*/
+									}/*cierro clases3*/		
+								} /*cierro clases2*/
 								
 			/*					
 						
@@ -1584,78 +1604,16 @@ local etnicidad No_aplica
 			recode valor 0=.
 			* recode muestra 0=.
 			save `tablas_`pais'', replace 
-			
-			use "${out}\indicadores_encuestas_hogares_scl_`pais'.dta"
-			append using  `tablas_`pais''
-		
-
-			save "${out}\indicadores_encuestas_hogares_scl_`pais'.dta", replace 
-			
+			include "${input}\dataframe_format.do"
+			save "${out}\indicadores_encuestas_hogares_scl_`pais'`ano'.dta", replace 
+			export delimited using "${covidtmp}\\indicadores_encuestas_hogares_`pais'`ano'.csv", replace
 			
 			*}/*cierro encuestas*/
 		} /* cierro anos */
 	} /* cierro paises */
-*} /* cierro quietly */
+} /* cierro quietly */
 
 
-/*====================================================================
-                        2: Save and Export results
-====================================================================*/
-
-
-local paises  ARG BHS BOL BRA BLZ BRB CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
-foreach pais of local paises { 
-	        
-			
-			*use "${out}\indicadores_encuestas_hogares_scl_`pais'.dta"
-			*include "${input}\dataframe_format.do"
-			export delimited using "${out}\\indicadores_encuestas_hogares_`pais'.csv", replace
-			*unicode convertfile "${out}\indicadores_encuestas_hogares_`pais'.csv" "${covidtmp}\indicadores_encuestas_hogares_`pais'.csv", dstencoding(latin1) replace 
-						
-} 
-
-* guardo el archivo temporal
-* (this file will be ignored by GitHub)
-
-
-* Variables de formato 
-
-***** include "${input}/var_formato.do"
-***** order tiempo tiempo_id pais_id geografia_id clase clase_id area area_id nivel nivel_id tema indicador tipo valor muestra
-
-
-*carpeta tmp
-
-***** export delimited using  "${covidtmp}/indicadores_encuestas_hogares_scl.csv", replace
-***** unicode convertfile "${covidtmp}/indicadores_encuestas_hogares_scl.csv" "${output}/indicadores_encuestas_hogares_scl_converted.csv", dstencoding(latin1) replace 
-***** save "${covidtmp}/indicadores_encuestas_hogares_scl.dta", replace
-
-
-/*
-
-
-	g 		division = "soc" if tema == "demografia" | tema == "vivienda" | tema == "pobreza" 
-	replace division = "lmk" if tema == "laboral" 													 
-	replace division = "edu" if tema == "educacion" 
-	replace division = "gdi" if tema == "inclusion"
-	replace division = "mig" if tema == "migracion"
-
-local divisiones soc lmk edu gdi mig											 
-
-foreach div of local divisiones { 
-	        
-			preserve
-			
-			keep if (division == "`div'")
-			drop division
-		
-			export delimited using "${covidtmp}//indicadores_encuestas_hogares_`div'.csv", replace
-			sleep 1000
-			restore
-						
-} 
- 
- */
  		
 
 /* End

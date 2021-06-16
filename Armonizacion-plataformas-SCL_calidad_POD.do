@@ -22,6 +22,8 @@ set maxvar 120000, perm
 *ssc install quantiles inequal7
  cap ssc install estout
  cap ssc install inequal7
+ cap ssc install svylorenz
+ 
  set max_memory 200g, permanently
 set segmentsize  400m, permanently
  
@@ -49,10 +51,10 @@ program scl_if_compose, sclass
  
  if "`if'"!="" {
      /* most common case */
-	 sreturn local xif `"`if' & `sexo'==1 & `area'==1 & `nivel_educativo'==1 & `quintil_ingreso'==1 & `grupo_etario'==1 "'
+	 sreturn local xif `"`if' & `sexo'==1 & `area'==1 & `nivel_educativo'==1 & `quintil_ingreso'==1 & `grupo_etario'==1 & `etnicidad'==1 "'
   }
   else {
-	 sreturn local xif `"if `sexo'==1 & `area'==1 & `nivel_educativo'==1 & `quintil_ingreso'==1 & `grupo_etario'==1 "'
+	 sreturn local xif `"if `sexo'==1 & `area'==1 & `nivel_educativo'==1 & `quintil_ingreso'==1 & `grupo_etario'==1 & `etnicidad'==1 "'
   }
   
 end
@@ -105,7 +107,7 @@ program scl_pct
 	
 	estat size
 	mat muestra=r(_N)
-	local muestra = muestra[1,colnumb(muestra,`"`indcat'.`indvar'"')]
+	local muestra = muestra[1,1]
 	di `muestra'
   	
 	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"sum of `indvar'"') (`valor') (`se') (`cv') (`muestra')
@@ -428,7 +430,7 @@ di c(pwd)
 * connected to the VPN)
 
 *if "${source}"=="" {
-	global source   "/home/alop/shared/Data_Governance/harmonized/" //if you have a local copy of the .dta files, change here to use your local copy 
+	global source   "/home/alop/shared/SCLDataPoD/Harmonized Household Surveys/" //if you have a local copy of the .dta files, change here to use your local copy 
 *}
 
 /*
@@ -441,7 +443,7 @@ di c(pwd)
 * 
 * NOTE: template.dta must be in this folder.
 */
-	global covidtmp  "/home/alop/shared/Data_Governance/indicators/"
+	global covidtmp  "/home/alop/shared/SCLDataPoD/Household Survey Indicators/`pais'/"
 
 //alternatively, this folder might be under the following path
 mata:st_numscalar("Found", direxists("$covidtmp"))
@@ -467,10 +469,10 @@ if scalar(Found)==0 {
 
 ** Creo locales principales:
 						
-global paises  ARG BHS BOL BRB BRA  BLZ BRA CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
+global paises  ARG BHS BOL BRB BRA BLZ CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
+global paises ARG COL CRI ECU PER SLV URY
 local anos  2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 
-global paises CRI
-
+local anos 2018 2019 2020
 
 local geografia_id total_nacional
 local etnicidad No_aplica
@@ -478,18 +480,6 @@ local etnicidad No_aplica
 	noisily display "Empezando calculos..."
 
 	foreach pais of global paises {
-		    
-			tempfile microdato_`pais'
-			tempname pmicrodato_`pais'
-
-			postfile `pmicrodato_`pais'' str4 tiempo_id str3 pais_id str25(fuente geografia_id sexo area quintil_ingreso nivel_educativo grupo_etario etnicidad tema indicador) str35 description valor se cv sample using `microdato_`pais'', replace
-			postclose `pmicrodato_`pais''
-			use `microdato_`pais'', clear
-
-
-			save "${out}/indicadores_encuestas_hogares_scl_`pais'.dta", replace 
-		
-		
 		foreach ano of local anos {	
 			
 			tempfile tablas_`pais'
@@ -550,7 +540,7 @@ local etnicidad No_aplica
 						
 						* variables de clase
 						
-					cap {
+					
 						gen No_aplica  =  1
 						gen byte Total  =  1
 						gen Primaria  =  1
@@ -561,7 +551,12 @@ local etnicidad No_aplica
 						gen Mujer  = (sexo_ci==2)
 						gen Urbano = (zona_c==1)
 						gen Rural  = (zona_c==0)
-					
+						gen Indi = (afroind_ci==1)
+						gen Afro = (afroind_ci==2)
+						gen Otro = (afroind_ci==3)
+						gen HogarIndi =(afroind_ch==1)
+						gen HogarAfro = (afroind_ch==2) 
+						gen HogarOtro = (afroind_ch==3)
 						
 						if "`pais'" == "HND" | ("`pais'" == "NIC" & "`ano'" == "2009")  {
 							drop quintil 
@@ -586,7 +581,7 @@ local etnicidad No_aplica
 						 gen quintil_5=1 if suma1>4*`ppquintil2' & suma1<=5*`ppquintil2'						
 			
 					* Variables intermedias 
-			} //end capture
+			//end capture
 						* Educación: niveles y edades teóricas cutomizadas  
 							include "${input}/var_tmp_EDU.do"
 						* Mercado laboral 
@@ -594,7 +589,7 @@ local etnicidad No_aplica
 						* Pobreza, vivienda, demograficas
 							include "${input}/var_tmp_SOC.do"
 						* Inclusion
-						**	include "${input}/var_tmp_GDI.do"	
+							include "${input}/var_tmp_GDI.do"	
 							
 					* base de datos de microdatos con variables intermedias
 					********** include "${input}/append_calculo_microdatos_scl.do"	
@@ -636,13 +631,16 @@ local etnicidad No_aplica
 						
 						local areas Total Rural Urbano  
 						local quintil_ingresos Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 
+						local etnicidades Total HogarIndi HogarAfro HogarOtro
 		
 						foreach quintil_ingreso of local quintil_ingresos {
-							foreach area of local areas {								
+							foreach area of local areas {	
+								foreach etnicidad of local etnicidades {
+							
 								local nivel_educativo No_aplica // formerly called "nivel". If "no_aplica", use Total.
 								local sexo No_aplica
 								local grupo_etario No_aplica
-								local etnicidad No_aplica 
+								
 								
 								/* Parameters of current disaggregation levels, used by all commands */
 								global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
@@ -718,18 +716,23 @@ local etnicidad No_aplica
 								* Edad mediana de la población en años *
 								scl_median ///
 								pobedad_ci edad_ci if edad_ci!=. 
-									
+								
+								
+									}/*cierro etnicidad*/	
 								}/*cierro area*/		
 							} /*cierro quintil*/
 							
 							local quintil_ingresos Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 
-															
+							local etnicidades Total Indi Afro Otro	
+							
 							foreach quintil_ingreso of local quintil_ingresos {
+								foreach etnicidad of local etnicidades {
+							
 								local area No_aplica
 								local nivel_educativo No_aplica							
 								local sexo No_aplica
 								local grupo_etario No_aplica
-								local etnicidad No_aplica
+								
 								
 								
 								/* Parameters of current disaggregation levels, used by all commands */
@@ -741,7 +744,8 @@ local etnicidad No_aplica
 								/* Porcentaje de población que reside en zonas urbanas*/
 								scl_pct ///
 								urbano_ci urbano_ci 1 if urbano_ci!=. 
-										
+								
+								} /*cierro etnicidad*/		
 							} /*cierro clase*/			    
 											
 			
@@ -756,12 +760,13 @@ local etnicidad No_aplica
 							local sexos Total Hombre Mujer  
 							local areas Total Rural Urbano
 							local quintil_ingresos Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5
+							local etnicidades Total Indi Afro Otro	
 							
 							foreach sexo of local sexos {	
 								foreach area of local areas {
 									foreach quintil_ingreso of local quintil_ingresos {
-									
-										local etnicidad No_aplica
+										foreach etnicidad of local etnicidades {
+										
 										local nivel_educativos Prescolar Primaria Secundaria Superior
 								
 										foreach nivel_educativo of local nivel_educativos {								
@@ -932,7 +937,9 @@ local etnicidad No_aplica
 										
 										
 									} /*cierro clases3 */	
-																			
+									
+									
+									} /*cierro etnicidad*/	
 								}/*cierro quintil*/
 							} /* cierro area */
 						}	/* cierro sexo */			
@@ -950,15 +957,17 @@ local etnicidad No_aplica
 								local area Total Rural Urbano
 								local grupo_etarios Total age_15_24 age_15_29 age_15_64 age_25_64 age_65_mas 
 								local quintil_ingresos Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 
+								local etnicidades Total Indi Afro Otro
 							
 								foreach sexo of local sexos {
 									foreach area of local areas {
 										foreach quintil_ingreso of local quintil_ingresos {
-											foreach grupo_etario of local grupo_etarios {
+											foreach etnicidad of local etnicidades {	
+												foreach grupo_etario of local grupo_etarios {
 											
 											
 											local nivel_educativo No_aplica
-											local etnicidad No_aplica
+										
 										
 											/* Parameters of current disaggregation levels, used by all commands */
 											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
@@ -1198,7 +1207,7 @@ local etnicidad No_aplica
 												y_pen_total ypent_ci 1 if ypent_ci!=. & age_65_mas==1
 																				
 										
-										
+										}  /*cierro etnicidad*/
 									} /*cierro quintiles*/
 								}/*cierro area*/
 							} /* cierro sexo*/ 
@@ -1215,10 +1224,13 @@ local etnicidad No_aplica
 								local sexos Total Hombre Mujer 
 								local areas	Total Rural Urbano
 								local grupo_etarios	Total age_00_04 age_05_14 age_15_24 age_25_64 age_65_mas
+								local etnicidades Total Indi Afro Otro
 								
 								foreach sexo of local sexos {
 									foreach area of local areas {
 										foreach grupo_etario of local grupo_etarios {
+											foreach etnicidad of local etnicidades {
+										
 											local quintil_ingreso No_aplica
 											local nivel_educativo No_aplica
 											local etnicidad No_aplica
@@ -1249,20 +1261,22 @@ local etnicidad No_aplica
 												scl_pct ///
 									            rich rich "1" if rich!=. 
 
-			
+											} /*cierro etnicidad*/
 										} /* cierro grupo_etario */	
 									}/*cierro area*/
 								} /* cierro sexo*/ 
 				
 							local areas  Total Urbano Rural
-													
+							local etnicidades Total HogIndi HogAfro HogOtro						
 								
 									foreach area of local areas {
+										foreach etnicidad of local etnicidades {
+									
 										local sexo No_aplica
 										local grupo_etario No_aplica
 										local quintil_ingreso No_aplica
 										local nivel_educativo No_aplica
-										local etnicidad No_aplica
+										
 										
 											/* Parameters of current disaggregation levels, used by all commands */
 												global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
@@ -1289,32 +1303,35 @@ local etnicidad No_aplica
 												scl_mean ///
 												ylmfem_ch shareylmfem_ch if jefe_ci==1 & shareylmfem_ch!=. 
 															 
-															
+										} /*cierro etnicidad*/					
 									}/*cierro area*/
 							
-																										
-								
-								local quintil_ingresos Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 
-								local areas Total Rural Urbano
-										
-								foreach quintil_ingreso of local quintil_ingresos {
-									foreach area of local areas {
-										local sexo No_aplica
-										local nivel_educativo No_aplica
-										local grupo_etario No_aplica
-										local etnicidad No_aplica
-										
-										
-											/* Parameters of current disaggregation levels, used by all commands */
-													global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
-													noisily display "$tema: $current_slice"	
-													
-													
-													/* Porcentaje de hogares que reciben remesas del exterior */
-													scl_pct ///
-														indexrem indexrem "1" 
+																											
+									
+									local quintil_ingresos Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 
+									local areas Total Rural Urbano
+									local etnicidades Total HogIndi HogAfro HogOtro
+									
+									foreach quintil_ingreso of local quintil_ingresos {
+										foreach area of local areas {
+											foreach etnicidad of local etnicidades {
+											
+												local sexo No_aplica
+												local nivel_educativo No_aplica
+												local grupo_etario No_aplica
+												
+												
+												
+													/* Parameters of current disaggregation levels, used by all commands */
+															global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
+															noisily display "$tema: $current_slice"	
+															
+															
+															/* Porcentaje de hogares que reciben remesas del exterior */
+															scl_pct ///
+																indexrem indexrem "1" 
 
-							
+											} /*cierro etnicidad*/
 										} /* cierro area */	
 									}/*cierro quintil_ingresos*/
 											
@@ -1329,70 +1346,73 @@ local etnicidad No_aplica
 								
 								local quintil_ingresos 	Total quintil_1 quintil_2 quintil_3 quintil_4 quintil_5 
 								local areas Total Rural Urbano
-						
+								local etnicidades Total HogIndi HogAfro HogOtro
 								
 								foreach quintil_ingreso of local quintil_ingresos {
 									foreach area of local areas {
-										local sexo No_aplica
-										local nivel_educativo No_aplica
-										local grupo_etario No_aplica
-										local etnicidad No_aplica
+										foreach etnicidad of local etnicidades {
 										
-											/* Parameters of current disaggregation levels, used by all commands */
-											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
-											noisily display "$tema: $current_slice"	
-								
-					
+											local sexo No_aplica
+											local nivel_educativo No_aplica
+											local grupo_etario No_aplica
+										
+											
+												/* Parameters of current disaggregation levels, used by all commands */
+												global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
+												noisily display "$tema: $current_slice"	
+									
 						
-											   * % de hogares con servicio de agua de acueducto*
-											   scl_pct ///
-									           aguared_ch aguared_ch "1" if jefe_ci==1 & aguared_ch!=. 
-																
-											   * % de hogares con acceso a servicios de saneamiento mejorados*
-											   scl_pct ///
-									           des2_ch des2_ch "1" if jefe_ci==1 & des2_ch!=. 							
-																														
-											   * % de hogares con electricidad *
-											   scl_pct ///
-									           luz_ch luz_ch 2 if jefe_ci==1 &  luz_ch!=. 
-																												
-										       * % hogares con pisos de tierra *
-										        scl_pct ///
-									            dirtf_ch dirtf_ch "1" if jefe_ci==1 &  dirtf_ch!=. 
-														
-											   * % de hogares con refrigerador *
-											    scl_pct ///
-									            refrig_ch freezer_ch "1" if jefe_ci==1 &  freezer_ch!=. 
+							
+												   * % de hogares con servicio de agua de acueducto*
+												   scl_pct ///
+												   aguared_ch aguared_ch "1" if jefe_ci==1 & aguared_ch!=. 
+																	
+												   * % de hogares con acceso a servicios de saneamiento mejorados*
+												   scl_pct ///
+												   des2_ch des2_ch "1" if jefe_ci==1 & des2_ch!=. 							
+																															
+												   * % de hogares con electricidad *
+												   scl_pct ///
+												   luz_ch luz_ch 2 if jefe_ci==1 &  luz_ch!=. 
+																													
+												   * % hogares con pisos de tierra *
+													scl_pct ///
+													dirtf_ch dirtf_ch "1" if jefe_ci==1 &  dirtf_ch!=. 
+															
+												   * % de hogares con refrigerador *
+													scl_pct ///
+													refrig_ch freezer_ch "1" if jefe_ci==1 &  freezer_ch!=. 
 
-												* % de hogares con carro particular*
-												scl_pct ///
-									            auto_ch auto_ch "1" if jefe_ci==1 &  auto_ch!=. 													
-																
-												* % de hogares con acceso a internet *
-												scl_pct ///
-									            internet_ch internet_ch "1" if jefe_ci==1 &  internet_ch!=. 
-																			
-												* % de hogares con teléfono celular*
-												scl_pct ///
-									            cel_ch cel_ch "1" if jefe_ci==1 &  cel_ch!=.
-																
-											    * % de hogares con techos de materiales no permanentes*
-												scl_pct ///
-									            techonp_ch techonp_ch "1" if jefe_ci==1 &  techonp_ch!=.
+													* % de hogares con carro particular*
+													scl_pct ///
+													auto_ch auto_ch "1" if jefe_ci==1 &  auto_ch!=. 													
+																	
+													* % de hogares con acceso a internet *
+													scl_pct ///
+													internet_ch internet_ch "1" if jefe_ci==1 &  internet_ch!=. 
+																				
+													* % de hogares con teléfono celular*
+													scl_pct ///
+													cel_ch cel_ch "1" if jefe_ci==1 &  cel_ch!=.
+																	
+													* % de hogares con techos de materiales no permanentes*
+													scl_pct ///
+													techonp_ch techonp_ch "1" if jefe_ci==1 &  techonp_ch!=.
 
-												* % de hogares con paredes de materiales no permanentes*
-											    cap scl_pct ///
-									            parednp_ch parednp_ch "1" if jefe_ci==1 &  parednp_ch!=.
+													* % de hogares con paredes de materiales no permanentes*
+													cap scl_pct ///
+													parednp_ch parednp_ch "1" if jefe_ci==1 &  parednp_ch!=.
 
-												* Número de miembros por cuarto*
-												scl_mean ///
-								                hacinamiento_ch hacinamiento_ch if jefe_ci==1 & hacinamiento_ch!=. 
+													* Número de miembros por cuarto*
+													scl_mean ///
+													hacinamiento_ch hacinamiento_ch if jefe_ci==1 & hacinamiento_ch!=. 
+													
+													*% de hogares con estatus residencial estable *
+													scl_pct ///
+													estable_ch estable_ch "1" if jefe_ci==1 &  estable_ch!=.
 												
-												*% de hogares con estatus residencial estable *
-												scl_pct ///
-									            estable_ch estable_ch "1" if jefe_ci==1 &  estable_ch!=.
 												
-			
+												}/*cierro etnicidades*/
 											}/*cierro area*/		
 										} /*cierro quintil_ingreso*/
 								
@@ -1406,8 +1426,8 @@ local etnicidad No_aplica
 								// Division: GDI
 								// Authors: Nathalia Maya, Maria Antonella Pereira, Cesar Lins de Oliveira
 								************************************************
-								local sexos 	Total Hombre Mujer
-								local areas 	Total Rural Urbano
+								local sexos Total Hombre Mujer
+								local areas Total Rural Urbano
 								
 								
 								foreach sexo of local sexos {
@@ -1430,24 +1450,24 @@ local etnicidad No_aplica
 												    pindi_ci afroind_ci "1" 
 												/* Porcentaje población ni Afrodescendiente ni indígena*/
 												scl_pct ///
-												    pnoafronoindi_ci afroind_ci "9"
+												    pnoafronoindi_ci afroind_ci "3"
 
-                                                /* Porcentaje de hogares con jefatura afrodescendiente */ 
+										/* Porcentaje de hogares con jefatura afrodescendiente */ 
 										        scl_pct ///
-												   pjefe_afro_ch afroind_ch "2" 
-												/* Porcentaje de hogares con jefatura indígena */ 
+											pjefe_afro_ch afroind_ch "2" 
+										/* Porcentaje de hogares con jefatura indígena */ 
 										        scl_pct ///												   
-												   pjefe_indi_ch afroind_ch "1" 
-											    /* Porcentaje de hogares con jefatura ni afrodescendiente ni indígena*/ 
-									            scl_pct ///												   
-                                                   pjefe_noafronoindi_ch afroind_ch "9"
+											pjefe_indi_ch afroind_ch "1" 
+										/* Porcentaje de hogares con jefatura ni afrodescendiente ni indígena*/ 
+											scl_pct ///												   
+											pjefe_noafronoindi_ch afroind_ch "3"
 
-                                               /* Porcentaje de personas que reportan tener alguna dificultad en actividades de la vida diaria */
-											    scl_pct ///												   
-                                                   pdis_ci dis_ci "1"
-												/* Porcentaje de hogares con miembros que reportan tener alguna dificultad en realizar actividades de la vida diaria. */
-                                                scl_pct ///
-												   pdis_ch dis_ch "1" 
+										/* Porcentaje de personas que reportan tener alguna dificultad en actividades de la vida diaria */
+											  scl_pct ///												   
+											pdis_ci dis_ci "1"
+										/* Porcentaje de hogares con miembros que reportan tener alguna dificultad en realizar actividades de la vida diaria. */
+											scl_pct ///
+											pdis_ch dis_ch "1" 
 																
 												
 											}/*cierro area*/		
@@ -1461,17 +1481,17 @@ local etnicidad No_aplica
 								// Division: MIG
 								// Authors: Fernando Morales Velandia
 								************************************************
-								local sexos 	Total /* Hombre Mujer */
-								local areas 	Total /* Rural Urbano */
+								local sexos Total Hombre Mujer
+								local areas Total Rural Urbano
+								local etnicidades Total	Afro Indi Otro
 								
-								
-								foreach sexo of local clases {
-									foreach area of local clases2 {
+								foreach sexo of local sexos {
+									foreach area of local areas {
+										foreach etnicidad of local etnicidades {
 									
 										local quintil_ingreso No_aplica
 										local nivel_educativo No_aplica
 										local grupo_etario No_aplica
-										local etnicidad No_aplica
 										
 											/* Parameters of current disaggregation levels, used by all commands */
 											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `nivel_educativo' `quintil_ingreso' `grupo_etario' `etnicidad'
@@ -1489,9 +1509,10 @@ local etnicidad No_aplica
 											/* Porcentaje de migrantes LAC en el pais */
 											scl_pct ///
 												migrantelac_ci migrantelac_ci "1"
-								
-											}/*cierro clases3*/		
-										} /*cierro clases2*/
+										
+										}/*cierro etnicidad*/
+									}/*cierro clases3*/		
+								} /*cierro clases2*/
 								
 			/*					
 						
@@ -1571,9 +1592,6 @@ local etnicidad No_aplica
 						*/ 
 			
 
-			
-
-
  
 			postclose `ptablas_`pais''
 
@@ -1583,76 +1601,17 @@ local etnicidad No_aplica
 			* recode muestra 0=.
 			save `tablas_`pais'', replace 
 			
-			use "${out}/indicadores_encuestas_hogares_scl_`pais'.dta"
-			append using  `tablas_`pais''
-		
-
-			save "${out}/indicadores_encuestas_hogares_scl_`pais'.dta", replace 
+			include "${input}/dataframe_format.do"
+			save "${out}/indicadores_encuestas_hogares_scl_`pais'`ano'.dta", replace 
+			export delimited using "${covidtmp}/indicadores_encuestas_hogares_`pais'_$encuestas_`ano'.csv", replace
+			clear
 			
-			
-			}/*cierro encuestas*/
+			*}/*cierro encuestas*/
 		} /* cierro anos */
 	} /* cierro paises */
-*} /* cierro quietly */
+} /* cierro quietly */
 
 
-/*====================================================================
-                        2: Save and Export results
-====================================================================*/
-local paises  ARG BHS BOL BRA BLZ BRB CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
-local paises CRI
-foreach pais of local paises { 
-	        
-			
-			use "${out}/indicadores_encuestas_hogares_scl_`pais'.dta"
-			include "${input}/dataframe_format.do"
-			export delimited using "${out}//indicadores_encuestas_hogares_`pais'.csv", replace
-			*unicode convertfile "${out}/indicadores_encuestas_hogares_`pais'.csv" "${covidtmp}/indicadores_encuestas_hogares_`pais'.csv", dstencoding(latin1) replace 
-						
-} 
-
-* guardo el archivo temporal
-* (this file will be ignored by GitHub)
-
-
-* Variables de formato 
-
-***** include "${input}/var_formato.do"
-***** order tiempo tiempo_id pais_id geografia_id clase clase_id area area_id nivel nivel_id tema indicador tipo valor muestra
-
-
-*carpeta tmp
-
-***** export delimited using  "${covidtmp}/indicadores_encuestas_hogares_scl.csv", replace
-***** unicode convertfile "${covidtmp}/indicadores_encuestas_hogares_scl.csv" "${output}/indicadores_encuestas_hogares_scl_converted.csv", dstencoding(latin1) replace 
-***** save "${covidtmp}/indicadores_encuestas_hogares_scl.dta", replace
-
-
-/*
-
-
-	g 		division = "soc" if tema == "demografia" | tema == "vivienda" | tema == "pobreza" 
-	replace division = "lmk" if tema == "laboral" 													 
-	replace division = "edu" if tema == "educacion" 
-	replace division = "gdi" if tema == "inclusion"
-	replace division = "mig" if tema == "migracion"
-
-local divisiones soc lmk edu gdi mig											 
-
-foreach div of local divisiones { 
-	        
-			preserve
-			
-			keep if (division == "`div'")
-			drop division
-		
-			export delimited using "${covidtmp}//indicadores_encuestas_hogares_`div'.csv", replace
-			sleep 1000
-			restore
-						
-} 
- 
- */
- 		
+	
 
 /* End
