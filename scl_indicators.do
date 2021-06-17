@@ -27,11 +27,11 @@ stored in your computer. The second points to the folder where the
 harmonized databases are found. Since these usually differ for each
 user, these variables have a different value to each user.
 
-To avoid having create these variables again every time, the program
+To avoid having to create these variables again every time, the program
 looks for a specific do-File in your PERSONAL folder and runs it. You
 can create both global variables in that do-File.
 The do-File should be named after your username and system, following the
-form "username_system.doh". Replace "username" by the value of
+pattern "username_system.doh". Replace "username" by the value of
 the macro `=c(username)' and "system" by the value of the macho `=c(os)'.
 Save this file into your PERSONAL folder (run the command "sysdir" to
 find out where the PERSONAL folder is located in your machine).
@@ -289,5 +289,20 @@ program scl_indicators
 	
   }		
 end
-noi display ">>>> Programa creado. Use: scl_indicators PAIS ANIO"
+noi display ""
+noi display "-------------------------------------------------------------------------------------------------------------"
+noi display "    SCL DATA ECOSYSTEM WORKING GROUP"
+noi display "-------------------------------------------------------------------------------------------------------------"
+noi display "     Use: scl_indicators PAIS ANIO"
+noi display "     Configuraciones buscadas en: `=c(sysdir_personal)'/`=c(username)'_`=c(os)'.doh"
+noi display "     Este archivo debe definir las variables globales gitFolder y source"
+noi display ""
+capture confirm file "`=c(sysdir_personal)'/`=c(username)'_`=c(os)'.doh"
+if _rc>0 {
+  noi display " ** ATENCIÓN: el archivo de configuración no existe. Es necesario crearlo."
+}
+else {
+  noi type "`=c(sysdir_personal)'/`=c(username)'_`=c(os)'.doh"
+}
+noi display "-------------------------------------------------------------------------------------------------------------"
 }
