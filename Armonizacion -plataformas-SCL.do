@@ -898,7 +898,7 @@ local geografia_id total_nacional
 												sal_menor_salmin menorwmin "1" if condocup_ci==1											
 
 											scl_mean ///
-												salmin_hora hsmin_ppp if condocup_ci==1 & hsmin_ppp!=.
+												salmin_hora hsmin_ci if condocup_ci==1 & hsmin_ppp!=.
 
 											scl_mean ///
 												salmin_mes salmm_ci if condocup_ci==1 & salmm_ci!=.
@@ -919,16 +919,16 @@ local geografia_id total_nacional
 												subempleo subemp_ci "1" if condocup_ci==1																	
 											
 											scl_mean ///
-												inglaboral_ppp_formales ylab_ppp if condocup_ci==1 & formal_ci==1
+												inglaboral_ppp_formales ylmpri_ppp if condocup_ci==1 & formal_ci==1
 												
 											scl_mean ///
-												inglaboral_ppp_informales ylab_ppp if condocup_ci==1 & formal_ci==0
+												inglaboral_ppp_informales ylmpri_ppp if condocup_ci==1 & formal_ci==0
 
 											scl_mean ///
-												inglaboral_formales ylab_ci if condocup_ci==1 & formal_ci==1
+												inglaboral_formales ylmpri_ci if condocup_ci==1 & formal_ci==1
 
 											scl_mean ///
-												inglaboral_informales ylab_ci if condocup_ci==1 & formal_ci==0
+												inglaboral_informales ylmpri_ci if condocup_ci==1 & formal_ci==0
 												
 											scl_nivel ///
 												nivel_asalariados asalariado if condocup_ci==1
