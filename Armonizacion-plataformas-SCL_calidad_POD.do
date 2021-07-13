@@ -271,7 +271,7 @@ program scl_median
  
   
   display `"$tema - `indname'"'
-  _pctile `indvar'  [pweight=factor_ch]  `xif', p(50) 
+  cap _pctile `indvar'  [pweight=factor_ch]  `xif', p(50) 
    
   if _rc == 0 {
    
@@ -471,9 +471,9 @@ if scalar(Found)==0 {
 ** Creo locales principales:
 						
 global paises  ARG BHS BOL BRB BRA BLZ CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
-global paises  SLV /*PER SLV URY BOL PRY PER BOL*/
-local anos  2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 
-local anos 2020
+global paises  ARG BOL COL CRI ECU SLV PRY PER URY  
+local anos  2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020
+
 
 local geografia_id total_nacional
 local etnicidad No_aplica
@@ -621,7 +621,7 @@ local etnicidad No_aplica
 *****************************************************************************************************************************************
 					* 1.2: Indicators for each topic		
 *****************************************************************************************************************************************
-	/*			
+			
 
 						************************************************
 						  global tema "demografia"
@@ -684,7 +684,7 @@ local etnicidad No_aplica
 								nucl_ch nucl_ch "1" 
 																
 								* Porcentaje de hogares ampliados*
-						        scl_pct ///
+								scl_pct ///
 								ampl_ch ampl_ch "1" 
 																																
 								* Porcentaje de hogares compuestos*
@@ -692,7 +692,7 @@ local etnicidad No_aplica
 								comp_ch comp_ch "1" 
 																	
 								* Porcentaje de hogares corresidentes*
-							    scl_pct ///
+								scl_pct ///
 								corres_ch corres_ch "1" 				
 
 								*Razón de dependencia*
@@ -705,7 +705,7 @@ local etnicidad No_aplica
 																
 								* Porcentaje de población menor de 18 años*
 								scl_pct ///
-							    pob18_ci pob18_ci "1" if pob18_ci!=.
+								pob18_ci pob18_ci "1" if pob18_ci!=.
 																									
 								* Porcentaje de población de 65+ años*
 								scl_pct ///
@@ -750,7 +750,7 @@ local etnicidad No_aplica
 								} /*cierro etnicidad*/		
 							} /*cierro clase*/			    
 											
-		*/	
+			
 											
 							************************************************
 							  global tema "educacion"
@@ -966,7 +966,7 @@ local etnicidad No_aplica
 						}	/* cierro sexo */			
 				
 										
-		/*			
+					
 								***************************************************
 								  global tema "laboral"
 								***************************************************
@@ -1534,7 +1534,7 @@ local etnicidad No_aplica
 										}/*cierro etnicidad*/
 									}/*cierro clases3*/		
 								} /*cierro clases2*/
-				*/				
+								
 			/*					
 						
 								************************************************
