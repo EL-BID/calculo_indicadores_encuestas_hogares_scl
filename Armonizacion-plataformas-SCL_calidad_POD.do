@@ -23,7 +23,8 @@ set maxvar 120000, perm
  cap ssc install estout
  cap ssc install inequal7
  cap ssc install svylorenz
- 
+ cap ssc install svygei_svyatk 
+
  set max_memory 200g, permanently
 set segmentsize  400m, permanently
  
@@ -443,12 +444,12 @@ di c(pwd)
 * 
 * NOTE: template.dta must be in this folder.
 */
-	global covidtmp  "/home/alop/shared/SCLDataPoD/Household Survey Indicators/`pais'/"
+	global covidtmp  "/home/alop/shared/SCLDataPoD/Household Survey Indicators/"
 
 //alternatively, this folder might be under the following path
 mata:st_numscalar("Found", direxists("$covidtmp"))
 if scalar(Found)==0  {
-	global covidtmp  "/home/alop/shared/Data_Governance/indicators/"
+	global covidtmp  "/home/alop/shared/SCLDataPoD/Household Survey Indicators/"
 	//check if it was found now
 	mata:st_numscalar("Found", direxists("$covidtmp"))
 }
@@ -470,9 +471,9 @@ if scalar(Found)==0 {
 ** Creo locales principales:
 						
 global paises  ARG BHS BOL BRB BRA BLZ CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN 
-global paises ARG COL CRI ECU PER SLV URY
+global paises  SLV /*PER SLV URY BOL PRY PER BOL*/
 local anos  2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 
-local anos 2018 2019 2020
+local anos 2020
 
 local geografia_id total_nacional
 local etnicidad No_aplica
@@ -524,6 +525,7 @@ local etnicidad No_aplica
 								if `r(N)' > 0 {
 									svyset [w=factor_ch], psu(upm_ci) strata(estrato_ci)
 								}
+								cap sum estrato_ci
 								if `r(N)' == 0{
 									svyset [w=factor_ch], psu(upm_ci) 
 								}
@@ -619,7 +621,7 @@ local etnicidad No_aplica
 *****************************************************************************************************************************************
 					* 1.2: Indicators for each topic		
 *****************************************************************************************************************************************
-				
+	/*			
 
 						************************************************
 						  global tema "demografia"
@@ -748,7 +750,7 @@ local etnicidad No_aplica
 								} /*cierro etnicidad*/		
 							} /*cierro clase*/			    
 											
-			
+		*/	
 											
 							************************************************
 							  global tema "educacion"
@@ -806,7 +808,40 @@ local etnicidad No_aplica
 															
 															
 									} /* cierro nivel educativo */
-											
+									
+						* Años_Escolaridad y Años_Escuela			
+										
+									local nivel_educativos anos_0 anos_1_5 anos_6 anos_7_11 anos_12 anos_13_o_mas
+									
+									foreach nivel_educativo of local nivel_educativos {
+								
+									cap svy:proportion `nivel_educativo' if age_25_mas==1 & `sexo'==1 & `area'==1 & `quintil_ingreso'==1 & `grupo_etario'==1 & `etnicidad'==1 
+									if _rc == 0 {
+										mat valores=r(table)
+										local valor = valores[1,colnumb(valores,`"1.`nivel_educativo'"')]*100
+	
+										estat cv
+										mat error_standar=r(se)
+										local se = error_standar[1,colnumb(error_standar,`"1.`nivel_educativo'"')]*100
+	
+										mat cv=r(cv)
+										local cv = cv[1,colnumb(cv,`"1.`nivel_educativo'"')]
+	
+										estat size
+										mat muestra=r(_N)
+										local muestra = muestra[1,1]
+										di `muestra'
+  	
+										post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("Anos_Escolaridad_25_mas") (`"sum of `indvar'"') (`valor') (`se') (`cv') (`muestra')
+	
+										}
+									if _rc != 0 {
+   /* generate a line with missing value */
+										post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("Anos_Escolaridad_25_mas") (`"sum of `indvar'"') (.) (.) (.) (.)
+										}
+														
+													
+									} /* cierro nivel educativo 3 */		
 										
 									local grupo_etarios age_4_5 age_6_11 age_12_14 age_15_17 age_18_23
 									
@@ -830,21 +865,7 @@ local etnicidad No_aplica
 													
 									} /*cierro grupo etario */
 									
-						* Años_Escolaridad y Años_Escuela			
-										
-									local nivel_educativos anos_0 anos_1_5 anos_6 anos_7_11 anos_12 anos_13_o_mas
-									
-									foreach nivel_educativo of local nivel_educativos {
-									local grupo_etario No_aplica
-									
-											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `quintil_ingreso'  `grupo_etario' `etnicidad'
-											noisily display "$tema: $current_slice"
-																			
-													scl_pct ///
-													Años_Escolaridad_25_mas `nivel_educativo' "1" if (aedu_ci !=. | edad_ci !=.)
-											
-													
-									} /* cierro nivel educativo 3 */		
+					
 										
 										
 						* Ninis_2	
@@ -945,7 +966,7 @@ local etnicidad No_aplica
 						}	/* cierro sexo */			
 				
 										
-					
+		/*			
 								***************************************************
 								  global tema "laboral"
 								***************************************************
@@ -1027,16 +1048,16 @@ local etnicidad No_aplica
 												subempleo subemp_ci "1" if condocup_ci==1																	
 											
 											scl_mean ///
-												inglaboral_ppp_formales ylab_ppp if condocup_ci==1 & formal_ci==1
+												inglaboral_ppp_formales ylmpri_ppp if condocup_ci==1 & formal_ci==1
 												
 											scl_mean ///
-												inglaboral_ppp_informales ylab_ppp if condocup_ci==1 & formal_ci==0
+												inglaboral_ppp_informales ylmpri_ppp if condocup_ci==1 & formal_ci==0
 
 											scl_mean ///
-												inglaboral_formales ylab_ci if condocup_ci==1 & formal_ci==1
+												inglaboral_formales ylmpri_ci if condocup_ci==1 & formal_ci==1
 
 											scl_mean ///
-												inglaboral_informales ylab_ci if condocup_ci==1 & formal_ci==0
+												inglaboral_informales ylmpri_ci if condocup_ci==1 & formal_ci==0
 												
 											scl_nivel ///
 												nivel_asalariados asalariado 1 if condocup_ci==1
@@ -1513,7 +1534,7 @@ local etnicidad No_aplica
 										}/*cierro etnicidad*/
 									}/*cierro clases3*/		
 								} /*cierro clases2*/
-								
+				*/				
 			/*					
 						
 								************************************************
@@ -1603,7 +1624,7 @@ local etnicidad No_aplica
 			
 			include "${input}/dataframe_format.do"
 			save "${out}/indicadores_encuestas_hogares_scl_`pais'`ano'.dta", replace 
-			export delimited using "${covidtmp}/indicadores_encuestas_hogares_`pais'_$encuestas_`ano'.csv", replace
+			export delimited using "${covidtmp}/`pais'/indicadores_encuestas_hogares_`pais'_`ano'.csv", replace
 			clear
 			
 			*}/*cierro encuestas*/
@@ -1615,3 +1636,4 @@ local etnicidad No_aplica
 	
 
 /* End
+
