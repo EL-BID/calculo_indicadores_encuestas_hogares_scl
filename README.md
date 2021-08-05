@@ -3,7 +3,7 @@ Este código armoniza el cálculo de los indicadores de las plataformas del sect
 
 # Descripción
 
-Este repositorio contiene los scripts para el cálculo de los indicadores de las plataformas del sector social del BID. Estos tienen como fuente de información las encuestas a hogares armonizadas del sector social. Los indicadores de estas bases de datos son construidas bajo un enfoque y estructura común, con nombres, definiciones y desagregaciones estandarizadas y almacenadas en un solo archivo para todos los años y países. Actualmente, se calculan 106 indicadores para 26 países de LAC de 2006 a 2019. 
+Este repositorio contiene los scripts para el cálculo de los indicadores de las plataformas del sector social del BID. Estos tienen como fuente de información las encuestas a hogares armonizadas del sector social. Los indicadores de estas bases de datos son construidas bajo un enfoque y estructura común, con nombres, definiciones y desagregaciones estandarizadas y almacenadas en objetos por anio y pais. Actualmente, se calculan 106 indicadores para 26 países de LAC de 2006 a 2020. 
 
 # Ubicación
 TBC
@@ -15,7 +15,7 @@ inequal7
 
 # Estructura
 
-El repositorio contiene dos subcarpetas: Input y Output, así como dos dofiles: Armonizacion -plataformas-SCL y validacion_claidad_indicadores_encuestas_hogares_scl, que aún se encuentra en contrucción.
+El repositorio contiene dos subcarpetas: Input y Output, así como dos dofiles: Armonizacion -plataformas-SCL .
 
 La subcarpeta Input contiene los scripts insumo para la creación de de la base de datos. Estos son: i) El directorio de cada encuesta (país, ronda, anio), ii) variables intermedias para el cálculo de los indicadores; se compone de varios scripts (uno por división) y iii) el script para el formato de la base final.
 La subcarpeta Output contiene la versión final de la base de datos en formato dta. 
