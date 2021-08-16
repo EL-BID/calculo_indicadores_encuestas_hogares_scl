@@ -176,3 +176,5 @@ foreach sexo of local sexos {
 Una vez finalizada la generación de indicadores para todos los temas, se usa el comando `postclose` para cerrar el archivo de salida temporal que fue generado por el script. Para hacer coincidir el formato de salida con el definido en los manuales de SCL, se ejecuta el script `Input/dataframe_format.do`. Este script se encarga de asegurarse de que el archivo generado al final seguirá el esquema definido en [M.232 Processed Schema Standard.xlsx](https://idbg.sharepoint.com/:x:/r/sites/DataGovernance-SCL/Shared%20Documents/General/Documentation/M.%20Manuals%20%26%20Standards/2.%20Standards,%20Methods%20and%20Processes/3.%20Standards/M.232%20Processed%20Schema%20Standard.xlsx?d=wc586af7d41c34c01917fc33d3d5cf302&csf=1&web=1&e=Ve5hqw).
 
 Finalmente, los comandos `save` y `export` (con la opción de reemplazar) se ejecutan para guardar los archivos dta y CSV, respectivamente, en el directorio *Outuput*.
+
+**
