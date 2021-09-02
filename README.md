@@ -20,6 +20,8 @@ Este repositorio contiene los scripts para el cálculo de los indicadores de las
 
 - estout
 - inequal7
+- svylorenz
+- svygei_svyatk
 
 ## Estructura
 
@@ -46,7 +48,7 @@ El script `scl_programs.doh` define un conjunto de programas que se utilizan par
 * **Razón**: `scl_ratio name var1 var2 [if]` - calcula indicadores formados por la relación entre dos variables. Se basa en el comando `svy:ratio var1/var2` y calcula la relación entre las dos variables.
 * **Gini**: `scl_ratio name varname [if]` - calcula o indicadores de desigualdad. Se basa en el comando `svylorenz` y calcula el coeficiente de gini para la variable `varname` dentro de la desagregación actual.
 
-En todos los comandos, el primer parámetro `nombre` indica el identificador de este indicador, el cuál se generará en el archivo de salida y de acuerdo con lo definido en el documento. [D.1.2.1 Diccionario - indicadores encuestas de hogares.xlsx](https://idbg.sharepoint.com/:x:/r/sites/DataGovernance-SCL/Shared%20Documents/General/Documentation/D.%20Collections/D.1-Household%20Socio-Economic%20Surveys/D.1.2%20c%C3%A1lculo_indicadores/D.1.2.1%20Diccionario%20-%20indicadores%20encuestas%20de%20hogares.xlsx?d=wc93240ed70b94a379f3f183978d1fa40&csf=1&web=1&e=nSL4hL), columna "indicator". La cláusula `[if]` debe utilizarse cuando sea necesario restringir el cálculo a muestras más específicas que el nivel actual de desagregación, pero no es necesario establecer el nivel de desagregación ya que este ya está identificado automáticamente por el programa principal.
+En todos los comandos, el primer parámetro `nombre` indica el identificador de este indicador, el cuál se generará en el archivo de salida y de acuerdo con lo definido en el documento [D.1.2.1 Diccionario - indicadores encuestas de hogares.xlsx](https://idbg.sharepoint.com/:x:/r/sites/DataGovernance-SCL/Shared%20Documents/General/Documentation/D.%20Collections/D.1-Household%20Socio-Economic%20Surveys/D.1.2%20c%C3%A1lculo_indicadores/D.1.2.1%20Diccionario%20-%20indicadores%20encuestas%20de%20hogares.xlsx?d=wc93240ed70b94a379f3f183978d1fa40&csf=1&web=1&e=nSL4hL), columna "indicator". La cláusula `[if]` debe utilizarse cuando sea necesario restringir el cálculo a muestras más específicas que el nivel actual de desagregación, pero no es necesario establecer el nivel de desagregación ya que este ya está identificado automáticamente por el programa principal.
 
 
 Dado que los cálculos de los indicadores son muy similares entre sí, con solo algunos cambios, se decidió crear estos programas auxiliares como una forma de simplificar la programación de los indicadores. El uso de este conjunto estandarizado de comandos reduce la probabilidad de errores de codificación y aumenta la eficiencia de la escritura y el mantenimiento del código.
@@ -119,7 +121,7 @@ Este arquivo se estrutura le la siguiente manera:
 
 	La estructura de este archivo debe seguir el modelo definido por SCL Data Governance, en el documento [M.232 Processed Schema Standard.xlsx](https://idbg.sharepoint.com/:x:/r/sites/DataGovernance-SCL/Shared%20Documents/General/Documentation/M.%20Manuals%20%26%20Standards/2.%20Standards,%20Methods%20and%20Processes/3.%20Standards/M.232%20Processed%20Schema%20Standard.xlsx?d=wc586af7d41c34c01917fc33d3d5cf302&csf=1&web=1&e=Ve5hqw). Para asegurar el cumplimiento del esquema definido, al final del programa se ejecuta el script `dataframe_format.do`, que realiza los ajustes de formato necesarios de acuerdo con este manual.
 
-3. *Carga de archivos de datos*: El script carga el archivo de datos de país y año proporcionado como argumento en la llamada al programa. Si no se encuentra el archivo, se cargará un modelo de datos vacío (una base de datos sin muestras). En este caso, los indicadores para este país y año se generarán todos con el valor *"missing"*. El archivo de datos vacío se encuentra en la carpeta *Inputs* y se llama `template.dta`.
+3. *Carga de archivos de datos*: El script carga el archivo de datos de país y año proporcionado como argumento en la llamada al programa. Si no se encuentra el archivo, se cargará un modelo de datos vacío (una base de datos sin muestras). En este caso, los indicadores para este país y año se generarán todos con el valor *"missing"*. El archivo de datos vacío se encuentra en la carpeta *Inputs* y se llama `template.dta`. Aún en esta etapa, se definen los parámetros de muestra con el comando `svyset` y las variables `estrato_ci` y `upm_ci`.
 
 4. *Creación de variables de desagregación*: se crean variables auxiliares para controlar la desagregación de indicadores. Se trata de variables binarias que identifican, para cada individuo de la muestra, a qué grupo de desagregación pertenece. Por ejemplo, el grupo de desglose "Total" coincide con todos los individuos. Por lo tanto, la variable de pertenencia para esta desagregación simplemente asigna un valor de "1" a toda la base de datos. La variable que identifica al grupo "Mujer", en cambio, asigna un valor de "1" sólo a aquellos individuos identificados por el sexo femenino. A continuación se muestra un ejemplo de la creación de algunas variables de desagregación:
 ```

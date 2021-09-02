@@ -1,5 +1,0 @@
-iddate,year,idgeo,isoalpha3,fuente,indicator,area,quintile,sex,education_level,age,ethnicity,value,se,cv,sample
-year,2019,country,SLV,SLV-EHPM,jefa_ch,NA,NA,Total,Total,NA,,,,,
-year,2019,country,SLV,SLV-EHPM,jefa_ch,NA,NA,Rural,Total,NA,,,,,
-year,2019,country,SLV,SLV-EHPM,jefa_ch,NA,NA,Total,quintil_1,NA,,,,,
-year,2019,country,SLV,SLV-EHPM,jefa_ch,NA,NA,Rural,quintil_1,NA,,,,,

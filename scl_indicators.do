@@ -106,6 +106,12 @@ qui include "${gitFolder}/calculo_indicadores_encuestas_hogares_scl/scl_programs
 ***************************************************************
 
 
+/* You can copy the list of country and years below to loop through countries/years.
+ * This is provided only for convenience and is not used in the code.
+ * global paises  ARG BHS BOL BRB BRA BLZ CHL COL CRI ECU SLV GTM GUY HTI HND JAM MEX NIC PAN PRY PER DOM SUR TTO URY VEN
+ * local anos  2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020
+ */
+
 
 /***********************************
  scl_indicators PAIS AÑO
@@ -135,7 +141,7 @@ program scl_indicators
 	global out 	 "`mydir'/Output"
 
 	local geografia_id country
-	
+		
 /*====================================================================
                         1: Open dataset and Generate indicators
 ====================================================================*/
@@ -234,6 +240,8 @@ program scl_indicators
 			include "${input}/var_tmp_SOC.do"
 		* Inclusion
 			include "${input}/var_tmp_GDI.do"	
+		* Migración
+			include "${input}/var_tmp_MIG.do"	
 	}
 	else {
 		/* IN the case the dta file DOES NOT EXIST for this country/year, we are going
@@ -442,6 +450,39 @@ program scl_indicators
 															
 									} /* cierro nivel educativo */
 											
+										* Años_Escolaridad y Años_Escuela			
+										
+									local nivel_educativos anos_0 anos_1_5 anos_6 anos_7_11 anos_12 anos_13_o_mas
+									
+									foreach nivel_educativo of local nivel_educativos {
+								
+									cap svy:proportion `nivel_educativo' if age_25_mas==1 & `sexo'==1 & `area'==1 & `quintil_ingreso'==1 & `grupo_etario'==1 & `etnicidad'==1 
+									if _rc == 0 {
+										mat valores=r(table)
+										local valor = valores[1,colnumb(valores,`"1.`nivel_educativo'"')]*100
+	
+										estat cv
+										mat error_standar=r(se)
+										local se = error_standar[1,colnumb(error_standar,`"1.`nivel_educativo'"')]*100
+	
+										mat cv=r(cv)
+										local cv = cv[1,colnumb(cv,`"1.`nivel_educativo'"')]
+	
+										estat size
+										mat muestra=r(_N)
+										local muestra = muestra[1,1]
+										di `muestra'
+  	
+										post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("Anos_Escolaridad_25_mas") (`"sum of `indvar'"') (`valor') (`se') (`cv') (`muestra')
+	
+										}
+									if _rc != 0 {
+   /* generate a line with missing value */
+										post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("Anos_Escolaridad_25_mas") (`"sum of `indvar'"') (.) (.) (.) (.)
+										}
+														
+													
+										} /* cierro nivel educativo 3 */
 										
 									local grupo_etarios age_4_5 age_6_11 age_12_14 age_15_17 age_18_23
 									
@@ -465,23 +506,6 @@ program scl_indicators
 													
 									} /*cierro grupo etario */
 									
-						* Años_Escolaridad y Años_Escuela			
-										
-									local nivel_educativos anos_0 anos_1_5 anos_6 anos_7_11 anos_12 anos_13_o_mas
-									
-									foreach nivel_educativo of local nivel_educativos {
-									local grupo_etario No_aplica
-									
-											global current_slice `pais' `ano' `geografia_id' `sexo' `area' `quintil_ingreso'  `grupo_etario' `etnicidad'
-											noisily display "$tema: $current_slice"
-																			
-													scl_pct ///
-													Años_Escolaridad_25_mas `nivel_educativo' "1" if (aedu_ci !=. | edad_ci !=.)
-											
-													
-									} /* cierro nivel educativo 3 */		
-										
-										
 						* Ninis_2	
 								
 									local grupo_etarios age_15_24 age_15_29
@@ -581,6 +605,7 @@ program scl_indicators
 				
 										
 					
+					
 								***************************************************
 								  global tema "laboral"
 								***************************************************
@@ -662,16 +687,16 @@ program scl_indicators
 												subempleo subemp_ci "1" if condocup_ci==1																	
 											
 											scl_mean ///
-												inglaboral_ppp_formales ylab_ppp if condocup_ci==1 & formal_ci==1
+												inglaboral_ppp_formales ylmpri_ppp if condocup_ci==1 & formal_ci==1
 												
 											scl_mean ///
-												inglaboral_ppp_informales ylab_ppp if condocup_ci==1 & formal_ci==0
+												inglaboral_ppp_informales ylmpri_ppp if condocup_ci==1 & formal_ci==0
 
 											scl_mean ///
-												inglaboral_formales ylab_ci if condocup_ci==1 & formal_ci==1
+												inglaboral_formales ylmpri_ci if condocup_ci==1 & formal_ci==1
 
 											scl_mean ///
-												inglaboral_informales ylab_ci if condocup_ci==1 & formal_ci==0
+												inglaboral_informales ylmpri_ci if condocup_ci==1 & formal_ci==0
 												
 											scl_nivel ///
 												nivel_asalariados asalariado 1 if condocup_ci==1

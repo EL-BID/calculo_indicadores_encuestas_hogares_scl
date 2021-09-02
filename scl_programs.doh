@@ -78,12 +78,12 @@ program scl_pct
 	local muestra = muestra[1,1]
 	di `muestra'
   	
-	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"sum of `indvar'"') (`valor') (`se') (`cv') (`muestra')
+	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"pct of `indcat'.`indvar'"') (`valor') (`se') (`cv') (`muestra')
 	
   }
   if _rc != 0 {
    /* generate a line with missing value */
-	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"sum of `indvar'"') (.) (.) (.) (.)
+	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"pct of `indcat'.`indvar'"') (.) (.) (.) (.)
   }
   
   
@@ -240,20 +240,17 @@ program scl_median
   display `"$tema - `indname'"'
   _pctile `indvar'  [pweight=factor_ch]  `xif', p(50) 
    
-  if _rc == 0 {
+  if "`r(r1)'" != "" {
    
-	return list
-	local valor = `r(r1)' 
-	estat cv
-	mat error_standar=r(se)
-	local se = error_standar[1,1] 
-	mat cv=r(cv)
-	local cv = cv[1,1] 
-	estat size
-	mat muestra=r(_N)
-	local muestra = muestra[1,1] 
+   ** captura la salida de _pctile
+	local valor = `r(r1)'
 	
-	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"median of `indvar'"') (`valor') (`se') (`cv') (`muestra')
+	** calcular el tamaño de la muestra
+	sum `indvar' `xif' /* Note que no necesita weights para calcular muestra */
+	local muestra=r(N) 
+	 
+	
+	post $output ("`ano'") ("`pais'") ("`pais'-$encuestas") ("`geografia_id'") ("`sexo'") ("`area'") ("`quintil_ingreso'") ("`nivel_educativo'") ("`grupo_etario'") ("`etnicidad'") ("$tema") ("`indname'") (`"median of `indvar'"') (`valor') (.) (.) (`muestra')
 	
   }
   else {
@@ -365,7 +362,7 @@ program scl_inequal
   						
 	capture quietly svylorenz `indvar'  `xif'
 	if _rc == 0 {
-    local valor =e(gini)
+    local valor =e(gini) /** This is calculating GINI only, not Theil (var typeind is being ignored) **/
 	local se = e(se_gini)
 	local cv =.
 	local muestra=.
