@@ -1,5 +1,7 @@
 ![analytics image (flat)](https://raw.githubusercontent.com/vitr/google-analytics-beacon/master/static/badge-flat.gif)
 ![analytics](https://www.google-analytics.com/collect?v=1&cid=555&t=pageview&ec=repo&ea=open&dp=/calculo_indicadores_encuestas_hogares_scl/readme&dt=&tid=UA-4677001-16)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=EL-BID_calculo_indicadores_encuestas_hogares_scl&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=EL-BID_calculo_indicadores_encuestas_hogares_scl)
+
 **SCL Data - Data Ecosystem Working Group**
 
 [![IDB Logo](https://scldata.iadb.org/assets/iadb-7779368a000004449beca0d4fc6f116cc0617572d549edf2ae491e9a17f63778.png)](https://scldata.iadb.org)
