@@ -14,6 +14,11 @@ Este código armoniza el cálculo de los indicadores de las plataformas del sect
 
 Este repositorio contiene los scripts para el cálculo de los indicadores de las plataformas del sector social del BID. Estos tienen como fuente de información las encuestas a hogares armonizadas del sector social. Los indicadores de estas bases de datos son construidas bajo un enfoque y estructura común, con nombres, definiciones y desagregaciones estandarizadas y almacenadas en objetos por anio y pais. Actualmente, se calculan más de **140 indicadores** para **26 países** de LAC desde 2006. 
 
+Esta herramienta está conformada por dos repositorios:
+
+* Microdatos armonzados: https://github.com/EL-BID/armonizacion_microdatos_encuestas_hogares_scl
+* Indicadores armonizados: https://github.com/EL-BID/calculo_indicadores_encuestas_hogares_scl
+
 ## Requisitos
 
 **Versión**
